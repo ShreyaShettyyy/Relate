@@ -1,0 +1,214 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>LuxStore - Premium E-Commerce</title>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <link rel="stylesheet" href="{{ url_for('static', filename='style.css') }}">
+</head>
+<body class="vibrant-bg">
+    <header class="navbar glass-effect">
+        <div class="logo" onclick="window.location.reload()" style="cursor:pointer;"><i class="fa-solid fa-store"></i> LuxStore</div>
+        <div class="search-bar">
+            <input type="text" id="search-input" placeholder="Search products...">
+            <button id="search-btn"><i class="fa-solid fa-search"></i></button>
+        </div>
+        <div class="user-actions">
+            <div id="login-container" class="user-login">
+                <button id="login-btn" class="nav-btn"><i class="fa-solid fa-user"></i> Login</button>
+                <span id="logged-in-user" class="hidden"></span>
+                <button id="logout-btn" class="nav-btn hidden"><i class="fa-solid fa-arrow-right-from-bracket"></i></button>
+            </div>
+            <div class="icon-btn" id="nav-wishlist"><i class="fa-regular fa-heart"></i></div>
+            <div class="icon-btn" id="nav-cart"><i class="fa-solid fa-cart-shopping"></i></div>
+        </div>
+    </header>
+
+    <nav class="categories glass-effect">
+        <ul id="category-list">
+            <li data-cat="All" class="active-cat">All</li>
+        </ul>
+    </nav>
+
+    <main class="container">
+        <!-- Product Catalog -->
+        <section id="catalog-section">
+            <div class="banner gradient-banner">
+                <div class="banner-text">
+                    <h2>Discover the Extraordinary</h2>
+                    <p>Shop premium electronics, clothing, food, books, and home essentials.</p>
+                </div>
+            </div>
+            <div id="product-grid" class="product-grid">
+                <!-- Injected via JS -->
+            </div>
+        </section>
+
+        <!-- Product Detail View -->
+        <section id="product-detail-section" class="hidden">
+            <div class="breadcrumb">
+                <span id="back-btn" class="back-link">Home</span> > <span id="bread-category">Category</span> > <span id="bread-name" class="current">Product</span>
+            </div>
+            
+            <div class="product-detail-layout glass-effect">
+                <div class="product-image-large">
+                    <img id="detail-image" src="" alt="Product" onerror="this.src='https://placehold.co/400x400/8b5cf6/ffffff?text=Image+Not+Found'">
+                </div>
+                
+                <div class="product-info">
+                    <div class="detail-category" id="detail-category">Category</div>
+                    <h1 id="detail-title" class="detail-title">Product Name</h1>
+                    <div class="detail-rating" id="detail-rating">
+                        <!-- Stars -->
+                    </div>
+                    <p class="detail-price" id="detail-price">₹0</p>
+                    <p class="detail-desc" id="detail-desc">Description</p>
+                    
+                    <div class="action-buttons">
+                        <button class="add-to-cart-btn" id="add-to-cart"><i class="fa-solid fa-cart-plus"></i> Add to Cart</button>
+                        <button class="buy-now-btn" id="buy-now"><i class="fa-solid fa-bolt"></i> Buy Now</button>
+                        <button class="wishlist-btn" id="wishlist-toggle"><i class="fa-regular fa-heart"></i></button>
+                    </div>
+
+                    <div class="guarantees">
+                        <div class="guarantee"><i class="fa-solid fa-truck-fast"></i> Free Delivery</div>
+                        <div class="guarantee"><i class="fa-solid fa-rotate-left"></i> 30-Day Returns</div>
+                        <div class="guarantee"><i class="fa-solid fa-shield-halved"></i> 1 Year Warranty</div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Recommendations -->
+            <div class="recommendations-container">
+                <div id="personal-recs-block" class="rec-block hidden">
+                    <h3 class="rec-title gradient-text"><i class="fa-solid fa-wand-magic-sparkles"></i> Since you bought this, you usually add:</h3>
+                    <div id="personal-recs-list" class="rec-carousel"></div>
+                </div>
+
+                <div id="global-recs-block" class="rec-block hidden">
+                    <h3 class="rec-title">Frequently Bought Together</h3>
+                    <div id="global-recs-list" class="rec-carousel"></div>
+                </div>
+                
+                <div class="rec-block" id="similar-recs-block">
+                    <h3 class="rec-title"><i class="fa-solid fa-clone"></i> Similar Products in <span id="sim-cat">Category</span></h3>
+                    <div id="similar-recs-list" class="rec-carousel"></div>
+                </div>
+            </div>
+
+            <!-- Reviews -->
+            <div class="reviews-section glass-effect">
+                <h3 class="rec-title">Customer Reviews</h3>
+                <div id="reviews-container">
+                    <!-- Injected via JS -->
+                </div>
+            </div>
+        </section>
+    </main>
+    
+    <!-- Login Modal -->
+    <div id="login-modal" class="modal hidden">
+        <div class="modal-content glass-effect">
+            <span class="close-modal" id="close-login">&times;</span>
+            <h2>Welcome Back</h2>
+            <p>Please enter your Customer ID to login.</p>
+            <input type="number" id="login-customer-id" placeholder="e.g. 1001" min="1001" max="1050">
+            <button id="submit-login" class="modal-btn">Login</button>
+        </div>
+    </div>
+
+    <!-- Checkout Modal -->
+    <div id="checkout-modal" class="modal hidden">
+        <div class="modal-content checkout-content glass-effect">
+            <span class="close-modal" id="close-checkout">&times;</span>
+            <h2>Checkout</h2>
+            
+            <div class="checkout-grid">
+                <div class="checkout-form">
+                    <h3>Shipping Address</h3>
+                    <input type="text" placeholder="Full Name" required>
+                    <input type="text" placeholder="Street Address" required>
+                    <div style="display:flex; gap:10px;">
+                        <input type="text" placeholder="City" required>
+                        <input type="text" placeholder="Postal Code" required>
+                    </div>
+
+                    <h3 style="margin-top:20px;">Payment Method</h3>
+                    <div class="payment-options">
+                        <label><input type="radio" name="payment" value="upi" checked> UPI / Wallets</label>
+                        <div id="upi-options" class="upi-apps">
+                            <button class="upi-btn selected" data-app="Google Pay"><img src="https://upload.wikimedia.org/wikipedia/commons/f/f2/Google_Pay_Logo.svg" alt="GPay" style="height:15px;"> Google Pay</button>
+                            <button class="upi-btn" data-app="PhonePe"><img src="https://upload.wikimedia.org/wikipedia/commons/7/71/PhonePe_Logo.svg" alt="PhonePe" style="height:15px;"> PhonePe</button>
+                            <button class="upi-btn" data-app="Paytm"><img src="https://upload.wikimedia.org/wikipedia/commons/4/42/Paytm_logo.png" alt="Paytm" style="height:10px;"> Paytm</button>
+                        </div>
+                        <label><input type="radio" name="payment" value="card"> Credit / Debit Card</label>
+                        <label><input type="radio" name="payment" value="cod"> Cash on Delivery</label>
+                    </div>
+                </div>
+
+                <div class="checkout-summary">
+                    <h3>Order Summary</h3>
+                    <div class="summary-item"><span id="checkout-item-name">Product</span> <span id="checkout-item-price">₹0</span></div>
+                    <div class="summary-item"><span>Shipping</span> <span>Free</span></div>
+                    
+                    <div class="coupon-box">
+                        <input type="text" id="coupon-code" placeholder="Enter Coupon Code">
+                        <button id="apply-coupon">Apply</button>
+                    </div>
+                    <div id="coupon-msg" class="coupon-msg"></div>
+
+                    <div class="summary-total">
+                        <span>Total:</span> <span id="checkout-total">₹0</span>
+                    </div>
+
+                    <button id="place-order-btn" class="place-order-btn">Place Order</button>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Processing Modal -->
+    <div id="processing-modal" class="modal hidden">
+        <div class="modal-content glass-effect" style="text-align: center;">
+            <div class="spinner"></div>
+            <h2 id="processing-text">Processing Payment...</h2>
+            <p>Please check your UPI app or wait for confirmation. Do not close this window.</p>
+        </div>
+    </div>
+
+    <!-- Tracking Modal -->
+    <div id="tracking-modal" class="modal hidden">
+        <div class="modal-content glass-effect" style="max-width: 600px; text-align: center;">
+            <span class="close-modal" id="close-tracking">&times;</span>
+            <h2 style="color: #10b981;">Order Placed Successfully! 🎉</h2>
+            <p style="font-weight: 600; margin-bottom: 2rem;">Order #<span id="order-number"></span></p>
+            
+            <div class="tracking-container">
+                <div class="track-step active">
+                    <div class="track-icon"><i class="fa-solid fa-box"></i></div>
+                    <p>Processing</p>
+                </div>
+                <div class="track-line"></div>
+                <div class="track-step">
+                    <div class="track-icon"><i class="fa-solid fa-truck-fast"></i></div>
+                    <p>Shipped</p>
+                </div>
+                <div class="track-line"></div>
+                <div class="track-step">
+                    <div class="track-icon"><i class="fa-solid fa-house-chimney"></i></div>
+                    <p>Delivered</p>
+                </div>
+            </div>
+            
+            <button class="modal-btn" onclick="document.getElementById('tracking-modal').classList.add('hidden')" style="margin-top: 2rem;">Continue Shopping</button>
+        </div>
+    </div>
+
+    <!-- Toast Notification -->
+    <div id="toast" class="toast hidden"></div>
+    
+    <script src="{{ url_for('static', filename='script.js') }}"></script>
+</body>
+</html>
