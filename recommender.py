@@ -65,9 +65,55 @@ class RecommenderSystem:
         
         return item_counts.head(top_n).index.tolist()
 
+    def get_user_feed_recommendations(self, customer_id, top_n=10):
+        # Get user's past purchases
+        user_txns = self.transactions_df[self.transactions_df['CustomerID'] == customer_id]
+        if user_txns.empty:
+            return []
+            
+        past_items = user_txns['Item'].unique().tolist()
+        
+        # Get recommendations based on past items
+        feed_recs = set()
+        
+        # First try to get rules from their past items
+        if self.rules is not None and not self.rules.empty:
+            for item in past_items:
+                relevant_rules = self.rules[self.rules['antecedents'].apply(lambda x: item in x)]
+                relevant_rules = relevant_rules.sort_values(['lift', 'confidence'], ascending=[False, False])
+                
+                for idx, row in relevant_rules.iterrows():
+                    for consequent in row['consequents']:
+                        if consequent not in past_items: # recommend new things
+                            feed_recs.add(consequent)
+                            if len(feed_recs) >= top_n:
+                                break
+                    if len(feed_recs) >= top_n:
+                        break
+                if len(feed_recs) >= top_n:
+                    break
+                    
+        # Fallback to items frequently bought together by other users if not enough rules found
+        if len(feed_recs) < top_n:
+            # find users who bought similar items
+            similar_users = self.transactions_df[self.transactions_df['Item'].isin(past_items)]['CustomerID'].unique()
+            similar_users = [u for u in similar_users if u != customer_id]
+            
+            if similar_users:
+                sim_txns = self.transactions_df[self.transactions_df['CustomerID'].isin(similar_users)]
+                pop_items = sim_txns['Item'].value_counts()
+                for item in pop_items.index:
+                    if item not in past_items and item not in feed_recs:
+                        feed_recs.add(item)
+                        if len(feed_recs) >= top_n:
+                            break
+                            
+        return list(feed_recs)[:top_n]
+
 if __name__ == "__main__":
     df = pd.read_csv('transactions.csv')
     rec = RecommenderSystem(df)
-    rec.train_market_basket(min_support=0.1)
+    rec.train_market_basket(min_support=0.01)
     print("Global with Bread:", rec.get_frequently_bought_with('Bread'))
     print("User 101 with Brush:", rec.get_user_frequently_bought_with(101, 'Brush'))
+

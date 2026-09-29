@@ -9,7 +9,7 @@ try:
     df_trans = pd.read_csv('transactions.csv')
     df_prod = pd.read_csv('products.csv')
     recommender = RecommenderSystem(df_trans)
-    recommender.train_market_basket(min_support=0.05, min_threshold=1.0)
+    recommender.train_market_basket(min_support=0.0005, min_threshold=0.1)
 except Exception as e:
     print("Error initializing recommender:", e)
 
@@ -37,13 +37,27 @@ def product_recs():
     if customer_id:
         personal_recs = recommender.get_user_frequently_bought_with(customer_id, product)
         
-    # Get full product details for the recommendations
     def get_prod_details(names):
         return df_prod[df_prod['Name'].isin(names)].to_dict('records')
         
     return jsonify({
         "global": get_prod_details(global_recs),
         "personal": get_prod_details(personal_recs)
+    })
+
+@app.route('/api/feed')
+def user_feed():
+    customer_id = request.args.get('customer_id', type=int)
+    if not customer_id:
+        return jsonify({"error": "No customer provided"}), 400
+        
+    feed_recs = recommender.get_user_feed_recommendations(customer_id, top_n=8)
+    
+    def get_prod_details(names):
+        return df_prod[df_prod['Name'].isin(names)].to_dict('records')
+        
+    return jsonify({
+        "feed": get_prod_details(feed_recs)
     })
 
 if __name__ == '__main__':

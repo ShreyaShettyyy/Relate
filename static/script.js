@@ -183,6 +183,9 @@ document.addEventListener('DOMContentLoaded', () => {
     document.getElementById('back-btn').addEventListener('click', () => {
         document.getElementById('product-detail-section').classList.add('hidden');
         document.getElementById('catalog-section').classList.remove('hidden');
+        if (currentCustomer) {
+            loadUserFeed(currentCustomer);
+        }
     });
 
     // Login Modal Logic
@@ -206,14 +209,31 @@ document.addEventListener('DOMContentLoaded', () => {
             // Refresh recs if on product page
             if (currentProductObj && !document.getElementById('product-detail-section').classList.contains('hidden')) {
                 showProductDetail(currentProductObj);
+            } else {
+                loadUserFeed(val);
             }
         }
     });
+
+    function loadUserFeed(customerId) {
+        fetch(`/api/feed?customer_id=${customerId}`)
+            .then(res => res.json())
+            .then(data => {
+                if (data.feed && data.feed.length > 0) {
+                    renderGrid(data.feed, document.getElementById('user-feed-list'));
+                    document.getElementById('user-feed-section').classList.remove('hidden');
+                } else {
+                    document.getElementById('user-feed-section').classList.add('hidden');
+                }
+            })
+            .catch(err => console.error("Error loading feed:", err));
+    }
     document.getElementById('logout-btn').addEventListener('click', () => {
         currentCustomer = null;
         document.getElementById('login-btn').classList.remove('hidden');
         document.getElementById('logged-in-user').classList.add('hidden');
         document.getElementById('logout-btn').classList.add('hidden');
+        document.getElementById('user-feed-section').classList.add('hidden');
         showToast(`Logged out successfully.`);
         if (currentProductObj && !document.getElementById('product-detail-section').classList.contains('hidden')) {
             showProductDetail(currentProductObj);

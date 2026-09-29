@@ -1,61 +1,159 @@
 import pandas as pd
 import numpy as np
 import random
+import urllib.request
+import json
+import re
 
-products = [
-    {"ID": 1, "Name": "MacBook Pro M2", "Category": "Electronics", "Price": 129999, "Rating": 4.8, "Image": "https://images.unsplash.com/photo-1517336714731-489689fd1ca8?w=400", "Description": "Supercharged by the M2 chip. Brilliant Retina display with extreme dynamic range. Powerful processing capabilities."},
-    {"ID": 2, "Name": "iPhone 14 Pro", "Category": "Electronics", "Price": 119999, "Rating": 4.9, "Image": "https://images.unsplash.com/photo-1510557880182-3d4d3cba35a5?w=400", "Description": "Dynamic Island. 48MP Main camera. Always-On display. The revolutionary A16 Bionic chip powers incredible photography."},
-    {"ID": 3, "Name": "Sony WH-1000XM5", "Category": "Electronics", "Price": 29999, "Rating": 4.8, "Image": "https://images.unsplash.com/photo-1618366712010-f4ae9c647dcb?w=400", "Description": "Industry leading noise canceling headphones. Exceptional battery life of up to 30 hours and quick charging."},
-    {"ID": 4, "Name": "Men's Cotton T-Shirt", "Category": "Clothing", "Price": 999, "Rating": 4.5, "Image": "https://images.unsplash.com/photo-1521572163474-6864f9cf17ab?w=400", "Description": "100% pure cotton classic fit t-shirt. Breathable and comfortable for everyday wear. Available in multiple colors."},
-    {"ID": 5, "Name": "Denim Jeans", "Category": "Clothing", "Price": 2499, "Rating": 4.6, "Image": "https://images.unsplash.com/photo-1542272604-787c3835535d?w=400", "Description": "Premium stretch denim jeans. Classic 5-pocket styling and a versatile straight fit. Durable and stylish."},
-    {"ID": 6, "Name": "Leather Jacket", "Category": "Clothing", "Price": 5999, "Rating": 4.8, "Image": "https://images.unsplash.com/photo-1551028719-00167b16eac5?w=400", "Description": "Genuine leather motorcycle jacket with asymmetrical zip closure. A timeless wardrobe staple for any season."},
-    {"ID": 7, "Name": "Gourmet Coffee Beans", "Category": "Food", "Price": 899, "Rating": 4.7, "Image": "https://images.unsplash.com/photo-1559525839-b184a4d698c7?w=400", "Description": "100% Arabica medium roast whole bean coffee. Sourced from sustainable farms in Colombia. Rich, chocolatey notes."},
-    {"ID": 8, "Name": "Dark Chocolate Truffles", "Category": "Food", "Price": 1299, "Rating": 4.9, "Image": "https://images.unsplash.com/photo-1549007994-cb92caebd54b?w=400", "Description": "Assorted dark chocolate truffles with creamy ganache centers. Perfect for gifting or treating yourself."},
-    {"ID": 9, "Name": "Organic Green Tea", "Category": "Food", "Price": 499, "Rating": 4.4, "Image": "https://images.unsplash.com/photo-1576092768241-dec231879fc3?w=400", "Description": "Premium organic green tea leaves packed with antioxidants. Refreshing and soothing natural flavor."},
-    {"ID": 10, "Name": "The Great Gatsby", "Category": "Books", "Price": 399, "Rating": 4.8, "Image": "https://images.unsplash.com/photo-1544947950-fa07a98d237f?w=400", "Description": "F. Scott Fitzgerald's classic novel of the Jazz Age. A tragic story of love, wealth, and the American Dream."},
-    {"ID": 11, "Name": "Atomic Habits", "Category": "Books", "Price": 699, "Rating": 4.9, "Image": "https://images.unsplash.com/photo-1589829085413-56de8ae18c73?w=400", "Description": "An easy and proven way to build good habits and break bad ones. Master small changes for remarkable results."},
-    {"ID": 12, "Name": "Scented Candle", "Category": "Home", "Price": 799, "Rating": 4.6, "Image": "https://images.unsplash.com/photo-1603006905003-be475563bc59?w=400", "Description": "Lavender and vanilla scented soy wax candle. Burns cleanly for up to 40 hours. Creates a relaxing atmosphere."},
-    {"ID": 13, "Name": "Throw Blanket", "Category": "Home", "Price": 1499, "Rating": 4.7, "Image": "https://images.unsplash.com/photo-1580301762395-21ce84d00bc6?w=400", "Description": "Ultra-soft faux fur throw blanket. Adds warmth and texture to your sofa or bed. Machine washable."},
-    {"ID": 14, "Name": "Ceramic Coffee Mug", "Category": "Home", "Price": 299, "Rating": 4.5, "Image": "https://images.unsplash.com/photo-1514228742587-6b1558fcca3d?w=400", "Description": "Large 15oz ceramic mug with an ergonomic handle. Microwave and dishwasher safe. Perfect for your morning brew."},
-    {"ID": 15, "Name": "Running Shoes", "Category": "Clothing", "Price": 4999, "Rating": 4.7, "Image": "https://images.unsplash.com/photo-1542291026-7eec264c27ff?w=400", "Description": "Lightweight and breathable running shoes with responsive cushioning. Engineered for maximum comfort on the track."},
-    {"ID": 16, "Name": "Wireless Earbuds", "Category": "Electronics", "Price": 3999, "Rating": 4.3, "Image": "https://images.unsplash.com/photo-1590658268037-6bf12165a8df?w=400", "Description": "True wireless earbuds with deep bass and clear treble. IPX7 waterproof rating and 24-hour battery life with case."}
-]
+def fetch_data(url):
+    req = urllib.request.Request(url, headers={'User-Agent': 'Mozilla/5.0'})
+    with urllib.request.urlopen(req) as response:
+        return json.loads(response.read().decode())
 
-df_products = pd.DataFrame(products)
+def sanitize_url(url):
+    if not isinstance(url, str):
+        return ""
+    if url.startswith('["') and url.endswith('"]'):
+        try:
+            parsed = json.loads(url)
+            if parsed and len(parsed) > 0:
+                url = parsed[0]
+        except:
+            pass
+    # Remove any extra quotes
+    url = url.strip('"').strip("'")
+    return url
+
+print("Fetching products from DummyJSON...")
+try:
+    data1 = fetch_data('https://dummyjson.com/products?limit=200')
+    dummy_products = data1.get('products', [])
+except Exception as e:
+    print(f"Error fetching from DummyJSON: {e}")
+    dummy_products = []
+
+print(f"Fetched {len(dummy_products)} products from DummyJSON.")
+
+print("Fetching products from FakeStore API...")
+try:
+    fakestore_products = fetch_data('https://fakestoreapi.com/products')
+except Exception as e:
+    print(f"Error fetching from FakeStore API: {e}")
+    fakestore_products = []
+
+print(f"Fetched {len(fakestore_products)} products from FakeStore API.")
+
+products = []
+current_id = 1
+
+# Process DummyJSON products
+for p in dummy_products:
+    image_url = p.get('thumbnail', '')
+    if not image_url and p.get('images'):
+        image_url = p['images'][0]
+    
+    image_url = sanitize_url(image_url)
+    
+    products.append({
+        "ID": current_id,
+        "Name": p.get('title', 'Unknown Product'),
+        "Category": str(p.get('category', 'General')).capitalize().replace('-', ' '),
+        "Price": int(p.get('price', 99) * 80),  # Convert to INR roughly
+        "Rating": p.get('rating', 4.0),
+        "Image": image_url,
+        "Description": p.get('description', '')
+    })
+    current_id += 1
+
+# Process FakeStore products
+for p in fakestore_products:
+    image_url = sanitize_url(p.get('image', ''))
+    
+    products.append({
+        "ID": current_id,
+        "Name": p.get('title', 'Unknown Product'),
+        "Category": str(p.get('category', 'General')).capitalize().replace('-', ' '),
+        "Price": int(p.get('price', 99) * 80), 
+        "Rating": p.get('rating', {}).get('rate', 4.0) if isinstance(p.get('rating'), dict) else 4.0,
+        "Image": image_url,
+        "Description": p.get('description', '')
+    })
+    current_id += 1
+
+# If we need even more, fetch from Platzi Fake Store API
+if len(products) < 220:
+    print("Fetching products from Platzi API...")
+    try:
+        platzi_products = fetch_data('https://api.escuelajs.co/api/v1/products?limit=100&offset=0')
+        print(f"Fetched {len(platzi_products)} products from Platzi API.")
+        
+        for p in platzi_products:
+            images = p.get('images', [])
+            image_url = images[0] if images else ""
+            image_url = sanitize_url(image_url)
+            
+            # Skip items without images or broken images from Platzi
+            if not image_url or "any" in image_url.lower():
+                continue
+                
+            products.append({
+                "ID": current_id,
+                "Name": p.get('title', 'Unknown Product'),
+                "Category": str(p.get('category', {}).get('name', 'General')).capitalize().replace('-', ' '),
+                "Price": int(p.get('price', 99) * 80), 
+                "Rating": round(random.uniform(3.5, 5.0), 1),
+                "Image": image_url,
+                "Description": p.get('description', '')
+            })
+            current_id += 1
+    except Exception as e:
+        print(f"Failed to fetch from Platzi API: {e}")
+
+# Remove duplicates based on Name just in case
+seen_names = set()
+unique_products = []
+for p in products:
+    if p['Name'] not in seen_names:
+        seen_names.add(p['Name'])
+        unique_products.append(p)
+
+# Assign sequential IDs
+for i, p in enumerate(unique_products):
+    p['ID'] = i + 1
+
+df_products = pd.DataFrame(unique_products)
 df_products.to_csv("products.csv", index=False)
+print(f"Total {len(df_products)} products saved to products.csv")
 
+# Now generate transactions
+print("Generating transactions...")
 transactions = []
 transaction_id = 1
-customers = list(range(1001, 1051))
+customers = list(range(1001, 1101)) # 100 customers
 
-for _ in range(1000):
+categories = df_products['Category'].unique().tolist()
+category_products = {cat: df_products[df_products['Category'] == cat]['ID'].tolist() for cat in categories}
+all_product_ids = df_products['ID'].tolist()
+
+for _ in range(3000): # Generating 3000 transactions for better recommendations
     cust_id = random.choice(customers)
-    basket_type = random.choice(['tech_buyer', 'clothing_buyer', 'food_buyer', 'home_buyer', 'reader', 'random'])
     
-    basket = []
-    if basket_type == 'tech_buyer':
-        basket.append(random.choice([1, 2]))
-        if random.random() > 0.4: basket.append(3)
-        if random.random() > 0.5: basket.append(16)
-    elif basket_type == 'clothing_buyer':
-        basket.append(4)
-        if random.random() > 0.3: basket.append(5)
-        if random.random() > 0.5: basket.append(6)
-        if random.random() > 0.7: basket.append(15)
-    elif basket_type == 'food_buyer':
-        basket.append(7)
-        if random.random() > 0.2: basket.append(8)
-        if random.random() > 0.5: basket.append(9)
-        if random.random() > 0.6: basket.append(14)
-    elif basket_type == 'home_buyer':
-        basket.append(12)
-        if random.random() > 0.3: basket.append(13)
-    elif basket_type == 'reader':
-        basket.append(10)
-        if random.random() > 0.4: basket.append(11)
-        if random.random() > 0.6: basket.append(7)
+    # Customer buys from a specific category or randomly
+    if random.random() > 0.4 and len(categories) > 0:
+        pref_cat = random.choice(categories)
+        avail_products = category_products[pref_cat]
+        
+        if len(avail_products) > 0:
+            basket_size = random.randint(1, min(4, len(avail_products)))
+            basket = random.sample(avail_products, k=basket_size)
+            
+            # Cross-selling: 30% chance to add a random product from any other category
+            if random.random() > 0.7:
+                basket.append(random.choice(all_product_ids))
+        else:
+            basket = random.sample(all_product_ids, k=random.randint(1, 3))
     else:
-        basket = random.sample(range(1, 17), k=random.randint(1, 3))
+        basket = random.sample(all_product_ids, k=random.randint(1, 3))
         
     for item_id in set(basket):
         transactions.append({
