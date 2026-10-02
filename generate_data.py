@@ -48,17 +48,27 @@ current_id = 1
 
 # Process DummyJSON products
 for p in dummy_products:
+    name = p.get('title', 'Unknown Product')
+    name_lower = name.lower()
+    category = str(p.get('category', 'General')).lower()
+    
+    # Filter out unwanted products
+    if any(unwanted in name_lower for unwanted in ['beef', 'cucumber', 'chicken', 'cat food', 'glass']) or 'groceries' in category or 'vegetable' in category:
+        continue
+
     image_url = p.get('thumbnail', '')
     if not image_url and p.get('images'):
         image_url = p['images'][0]
     
     image_url = sanitize_url(image_url)
+    if not image_url or image_url.endswith('.svg') or 'placehold' in image_url:
+        image_url = f"https://picsum.photos/seed/{current_id}/400/400"
     
     products.append({
         "ID": current_id,
-        "Name": p.get('title', 'Unknown Product'),
-        "Category": str(p.get('category', 'General')).capitalize().replace('-', ' '),
-        "Price": int(p.get('price', 99) * 80),  # Convert to INR roughly
+        "Name": name,
+        "Category": category.capitalize().replace('-', ' '),
+        "Price": int(p.get('price', 9.99) * 25),  # Lowered multiplier for realistic INR prices
         "Rating": p.get('rating', 4.0),
         "Image": image_url,
         "Description": p.get('description', '')
@@ -68,12 +78,14 @@ for p in dummy_products:
 # Process FakeStore products
 for p in fakestore_products:
     image_url = sanitize_url(p.get('image', ''))
+    if not image_url or image_url.endswith('.svg'):
+        image_url = f"https://picsum.photos/seed/{current_id}/400/400"
     
     products.append({
         "ID": current_id,
         "Name": p.get('title', 'Unknown Product'),
         "Category": str(p.get('category', 'General')).capitalize().replace('-', ' '),
-        "Price": int(p.get('price', 99) * 80), 
+        "Price": int(p.get('price', 9.99) * 25), 
         "Rating": p.get('rating', {}).get('rate', 4.0) if isinstance(p.get('rating'), dict) else 4.0,
         "Image": image_url,
         "Description": p.get('description', '')
@@ -100,7 +112,7 @@ if len(products) < 220:
                 "ID": current_id,
                 "Name": p.get('title', 'Unknown Product'),
                 "Category": str(p.get('category', {}).get('name', 'General')).capitalize().replace('-', ' '),
-                "Price": int(p.get('price', 99) * 80), 
+                "Price": int(p.get('price', 9.99) * 25), 
                 "Rating": round(random.uniform(3.5, 5.0), 1),
                 "Image": image_url,
                 "Description": p.get('description', '')
@@ -147,9 +159,12 @@ for _ in range(3000): # Generating 3000 transactions for better recommendations
             basket_size = random.randint(1, min(4, len(avail_products)))
             basket = random.sample(avail_products, k=basket_size)
             
-            # Cross-selling: 30% chance to add a random product from any other category
-            if random.random() > 0.7:
-                basket.append(random.choice(all_product_ids))
+            # Cross-selling: 15% chance to add a product from a related category instead of purely random
+            if random.random() > 0.85:
+                # To prevent makeup + glass, just pick from another category somewhat safely, 
+                # or just don't cross-sell wildly. We'll pick another item from the same category to keep it safe.
+                if len(avail_products) > basket_size:
+                    basket.append(random.choice([x for x in avail_products if x not in basket]))
         else:
             basket = random.sample(all_product_ids, k=random.randint(1, 3))
     else:

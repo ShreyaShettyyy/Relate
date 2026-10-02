@@ -93,21 +93,6 @@ class RecommenderSystem:
                 if len(feed_recs) >= top_n:
                     break
                     
-        # Fallback to items frequently bought together by other users if not enough rules found
-        if len(feed_recs) < top_n:
-            # find users who bought similar items
-            similar_users = self.transactions_df[self.transactions_df['Item'].isin(past_items)]['CustomerID'].unique()
-            similar_users = [u for u in similar_users if u != customer_id]
-            
-            if similar_users:
-                sim_txns = self.transactions_df[self.transactions_df['CustomerID'].isin(similar_users)]
-                pop_items = sim_txns['Item'].value_counts()
-                for item in pop_items.index:
-                    if item not in past_items and item not in feed_recs:
-                        feed_recs.add(item)
-                        if len(feed_recs) >= top_n:
-                            break
-                            
         return list(feed_recs)[:top_n]
 
 if __name__ == "__main__":

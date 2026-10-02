@@ -9,6 +9,31 @@
     <link rel="stylesheet" href="{{ url_for('static', filename='style.css') }}">
 </head>
 <body class="vibrant-bg">
+    <!-- Auth Page -->
+    <div id="auth-page" class="auth-page">
+        <div class="auth-container glass-effect">
+            <h1 class="gradient-text" style="text-align:center; font-size: 2.5rem; margin-bottom: 2rem;"><i class="fa-solid fa-store"></i> LuxStore</h1>
+            <div id="login-form">
+                <h2 style="margin-bottom: 1rem;">Welcome Back</h2>
+                <input type="email" id="auth-email" placeholder="Email" class="auth-input" required>
+                <input type="password" id="auth-password" placeholder="Password" class="auth-input" required>
+                <button id="auth-login-btn" class="modal-btn" style="margin-top: 1rem;">Login</button>
+                <p style="text-align: center; margin-top: 1rem;">Don't have an account? <span id="show-register" class="link-text" style="cursor:pointer; color:var(--primary);">Create Account</span></p>
+            </div>
+            <div id="register-form" class="hidden">
+                <h2 style="margin-bottom: 1rem;">Create Account</h2>
+                <input type="text" id="reg-name" placeholder="Full Name" class="auth-input" required>
+                <input type="email" id="reg-email" placeholder="Email" class="auth-input" required>
+                <input type="password" id="reg-password" placeholder="Password" class="auth-input" required>
+                <input type="password" id="reg-confirm" placeholder="Confirm Password" class="auth-input" required>
+                <button id="auth-register-btn" class="modal-btn" style="margin-top: 1rem;">Sign Up</button>
+                <p style="text-align: center; margin-top: 1rem;">Already have an account? <span id="show-login" class="link-text" style="cursor:pointer; color:var(--primary);">Login</span></p>
+            </div>
+        </div>
+    </div>
+
+    <!-- Main App -->
+    <div id="app-content" class="hidden">
     <header class="navbar glass-effect">
         <div class="logo" onclick="window.location.reload()" style="cursor:pointer;"><i class="fa-solid fa-store"></i> LuxStore</div>
         <div class="search-bar">
@@ -17,72 +42,80 @@
         </div>
         <div class="user-actions">
             <div id="login-container" class="user-login">
-                <button id="login-btn" class="nav-btn"><i class="fa-solid fa-user"></i> Login</button>
-                <span id="logged-in-user" class="hidden"></span>
-                <button id="logout-btn" class="nav-btn hidden"><i class="fa-solid fa-arrow-right-from-bracket"></i></button>
+                <span id="logged-in-user"></span>
+                <button id="logout-btn" class="nav-btn"><i class="fa-solid fa-arrow-right-from-bracket"></i></button>
             </div>
-            <div class="icon-btn" id="nav-wishlist"><i class="fa-regular fa-heart"></i></div>
-            <div class="icon-btn" id="nav-cart"><i class="fa-solid fa-cart-shopping"></i></div>
+            <div class="icon-btn" id="nav-orders" title="My Orders"><i class="fa-solid fa-clock-rotate-left"></i></div>
+            <div class="icon-btn" id="nav-wishlist" title="Wishlist"><i class="fa-regular fa-heart"></i></div>
+            <div class="icon-btn" id="nav-cart" title="Cart"><i class="fa-solid fa-cart-shopping"></i></div>
         </div>
     </header>
 
-    <nav class="categories glass-effect">
-        <ul id="category-list">
-            <li data-cat="All" class="active-cat">All</li>
-        </ul>
+    <nav class="flipkart-categories" id="flipkart-category-list">
+        <!-- Injected via JS -->
     </nav>
 
     <main class="container">
         <!-- Product Catalog -->
         <section id="catalog-section">
-            <div class="banner gradient-banner" id="main-banner">
-                <div class="banner-text">
-                    <h2>Discover the Extraordinary</h2>
-                    <p>Shop premium electronics, clothing, food, books, and home essentials.</p>
-                </div>
-            </div>
             
-            <div id="user-feed-section" class="rec-block hidden" style="margin-top: 2rem; margin-bottom: 2rem;">
-                <h3 class="rec-title gradient-text"><i class="fa-solid fa-sparkles"></i> Your Personalized Feed based on Purchase Pattern</h3>
-                <div id="user-feed-list" class="rec-carousel"></div>
+            <div id="personalized-feed-wrapper" class="hidden">
+                <h2 class="section-title">Your Personalized Feed</h2>
+                <div id="personalized-grid" class="product-grid" style="margin-bottom: 2rem;"></div>
             </div>
+
+            <h2 class="section-title">Grab or Gone Deals</h2>
+            <div id="deals-grid" class="product-grid" style="margin-bottom: 2rem;"></div>
+
+            <h2 class="section-title">Top Rated & Festive Delights</h2>
+            <div id="toprated-grid" class="product-grid" style="margin-bottom: 2rem;"></div>
             
-            <h3 id="all-products-title" style="margin-top: 2rem; margin-bottom: 1rem; color: var(--text-main);">Explore All Products</h3>
-            <div id="product-grid" class="product-grid">
-                <!-- Injected via JS -->
+            <h2 class="section-title">Explore All Products</h2>
+            <div id="product-grid" class="product-grid" style="margin-bottom: 2rem;">
+                <!-- Main feed injected via JS -->
             </div>
         </section>
 
         <!-- Product Detail View -->
         <section id="product-detail-section" class="hidden">
-            <div class="breadcrumb">
-                <span id="back-btn" class="back-link">Home</span> > <span id="bread-category">Category</span> > <span id="bread-name" class="current">Product</span>
+            <div class="breadcrumb" style="margin-bottom: 1rem; color: var(--text-muted);">
+                <span id="bread-category">Category</span> &gt; <span id="bread-name" class="current" style="color: var(--text-main); font-weight: bold;">Product</span>
             </div>
             
-            <div class="product-detail-layout glass-effect">
-                <div class="product-image-large">
-                    <img id="detail-image" src="" alt="Product" onerror="this.src='https://placehold.co/400x400/8b5cf6/ffffff?text=Image+Not+Found'">
+            <div class="product-detail-layout glass-effect" style="display: flex; gap: 2rem; background: white; color: black; border-radius: 4px; padding: 2rem;">
+                <div class="product-images-col" style="flex: 1; display: flex; flex-direction: column; gap: 10px; align-items: center;">
+                    <img id="detail-image" src="" alt="Product" style="width: 100%; max-width: 400px; object-fit: contain; border: 1px solid #eee; padding: 1rem;">
+                    <div id="detail-thumbnails" style="display: flex; gap: 10px; justify-content: center;">
+                        <!-- JS injected thumbnails -->
+                    </div>
                 </div>
                 
-                <div class="product-info">
-                    <div class="detail-category" id="detail-category">Category</div>
-                    <h1 id="detail-title" class="detail-title">Product Name</h1>
-                    <div class="detail-rating" id="detail-rating">
+                <div class="product-info" style="flex: 2;">
+                    <h1 id="detail-title" class="detail-title" style="font-size: 1.5rem; margin-bottom: 0.5rem; font-weight: 500;">Product Name</h1>
+                    <div class="detail-rating" id="detail-rating" style="margin-bottom: 1rem; color: #388e3c; font-weight: bold; background: #e8f5e9; display: inline-block; padding: 2px 8px; border-radius: 4px; font-size: 0.9rem;">
                         <!-- Stars -->
                     </div>
-                    <p class="detail-price" id="detail-price">₹0</p>
-                    <p class="detail-desc" id="detail-desc">Description</p>
+                    <p class="detail-price" id="detail-price" style="font-size: 2rem; font-weight: bold; margin-bottom: 1rem;">₹0</p>
                     
-                    <div class="action-buttons">
-                        <button class="add-to-cart-btn" id="add-to-cart"><i class="fa-solid fa-cart-plus"></i> Add to Cart</button>
-                        <button class="buy-now-btn" id="buy-now"><i class="fa-solid fa-bolt"></i> Buy Now</button>
-                        <button class="wishlist-btn" id="wishlist-toggle"><i class="fa-regular fa-heart"></i></button>
+                    <div style="margin-bottom: 1.5rem;">
+                        <h4 style="margin-bottom: 0.5rem; color: #878787;">Product Highlights</h4>
+                        <ul id="product-highlights" style="list-style-type: disc; margin-left: 1.5rem; line-height: 1.8; color: #212121;">
+                            <!-- JS injected highlights -->
+                        </ul>
                     </div>
 
-                    <div class="guarantees">
-                        <div class="guarantee"><i class="fa-solid fa-truck-fast"></i> Free Delivery</div>
-                        <div class="guarantee"><i class="fa-solid fa-rotate-left"></i> 30-Day Returns</div>
-                        <div class="guarantee"><i class="fa-solid fa-shield-halved"></i> 1 Year Warranty</div>
+                    <p class="detail-desc" id="detail-desc" style="color: #212121; margin-bottom: 1.5rem;">Description</p>
+                    
+                    <div class="action-buttons" style="display: flex; gap: 1rem; margin-bottom: 2rem;">
+                        <button class="modal-btn" id="add-to-cart" style="background: #ff9f00; border-radius: 2px; padding: 1rem 2rem; flex: 1; font-weight: bold; font-size: 1.1rem; box-shadow: 0 1px 2px 0 rgba(0,0,0,.2);"><i class="fa-solid fa-cart-plus"></i> ADD TO CART</button>
+                        <button class="modal-btn" id="buy-now" style="background: #fb641b; border-radius: 2px; padding: 1rem 2rem; flex: 1; font-weight: bold; font-size: 1.1rem; box-shadow: 0 1px 2px 0 rgba(0,0,0,.2);"><i class="fa-solid fa-bolt"></i> BUY NOW</button>
+                        <button class="wishlist-btn" id="wishlist-toggle" style="background: white; border: 1px solid #e0e0e0; color: #c2c2c2; padding: 0 1.5rem;"><i class="fa-solid fa-heart"></i></button>
+                    </div>
+
+                    <div class="guarantees" style="display: flex; gap: 1.5rem; flex-wrap: wrap; border-top: 1px solid #f0f0f0; padding-top: 1rem;">
+                        <div class="guarantee" style="display: flex; align-items: center; gap: 8px; font-size: 0.9rem; color: #212121;"><i class="fa-solid fa-arrow-rotate-left" style="color:var(--primary); font-size:1.2rem;"></i> 10 Days Return Policy</div>
+                        <div class="guarantee" style="display: flex; align-items: center; gap: 8px; font-size: 0.9rem; color: #212121;"><i class="fa-solid fa-money-bill-wave" style="color:var(--primary); font-size:1.2rem;"></i> Cash on Delivery available</div>
+                        <div class="guarantee" style="display: flex; align-items: center; gap: 8px; font-size: 0.9rem; color: #212121;"><i class="fa-solid fa-shield-halved" style="color:#2874f0; font-size:1.2rem;"></i> Flipkart Assured</div>
                     </div>
                 </div>
             </div>
@@ -113,33 +146,59 @@
                 </div>
             </div>
         </section>
-    </main>
-    
-    <!-- Login Modal -->
-    <div id="login-modal" class="modal hidden">
-        <div class="modal-content glass-effect">
-            <span class="close-modal" id="close-login">&times;</span>
-            <h2>Welcome Back</h2>
-            <p>Please enter your Customer ID to login.</p>
-            <input type="number" id="login-customer-id" placeholder="e.g. 1001" min="1001" max="1050">
-            <button id="submit-login" class="modal-btn">Login</button>
-        </div>
-    </div>
 
-    <!-- Checkout Modal -->
-    <div id="checkout-modal" class="modal hidden">
-        <div class="modal-content checkout-content glass-effect">
-            <span class="close-modal" id="close-checkout">&times;</span>
-            <h2>Checkout</h2>
+        <!-- Orders Section -->
+        <section id="orders-section" class="hidden glass-effect" style="padding: 2rem; border-radius: 16px; margin-top: 2rem;">
+            <div class="breadcrumb" style="margin-bottom: 2rem;">
+                <span class="current">My Purchases</span>
+            </div>
+            <h2 class="gradient-text" style="margin-top: 1rem; margin-bottom: 2rem;"><i class="fa-solid fa-clock-rotate-left"></i> Your Past Purchases</h2>
+            <div id="orders-page-list">
+                <!-- Advanced order items injected here -->
+            </div>
+        </section>
+
+        <!-- Upsell Section -->
+        <section id="upsell-section" class="hidden glass-effect" style="padding: 2rem; border-radius: 16px; margin-top: 2rem;">
+            <div class="breadcrumb" style="margin-bottom: 2rem;">
+                <span class="back-link" onclick="document.getElementById('catalog-section').classList.remove('hidden'); document.getElementById('upsell-section').classList.add('hidden');">Home</span> > <span class="current">Recommendations</span>
+            </div>
+            <h2 class="gradient-text" style="text-align: center; font-size: 2rem; margin-bottom: 1rem;"><i class="fa-solid fa-gift"></i> Wait! Before you checkout...</h2>
+            <p style="text-align: center; color: var(--text-muted); margin-bottom: 2rem;">Check out these personalized recommendations based on your selection.</p>
             
-            <div class="checkout-grid">
+            <div style="display: flex; flex-direction: column; gap: 2rem;">
+                <div id="upsell-personal-block" class="hidden" style="background: rgba(255,255,255,0.05); padding: 1.5rem; border-radius: 12px; border: 1px solid var(--primary);">
+                    <h3 style="color: var(--primary);"><i class="fa-solid fa-wand-magic-sparkles"></i> You usually buy this with:</h3>
+                    <div id="upsell-personal-item" style="display: flex; align-items: center; gap: 15px; margin-top: 1rem;"></div>
+                </div>
+                
+                <div id="upsell-global-block" class="hidden" style="background: rgba(255,255,255,0.05); padding: 1.5rem; border-radius: 12px; border: 1px solid var(--border);">
+                    <h3><i class="fa-solid fa-users"></i> Most people buy this with:</h3>
+                    <div id="upsell-global-item" style="display: flex; align-items: center; gap: 15px; margin-top: 1rem;"></div>
+                </div>
+            </div>
+            
+            <div style="margin-top: 3rem; text-align: center; border-top: 1px solid var(--border); padding-top: 2rem; display: flex; justify-content: center; gap: 15px;">
+                <button id="upsell-skip-btn" class="modal-btn" style="background: transparent; border: 2px solid var(--border); color: var(--text-main);">No thanks, just my item</button>
+                <button id="upsell-accept-btn" class="modal-btn" style="background: #10b981;">Add selected to cart & Checkout</button>
+            </div>
+        </section>
+
+        <!-- Checkout Section -->
+        <section id="checkout-section" class="hidden glass-effect" style="padding: 2rem; border-radius: 16px; margin-top: 2rem;">
+            <div class="breadcrumb" style="margin-bottom: 2rem;">
+                <span class="current">Checkout</span>
+            </div>
+            <h2>Complete Your Purchase</h2>
+            
+            <div class="checkout-grid" style="margin-top: 2rem;">
                 <div class="checkout-form">
                     <h3>Shipping Address</h3>
-                    <input type="text" placeholder="Full Name" required>
-                    <input type="text" placeholder="Street Address" required>
-                    <div style="display:flex; gap:10px;">
-                        <input type="text" placeholder="City" required>
-                        <input type="text" placeholder="Postal Code" required>
+                    <input type="text" id="ship-name" placeholder="Full Name" required style="width:100%; padding: 0.8rem; border-radius: 8px; border: 1px solid var(--border); margin-bottom: 1rem;">
+                    <input type="text" id="ship-street" placeholder="Street Address" required style="width:100%; padding: 0.8rem; border-radius: 8px; border: 1px solid var(--border); margin-bottom: 1rem;">
+                    <div style="display:flex; gap:10px; margin-bottom: 1rem;">
+                        <input type="text" id="ship-city" placeholder="City" required style="flex:1; padding: 0.8rem; border-radius: 8px; border: 1px solid var(--border);">
+                        <input type="text" id="ship-pin" placeholder="Postal Code" required style="flex:1; padding: 0.8rem; border-radius: 8px; border: 1px solid var(--border);">
                     </div>
 
                     <h3 style="margin-top:20px;">Payment Method</h3>
@@ -157,33 +216,73 @@
 
                 <div class="checkout-summary">
                     <h3>Order Summary</h3>
-                    <div class="summary-item"><span id="checkout-item-name">Product</span> <span id="checkout-item-price">₹0</span></div>
-                    <div class="summary-item"><span>Shipping</span> <span>Free</span></div>
+                    <div class="summary-item" style="display:flex; justify-content:space-between; margin-top:1rem;"><span id="checkout-item-name">Product</span> <span id="checkout-item-price">₹0</span></div>
+                    <div class="summary-item" style="display:flex; justify-content:space-between; margin-top:1rem; padding-bottom:1rem; border-bottom:1px solid var(--border);"><span>Shipping</span> <span>Free</span></div>
                     
-                    <div class="coupon-box">
-                        <input type="text" id="coupon-code" placeholder="Enter Coupon Code">
-                        <button id="apply-coupon">Apply</button>
+                    <div class="coupon-box" style="display:flex; gap:10px; margin-top: 1rem;">
+                        <input type="text" id="coupon-code" placeholder="Enter Coupon Code" style="flex:1; padding:0.5rem; border-radius:4px; border:1px solid var(--border);">
+                        <button id="apply-coupon" class="modal-btn" style="padding:0.5rem 1rem;">Apply</button>
                     </div>
-                    <div id="coupon-msg" class="coupon-msg"></div>
+                    <div id="coupon-msg" class="coupon-msg" style="margin-top:0.5rem; font-size:0.9rem;"></div>
 
-                    <div class="summary-total">
+                    <div class="summary-total" style="display:flex; justify-content:space-between; font-weight:bold; font-size:1.2rem; margin-top: 2rem;">
                         <span>Total:</span> <span id="checkout-total">₹0</span>
                     </div>
 
-                    <button id="place-order-btn" class="place-order-btn">Place Order</button>
+                    <button id="place-order-btn" class="place-order-btn" style="margin-top: 2rem;">Place Order</button>
                 </div>
             </div>
+        </section>
+
+        <!-- Payment Processing Page -->
+        <section id="payment-processing-section" class="hidden" style="height: 60vh; display: flex; align-items: center; justify-content: center; flex-direction: column;">
+            <div class="glass-effect" style="padding: 4rem; text-align: center; border-radius: 20px; width: 400px; max-width: 90%;">
+                <img id="payment-app-logo" src="https://upload.wikimedia.org/wikipedia/commons/f/f2/Google_Pay_Logo.svg" alt="App" style="height: 40px; margin-bottom: 2rem;">
+                
+                <h2 id="processing-text">Enter UPI PIN</h2>
+                <div style="font-size: 2.5rem; font-weight: bold; margin-top: 1rem; margin-bottom: 2rem; color: var(--text-main);" id="payment-amount">₹0</div>
+                
+                <div id="pin-container" style="margin-bottom: 2rem;">
+                    <input type="password" id="upi-pin-input" maxlength="6" placeholder="******" style="letter-spacing: 15px; text-align: center; font-size: 2rem; padding: 15px; border-radius: 10px; border: 1px solid var(--border); width: 100%; background: rgba(255,255,255,0.05); color: white;">
+                </div>
+                
+                <button id="submit-pin-btn" class="modal-btn" style="width: 100%; font-size: 1.2rem; padding: 1rem;">Submit & Pay</button>
+                <div class="spinner hidden" id="payment-spinner" style="margin: 2rem auto 0 auto;"></div>
+            </div>
+        </section>
+
+    </main>
+    
+    <!-- Cart Modal -->
+    <div id="cart-modal" class="modal hidden">
+        <div class="modal-content glass-effect">
+            <span class="close-modal" id="close-cart">&times;</span>
+            <h2>Your Cart</h2>
+            <div id="cart-items" style="margin-top: 1rem; max-height: 300px; overflow-y: auto;">
+                <!-- Cart items injected here -->
+            </div>
+            <div class="cart-total" style="font-size: 1.2rem; font-weight: bold; margin-top: 1rem; text-align: right;">
+                Total: <span id="cart-total-price">₹0</span>
+            </div>
+            <button id="checkout-cart-btn" class="modal-btn" style="margin-top: 1rem;">Proceed to Checkout</button>
         </div>
     </div>
 
-    <!-- Processing Modal -->
-    <div id="processing-modal" class="modal hidden">
-        <div class="modal-content glass-effect" style="text-align: center;">
-            <div class="spinner"></div>
-            <h2 id="processing-text">Processing Payment...</h2>
-            <p>Please check your UPI app or wait for confirmation. Do not close this window.</p>
+    <!-- Wishlist Modal -->
+    <div id="wishlist-modal" class="modal hidden">
+        <div class="modal-content glass-effect">
+            <span class="close-modal" id="close-wishlist">&times;</span>
+            <h2>Your Wishlist</h2>
+            <div id="wishlist-items" style="margin-top: 1rem; max-height: 400px; overflow-y: auto;">
+                <!-- Wishlist items injected here -->
+            </div>
         </div>
     </div>
+    <!-- Empty chunk since Orders Modal was moved -->
+
+    <!-- Empty chunk since Upsell Modal was moved -->
+
+    <!-- Empty chunk since Checkout and Processing Modals were moved -->
 
     <!-- Tracking Modal -->
     <div id="tracking-modal" class="modal hidden">
@@ -215,6 +314,8 @@
 
     <!-- Toast Notification -->
     <div id="toast" class="toast hidden"></div>
+    
+    </div> <!-- End of App Content -->
     
     <script src="{{ url_for('static', filename='script.js') }}"></script>
 </body>
