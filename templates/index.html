@@ -6,12 +6,13 @@
     <title>LuxStore - Premium E-Commerce</title>
     <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&display=swap" rel="stylesheet">
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
-    <link rel="stylesheet" href="{{ url_for('static', filename='style.css') }}?v=5">
+    <link rel="stylesheet" href="{{ url_for('static', filename='style.css') }}?v=6">
 </head>
 <body class="vibrant-bg">
     <!-- Auth Page -->
-    <div id="auth-page" class="auth-page">
-        <div class="auth-container glass-effect">
+    <div id="auth-page" class="auth-page hidden">
+        <div class="auth-container glass-effect" style="position: relative;">
+            <span id="close-auth" style="position: absolute; top: 15px; right: 20px; font-size: 1.5rem; cursor: pointer; color: var(--text-muted);">&times;</span>
             <h1 class="gradient-text" style="text-align:center; font-size: 2.5rem; margin-bottom: 2rem;"><i class="fa-solid fa-store"></i> LuxStore</h1>
             <div id="login-form">
                 <h2 style="margin-bottom: 1rem;">Welcome Back</h2>
@@ -33,7 +34,7 @@
     </div>
 
     <!-- Main App -->
-    <div id="app-content" class="hidden">
+    <div id="app-content">
     <header class="navbar glass-effect">
         <div class="logo" onclick="window.location.reload()" style="cursor:pointer;"><i class="fa-solid fa-store"></i> LuxStore</div>
         <div class="search-bar">
@@ -42,8 +43,9 @@
         </div>
         <div class="user-actions">
             <div id="login-container" class="user-login">
-                <span id="logged-in-user"></span>
-                <button id="logout-btn" class="nav-btn"><i class="fa-solid fa-arrow-right-from-bracket"></i></button>
+                <button id="login-btn" class="nav-btn"><i class="fa-solid fa-user"></i> Login</button>
+                <span id="logged-in-user" class="hidden"></span>
+                <button id="logout-btn" class="nav-btn hidden"><i class="fa-solid fa-arrow-right-from-bracket"></i></button>
             </div>
             <div class="icon-btn" id="nav-orders" title="My Orders"><i class="fa-solid fa-clock-rotate-left"></i></div>
             <div class="icon-btn" id="nav-wishlist" title="Wishlist"><i class="fa-regular fa-heart"></i></div>
@@ -305,6 +307,6 @@
     
     </div> <!-- End of App Content -->
     
-    <script src="{{ url_for('static', filename='script.js') }}?v=5"></script>
+    <script src="{{ url_for('static', filename='script.js') }}?v=6"></script>
 </body>
 </html>

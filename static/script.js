@@ -238,6 +238,20 @@ document.addEventListener('DOMContentLoaded', () => {
     // Removed manual back button logic to rely entirely on browser Back (popstate)
 
     // ---------------- AUTH LOGIC ----------------
+    const loginBtn = document.getElementById('login-btn');
+    if (loginBtn) {
+        loginBtn.addEventListener('click', () => {
+            document.getElementById('auth-page').classList.remove('hidden');
+        });
+    }
+
+    const closeAuthBtn = document.getElementById('close-auth');
+    if (closeAuthBtn) {
+        closeAuthBtn.addEventListener('click', () => {
+            document.getElementById('auth-page').classList.add('hidden');
+        });
+    }
+
     document.getElementById('show-register').addEventListener('click', () => {
         document.getElementById('login-form').classList.add('hidden');
         document.getElementById('register-form').classList.remove('hidden');
@@ -301,8 +315,10 @@ document.addEventListener('DOMContentLoaded', () => {
     function handleLoginSuccess(user) {
         currentUser = user;
         document.getElementById('auth-page').classList.add('hidden');
-        document.getElementById('app-content').classList.remove('hidden');
         document.getElementById('logged-in-user').textContent = `Hi, ${user.name}`;
+        document.getElementById('logged-in-user').classList.remove('hidden');
+        document.getElementById('logout-btn').classList.remove('hidden');
+        if (document.getElementById('login-btn')) document.getElementById('login-btn').classList.add('hidden');
         showToast("Logged in successfully!");
         
         // Fetch User Data (cart, wishlist, orders)
@@ -320,8 +336,9 @@ document.addEventListener('DOMContentLoaded', () => {
         currentUser = null;
         cart = []; wishlist = []; orders = [];
         currentFeedList = allProducts;
-        document.getElementById('app-content').classList.add('hidden');
-        document.getElementById('auth-page').classList.remove('hidden');
+        document.getElementById('logged-in-user').classList.add('hidden');
+        document.getElementById('logout-btn').classList.add('hidden');
+        if (document.getElementById('login-btn')) document.getElementById('login-btn').classList.remove('hidden');
         navigateTo('catalog-section');
         executeSearch();
         showToast("Logged out");
