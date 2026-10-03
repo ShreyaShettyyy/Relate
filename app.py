@@ -3,7 +3,7 @@ import pandas as pd
 from recommender import RecommenderSystem
 
 app = Flask(__name__)
-
+app.config['SEND_FILE_MAX_AGE_DEFAULT'] = 0
 # Initialize Recommender System
 try:
     df_trans = pd.read_csv('transactions.csv')
