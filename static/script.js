@@ -136,13 +136,21 @@ document.addEventListener('DOMContentLoaded', () => {
         document.getElementById('detail-image').src = product.Image;
         document.getElementById('detail-title').textContent = product.Name;
         
-        // Thumbnail
+        // Thumbnails
         const thumbContainer = document.getElementById('detail-thumbnails');
         thumbContainer.innerHTML = '';
-        const img = document.createElement('img');
-        img.src = product.Image;
-        img.style.cssText = 'width: 60px; height: 60px; object-fit: contain; border: 1px solid #2874f0; border-radius: 4px; cursor: pointer; padding: 4px;';
-        thumbContainer.appendChild(img);
+        for (let i = 0; i < 3; i++) {
+            const img = document.createElement('img');
+            img.src = product.Image;
+            img.style.cssText = 'width: 60px; height: 60px; object-fit: contain; border: 1px solid #ddd; border-radius: 4px; cursor: pointer; padding: 4px;';
+            if (i === 0) img.style.borderColor = '#2874f0';
+            img.addEventListener('click', () => {
+                document.getElementById('detail-image').src = product.Image;
+                Array.from(thumbContainer.children).forEach(c => c.style.borderColor = '#ddd');
+                img.style.borderColor = '#2874f0';
+            });
+            thumbContainer.appendChild(img);
+        }
 
         // Mock Product Highlights
         const highlights = document.getElementById('product-highlights');
@@ -458,33 +466,40 @@ document.addEventListener('DOMContentLoaded', () => {
                 
                 let itemsHtml = '';
                 order.items.forEach(itemName => {
-                    const prod = allProducts.find(p => p.Name === itemName);
-                    if (prod) {
-                        itemsHtml += `
-                            <div style="display:flex; gap:15px; margin-top:1rem; padding-bottom:1rem; border-bottom:1px solid var(--border);">
-                                <img src="${prod.Image}" style="width:100px; height:100px; object-fit:cover; border-radius:8px;">
-                                <div style="flex:1;">
-                                    <div style="font-weight:bold; font-size:1.1rem;">${prod.Name}</div>
-                                    <div style="color:var(--text-muted); font-size:0.9rem; margin:0.5rem 0;">${prod.Description.substring(0, 80)}...</div>
-                                    <div style="color:var(--primary); font-weight:bold;">${formatPrice(prod.Price)}</div>
-                                </div>
-                                <div style="flex:1;">
-                                    <strong>Leave a Review</strong><br>
-                                    <div style="color:#fbbf24; margin:0.5rem 0; cursor:pointer;" onclick="this.innerHTML='<i class=\\'fa-solid fa-star\\'></i><i class=\\'fa-solid fa-star\\'></i><i class=\\'fa-solid fa-star\\'></i><i class=\\'fa-solid fa-star\\'></i><i class=\\'fa-solid fa-star\\'></i>'">
-                                        <i class="fa-regular fa-star"></i><i class="fa-regular fa-star"></i><i class="fa-regular fa-star"></i><i class="fa-regular fa-star"></i><i class="fa-regular fa-star"></i>
-                                    </div>
-                                    <textarea placeholder="Write your feedback..." style="width:100%; padding:0.8rem; border-radius:8px; border:1px solid var(--border); background:rgba(255,255,255,0.05); color:var(--text-main); font-family: inherit; resize: vertical; min-height: 60px; margin-bottom: 0.5rem;"></textarea>
-                                    <div style="margin-bottom: 1rem; color: #212121; font-size: 0.85rem;">
-                                        <label for="review-img-${order.id}-${prod.ID}" style="cursor: pointer; display: flex; align-items: center; gap: 5px; color: var(--primary); font-weight: bold;">
-                                            <i class="fa-solid fa-camera"></i> Add Image (Optional)
-                                        </label>
-                                        <input type="file" id="review-img-${order.id}-${prod.ID}" accept="image/*" style="display: none;">
-                                    </div>
-                                    <button style="padding: 0.5rem 1.5rem; border-radius: 20px; border: none; background: var(--primary); color: white; cursor: pointer; font-weight: bold; font-size: 0.85rem; margin-top: 0.5rem; transition: 0.3s; width: max-content;" onmouseover="this.style.opacity='0.8'" onmouseout="this.style.opacity='1'" onclick="this.textContent='Thank you!'; this.style.background='#10b981';">Submit Review</button>
-                                </div>
-                            </div>
-                        `;
+                    let prod = allProducts.find(p => p.Name === itemName);
+                    if (!prod) {
+                        prod = {
+                            Name: itemName,
+                            Image: 'https://placehold.co/100x100/1e1e1e/878787?text=Unavailable',
+                            Description: 'This product is no longer available in the catalog.',
+                            Price: 0,
+                            ID: Math.floor(Math.random() * 10000)
+                        };
                     }
+                    itemsHtml += `
+                        <div style="display:flex; gap:15px; margin-top:1rem; padding-bottom:1rem; border-bottom:1px solid var(--border);">
+                            <img src="${prod.Image}" style="width:100px; height:100px; object-fit:cover; border-radius:8px;">
+                            <div style="flex:1;">
+                                <div style="font-weight:bold; font-size:1.1rem;">${prod.Name}</div>
+                                <div style="color:var(--text-muted); font-size:0.9rem; margin:0.5rem 0;">${prod.Description.substring(0, 80)}...</div>
+                                <div style="color:var(--primary); font-weight:bold;">${formatPrice(prod.Price)}</div>
+                            </div>
+                            <div style="flex:1;">
+                                <strong>Leave a Review</strong><br>
+                                <div style="color:#fbbf24; margin:0.5rem 0; cursor:pointer;" onclick="this.innerHTML='<i class=\\'fa-solid fa-star\\'></i><i class=\\'fa-solid fa-star\\'></i><i class=\\'fa-solid fa-star\\'></i><i class=\\'fa-solid fa-star\\'></i><i class=\\'fa-solid fa-star\\'></i>'">
+                                    <i class="fa-regular fa-star"></i><i class="fa-regular fa-star"></i><i class="fa-regular fa-star"></i><i class="fa-regular fa-star"></i><i class="fa-regular fa-star"></i>
+                                </div>
+                                <textarea placeholder="Write your feedback..." style="width:100%; padding:0.8rem; border-radius:8px; border:1px solid var(--border); background:rgba(255,255,255,0.05); color:var(--text-main); font-family: inherit; resize: vertical; min-height: 60px; margin-bottom: 0.5rem;"></textarea>
+                                <div style="margin-bottom: 1rem; color: #212121; font-size: 0.85rem;">
+                                    <label for="review-img-${order.id}-${prod.ID}" style="cursor: pointer; display: flex; align-items: center; gap: 5px; color: var(--primary); font-weight: bold;">
+                                        <i class="fa-solid fa-camera"></i> Add Image (Optional)
+                                    </label>
+                                    <input type="file" id="review-img-${order.id}-${prod.ID}" accept="image/*" style="display: none;">
+                                </div>
+                                <button style="padding: 0.5rem 1.5rem; border-radius: 20px; border: none; background: var(--primary); color: white; cursor: pointer; font-weight: bold; font-size: 0.85rem; margin-top: 0.5rem; transition: 0.3s; width: max-content;" onmouseover="this.style.opacity='0.8'" onmouseout="this.style.opacity='1'" onclick="this.textContent='Thank you!'; this.style.background='#10b981';">Submit Review</button>
+                            </div>
+                        </div>
+                    `;
                 });
 
                 orderCard.innerHTML = `

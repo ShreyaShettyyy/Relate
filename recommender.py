@@ -32,21 +32,25 @@ class RecommenderSystem:
         print("Market Basket Model trained successfully.")
 
     def get_frequently_bought_with(self, item, top_n=3):
-        if self.rules is None or self.rules.empty:
-            return []
-        
-        # Find rules where item is in antecedents
-        relevant_rules = self.rules[self.rules['antecedents'].apply(lambda x: item in x)]
-        if relevant_rules.empty:
-            return []
-            
-        relevant_rules = relevant_rules.sort_values(['lift', 'confidence'], ascending=[False, False]).head(top_n)
-        
         recommendations = set()
-        for idx, row in relevant_rules.iterrows():
-            for consequent in row['consequents']:
-                recommendations.add(consequent)
-                
+        
+        if self.rules is not None and not self.rules.empty:
+            relevant_rules = self.rules[self.rules['antecedents'].apply(lambda x: item in x)]
+            if not relevant_rules.empty:
+                relevant_rules = relevant_rules.sort_values(['lift', 'confidence'], ascending=[False, False]).head(top_n)
+                for idx, row in relevant_rules.iterrows():
+                    for consequent in row['consequents']:
+                        recommendations.add(consequent)
+        
+        # Fallback if apriori rules didn't catch anything or didn't find enough
+        if len(recommendations) < top_n:
+            txns_with_item = self.transactions_df[self.transactions_df['Item'] == item]['TransactionID'].unique()
+            if len(txns_with_item) > 0:
+                items_in_same_txns = self.transactions_df[self.transactions_df['TransactionID'].isin(txns_with_item)]
+                item_counts = items_in_same_txns[items_in_same_txns['Item'] != item]['Item'].value_counts()
+                for fallback_item in item_counts.head(top_n).index:
+                    recommendations.add(fallback_item)
+                    
         return list(recommendations)[:top_n]
 
     def get_user_frequently_bought_with(self, customer_id, item, top_n=3):

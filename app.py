@@ -81,6 +81,7 @@ def user_feed():
 
 import json
 import os
+from werkzeug.security import generate_password_hash, check_password_hash
 
 DB_FILE = 'users.json'
 
@@ -103,7 +104,8 @@ def register():
     if not email or not password: return jsonify({"error": "Missing fields"}), 400
     db = load_db()
     if email in db: return jsonify({"error": "User already exists"}), 400
-    db[email] = {"name": name, "password": password, "cart": [], "wishlist": [], "orders": [], "customer_id": len(db) + 1101}
+    hashed_password = generate_password_hash(password)
+    db[email] = {"name": name, "password": hashed_password, "cart": [], "wishlist": [], "orders": [], "customer_id": len(db) + 1101}
     save_db(db)
     return jsonify({"success": True, "user": {"email": email, "name": name, "customer_id": db[email]['customer_id']}})
 
@@ -113,9 +115,12 @@ def login():
     email = data.get('email')
     password = data.get('password')
     db = load_db()
-    if email in db and db[email]['password'] == password:
-        user = db[email]
-        return jsonify({"success": True, "user": {"email": email, "name": user['name'], "customer_id": user['customer_id']}})
+    if email in db:
+        user_password = db[email].get('password', '')
+        # Support both hashed passwords and legacy plain-text passwords for existing users
+        if check_password_hash(user_password, password) or user_password == password:
+            user = db[email]
+            return jsonify({"success": True, "user": {"email": email, "name": user['name'], "customer_id": user['customer_id']}})
     return jsonify({"error": "Invalid credentials"}), 401
 
 @app.route('/api/user/data', methods=['GET', 'POST'])
