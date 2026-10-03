@@ -55,14 +55,16 @@ document.addEventListener('DOMContentLoaded', () => {
                 catList.appendChild(div);
             });
             
-            renderGrid(allProducts, document.getElementById('product-grid'));
+            // Mix Top Rated and Deals to the front for guests
+            const topRated = [...allProducts].sort((a,b) => b.Rating - a.Rating).slice(0, 10);
+            const deals = [...allProducts].sort(() => 0.5 - Math.random()).slice(0, 10);
             
-            // Populate special grids
-            const deals = allProducts.sort(() => 0.5 - Math.random()).slice(0, 6);
-            renderGrid(deals, document.getElementById('deals-grid'));
+            const combinedFront = [...topRated, ...deals];
+            const frontIds = new Set(combinedFront.map(p => p.ID));
+            const rest = allProducts.filter(p => !frontIds.has(p.ID));
             
-            const topRated = [...allProducts].sort((a,b) => b.Rating - a.Rating).slice(0, 6);
-            renderGrid(topRated, document.getElementById('toprated-grid'));
+            currentFeedList = [...combinedFront, ...rest];
+            renderGrid(currentFeedList, document.getElementById('product-grid'));
         });
 
     function generateStars(rating) {
@@ -341,10 +343,8 @@ document.addEventListener('DOMContentLoaded', () => {
                 if (data.feed && data.feed.length > 0) {
                     const feedIds = new Set(data.feed.map(p => p.ID));
                     const restProducts = allProducts.filter(p => !feedIds.has(p.ID));
-                    currentFeedList = [...restProducts]; // Only use rest for main grid
-                    document.getElementById('personalized-feed-wrapper').classList.remove('hidden');
-                    renderGrid(data.feed, document.getElementById('personalized-grid'));
-                    executeSearch(); // re-render main grid with the rest
+                    currentFeedList = [...data.feed, ...restProducts];
+                    executeSearch(); // re-render main grid with the updated order
                 }
             })
             .catch(err => console.error("Error loading feed:", err));
@@ -494,17 +494,33 @@ document.addEventListener('DOMContentLoaded', () => {
                                     <label for="review-img-${order.id}-${prod.ID}" style="cursor: pointer; display: flex; align-items: center; gap: 5px; color: var(--primary); font-weight: bold;">
                                         <i class="fa-solid fa-camera"></i> Add Image (Optional)
                                     </label>
-                                    <input type="file" id="review-img-${order.id}-${prod.ID}" accept="image/*" style="display: none;">
+                                    <input type="file" id="review-img-${order.id}-${prod.ID}" accept="image/*" style="display: none;" onchange="
+                                        const file = this.files[0];
+                                        if (file) {
+                                            const reader = new FileReader();
+                                            reader.onload = function(e) {
+                                                let previewContainer = document.getElementById('preview-container-${order.id}-${prod.ID}');
+                                                if (!previewContainer) {
+                                                    previewContainer = document.createElement('div');
+                                                    previewContainer.id = 'preview-container-${order.id}-${prod.ID}';
+                                                    previewContainer.style.marginTop = '10px';
+                                                    document.getElementById('review-img-${order.id}-${prod.ID}').parentNode.appendChild(previewContainer);
+                                                }
+                                                previewContainer.innerHTML = '<img src=\\'' + e.target.result + '\\' style=\\'width:60px; height:60px; object-fit:cover; border-radius:4px; border:1px solid #ddd;\\'>';
+                                            }
+                                            reader.readAsDataURL(file);
+                                        }
+                                    ">
                                 </div>
                                 <button style="padding: 0.5rem 1.5rem; border-radius: 20px; border: none; background: var(--primary); color: white; cursor: pointer; font-weight: bold; font-size: 0.85rem; margin-top: 0.5rem; transition: 0.3s; width: max-content;" onmouseover="this.style.opacity='0.8'" onmouseout="this.style.opacity='1'" onclick="this.textContent='Thank you!'; this.style.background='#10b981';">Submit Review</button>
                             </div>
                         </div>
+                        <div style="font-size: 0.85rem; color: var(--text-muted); margin-top: 0.5rem;">Order #${order.id}</div>
                     `;
                 });
 
                 orderCard.innerHTML = `
-                    <div style="display:flex; justify-content:space-between; border-bottom:2px solid var(--border); padding-bottom:0.5rem;">
-                        <h3 style="margin:0;">Order #${order.id}</h3>
+                    <div style="display:flex; justify-content:flex-end; border-bottom:2px solid var(--border); padding-bottom:0.5rem;">
                         <div style="font-weight:bold; color:var(--primary); font-size:1.2rem;">Total: ${formatPrice(order.total)}</div>
                     </div>
                     ${itemsHtml}
