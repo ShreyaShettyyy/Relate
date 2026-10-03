@@ -89,7 +89,7 @@ document.addEventListener('DOMContentLoaded', () => {
         const card = document.createElement('div');
         card.className = 'product-card';
         card.innerHTML = `
-            <img src="${product.Image}" alt="${product.Name}" loading="lazy" onerror="this.src='https://placehold.co/400x400/8b5cf6/ffffff?text=Image+Not+Found'">
+            <img src="${product.Image}" alt="${product.Name}" loading="lazy" onerror="this.onerror=null; this.src='https://picsum.photos/seed/${product.ID}/400/400'">
             <div class="card-category">${product.Category}</div>
             <div class="card-title">${product.Name}</div>
             <div class="card-rating">${generateStars(product.Rating)}</div>
@@ -145,10 +145,10 @@ document.addEventListener('DOMContentLoaded', () => {
             const img = document.createElement('img');
             let imgSrc = product.Image;
             if (i > 0) {
-                const catStr = (product.Category || 'product').split(' ')[0].toLowerCase();
-                imgSrc = `https://loremflickr.com/400/400/${catStr},product?random=${product.ID * 10 + i}`;
+                imgSrc = `https://picsum.photos/seed/${product.ID * 10 + i}/400/400`;
             }
             img.src = imgSrc;
+            img.onerror = () => { img.src = `https://placehold.co/400x400/eeeeee/333333?text=View+${i+1}`; };
             img.style.cssText = 'width: 60px; height: 60px; object-fit: contain; border: 1px solid #ddd; border-radius: 4px; cursor: pointer; padding: 4px;';
             if (i === 0) img.style.borderColor = '#2874f0';
             img.addEventListener('click', () => {
