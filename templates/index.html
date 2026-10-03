@@ -10,7 +10,7 @@
 </head>
 <body class="vibrant-bg">
     <!-- Auth Page -->
-    <div id="auth-page" class="auth-page hidden">
+    <div id="auth-page" class="auth-page">
         <div class="auth-container glass-effect">
             <h1 class="gradient-text" style="text-align:center; font-size: 2.5rem; margin-bottom: 2rem;"><i class="fa-solid fa-store"></i> LuxStore</h1>
             <div id="login-form">
@@ -19,7 +19,6 @@
                 <input type="password" id="auth-password" placeholder="Password" class="auth-input" required>
                 <button id="auth-login-btn" class="modal-btn" style="margin-top: 1rem;">Login</button>
                 <p style="text-align: center; margin-top: 1rem;">Don't have an account? <span id="show-register" class="link-text" style="cursor:pointer; color:var(--primary);">Create Account</span></p>
-                <p style="text-align: center; margin-top: 1rem;"><span id="close-auth" class="link-text" style="cursor:pointer; color:var(--text-muted);">Cancel</span></p>
             </div>
             <div id="register-form" class="hidden">
                 <h2 style="margin-bottom: 1rem;">Create Account</h2>
@@ -34,7 +33,7 @@
     </div>
 
     <!-- Main App -->
-    <div id="app-content">
+    <div id="app-content" class="hidden">
     <header class="navbar glass-effect">
         <div class="logo" onclick="window.location.reload()" style="cursor:pointer;"><i class="fa-solid fa-store"></i> LuxStore</div>
         <div class="search-bar">
@@ -43,9 +42,8 @@
         </div>
         <div class="user-actions">
             <div id="login-container" class="user-login">
-                <button id="login-btn" class="nav-btn"><i class="fa-solid fa-user"></i> Login</button>
-                <span id="logged-in-user" class="hidden"></span>
-                <button id="logout-btn" class="nav-btn hidden"><i class="fa-solid fa-arrow-right-from-bracket"></i></button>
+                <span id="logged-in-user"></span>
+                <button id="logout-btn" class="nav-btn"><i class="fa-solid fa-arrow-right-from-bracket"></i></button>
             </div>
             <div class="icon-btn" id="nav-orders" title="My Orders"><i class="fa-solid fa-clock-rotate-left"></i></div>
             <div class="icon-btn" id="nav-wishlist" title="Wishlist"><i class="fa-regular fa-heart"></i></div>
@@ -53,21 +51,13 @@
         </div>
     </header>
 
-    <nav class="categories glass-effect" style="margin-bottom: 2rem;">
-        <ul id="category-list">
-            <li data-cat="All" class="active-cat">All</li>
-        </ul>
+    <nav class="flipkart-categories" id="flipkart-category-list">
+        <!-- Injected via JS -->
     </nav>
 
     <main class="container">
         <!-- Product Catalog -->
         <section id="catalog-section">
-            <div class="banner gradient-banner" id="main-banner">
-                <div class="banner-text">
-                    <h2>Discover the Extraordinary</h2>
-                    <p>Shop premium electronics, clothing, food, books, and home essentials.</p>
-                </div>
-            </div>
             
             <div id="personalized-feed-wrapper" class="hidden">
                 <h2 class="section-title">Your Personalized Feed</h2>
@@ -92,7 +82,7 @@
                 <span id="bread-category">Category</span> &gt; <span id="bread-name" class="current" style="color: var(--text-main); font-weight: bold;">Product</span>
             </div>
             
-            <div class="product-detail-layout glass-effect" style="display: flex; gap: 2rem; border-radius: 12px; padding: 2rem;">
+            <div class="product-detail-layout glass-effect" style="display: flex; gap: 2rem; background: white; color: black; border-radius: 4px; padding: 2rem;">
                 <div class="product-images-col" style="flex: 1; display: flex; flex-direction: column; gap: 10px; align-items: center;">
                     <img id="detail-image" src="" alt="Product" style="width: 100%; max-width: 400px; object-fit: contain; border: 1px solid #eee; padding: 1rem;">
                     <div id="detail-thumbnails" style="display: flex; gap: 10px; justify-content: center;">

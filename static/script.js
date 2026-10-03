@@ -27,51 +27,43 @@ document.addEventListener('DOMContentLoaded', () => {
     });
     history.replaceState({ section: 'catalog-section' }, '', '#catalog-section');
 
+    const flipCategories = [
+        { name: "Top Offers", img: "https://img.icons8.com/color/96/000000/discount--v1.png", cat: "All" },
+        { name: "Mobiles", img: "https://img.icons8.com/color/96/000000/smartphone--v1.png", cat: "Smartphones" },
+        { name: "Electronics", img: "https://img.icons8.com/color/96/000000/tv.png", cat: "Electronics" },
+        { name: "Fashion", img: "https://img.icons8.com/color/96/000000/t-shirt.png", cat: "Womens dresses" },
+        { name: "Beauty", img: "https://img.icons8.com/color/96/000000/cosmetic-brush.png", cat: "Beauty" },
+        { name: "Home", img: "https://img.icons8.com/color/96/000000/sofa.png", cat: "Kitchen accessories" },
+        { name: "Grocery", img: "https://img.icons8.com/color/96/000000/shopping-cart.png", cat: "Groceries" }
+    ];
+
     // Fetch Data
     fetch('/api/metadata')
         .then(res => res.json())
         .then(data => {
             allProducts = data.products;
             
-            // Populate Categories dynamically
-            const catSet = new Set(allProducts.map(p => p.Category));
-            const catList = document.getElementById('category-list');
-            if (catList) {
-                Array.from(catSet).sort().forEach(cat => {
-                    const li = document.createElement('li');
-                    li.setAttribute('data-cat', cat);
-                    li.textContent = cat;
-                    catList.appendChild(li);
+            const catList = document.getElementById('flipkart-category-list');
+            flipCategories.forEach(c => {
+                const div = document.createElement('div');
+                div.className = 'flip-cat-item';
+                div.innerHTML = `<img src="${c.img}"><span>${c.name}</span>`;
+                div.addEventListener('click', () => {
+                    currentCategory = c.cat;
+                    executeSearch();
                 });
-                bindCategoryClicks();
-            }
+                catList.appendChild(div);
+            });
             
             renderGrid(allProducts, document.getElementById('product-grid'));
             
-            // Populate special grids if they exist
-            const dealsGrid = document.getElementById('deals-grid');
-            if (dealsGrid) {
-                const deals = allProducts.sort(() => 0.5 - Math.random()).slice(0, 6);
-                renderGrid(deals, dealsGrid);
-            }
+            // Populate special grids
+            const deals = allProducts.sort(() => 0.5 - Math.random()).slice(0, 6);
+            renderGrid(deals, document.getElementById('deals-grid'));
             
-            const topRatedGrid = document.getElementById('toprated-grid');
-            if (topRatedGrid) {
-                const topRated = [...allProducts].sort((a,b) => b.Rating - a.Rating).slice(0, 6);
-                renderGrid(topRated, topRatedGrid);
-            }
+            const topRated = [...allProducts].sort((a,b) => b.Rating - a.Rating).slice(0, 6);
+            renderGrid(topRated, document.getElementById('toprated-grid'));
         });
-
-    function bindCategoryClicks() {
-        document.querySelectorAll('#category-list li').forEach(li => {
-            li.addEventListener('click', (e) => {
-                document.querySelectorAll('#category-list li').forEach(el => el.classList.remove('active-cat'));
-                e.target.classList.add('active-cat');
-                currentCategory = e.target.getAttribute('data-cat');
-                executeSearch();
-            });
-        });
-    }
 
     function generateStars(rating) {
         let starsHtml = '';
@@ -244,20 +236,6 @@ document.addEventListener('DOMContentLoaded', () => {
     // Removed manual back button logic to rely entirely on browser Back (popstate)
 
     // ---------------- AUTH LOGIC ----------------
-    const loginBtn = document.getElementById('login-btn');
-    if (loginBtn) {
-        loginBtn.addEventListener('click', () => {
-            document.getElementById('auth-page').classList.remove('hidden');
-        });
-    }
-
-    const closeAuthBtn = document.getElementById('close-auth');
-    if (closeAuthBtn) {
-        closeAuthBtn.addEventListener('click', () => {
-            document.getElementById('auth-page').classList.add('hidden');
-        });
-    }
-
     document.getElementById('show-register').addEventListener('click', () => {
         document.getElementById('login-form').classList.add('hidden');
         document.getElementById('register-form').classList.remove('hidden');
@@ -321,10 +299,8 @@ document.addEventListener('DOMContentLoaded', () => {
     function handleLoginSuccess(user) {
         currentUser = user;
         document.getElementById('auth-page').classList.add('hidden');
+        document.getElementById('app-content').classList.remove('hidden');
         document.getElementById('logged-in-user').textContent = `Hi, ${user.name}`;
-        document.getElementById('logged-in-user').classList.remove('hidden');
-        document.getElementById('logout-btn').classList.remove('hidden');
-        if (document.getElementById('login-btn')) document.getElementById('login-btn').classList.add('hidden');
         showToast("Logged in successfully!");
         
         // Fetch User Data (cart, wishlist, orders)
@@ -342,9 +318,8 @@ document.addEventListener('DOMContentLoaded', () => {
         currentUser = null;
         cart = []; wishlist = []; orders = [];
         currentFeedList = allProducts;
-        document.getElementById('logged-in-user').classList.add('hidden');
-        document.getElementById('logout-btn').classList.add('hidden');
-        if (document.getElementById('login-btn')) document.getElementById('login-btn').classList.remove('hidden');
+        document.getElementById('app-content').classList.add('hidden');
+        document.getElementById('auth-page').classList.remove('hidden');
         navigateTo('catalog-section');
         executeSearch();
         showToast("Logged out");
