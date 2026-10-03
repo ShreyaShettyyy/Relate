@@ -31,9 +31,9 @@ document.addEventListener('DOMContentLoaded', () => {
         { name: "Top Offers", img: "https://img.icons8.com/color/96/000000/discount--v1.png", cat: "All" },
         { name: "Mobiles", img: "https://img.icons8.com/color/96/000000/smartphone--v1.png", cat: "Smartphones" },
         { name: "Electronics", img: "https://img.icons8.com/color/96/000000/tv.png", cat: "Electronics" },
-        { name: "Fashion", img: "https://img.icons8.com/color/96/000000/t-shirt.png", cat: "Womens dresses" },
+        { name: "Fashion", img: "https://img.icons8.com/color/96/000000/t-shirt.png", cat: "Fashion" },
         { name: "Beauty", img: "https://img.icons8.com/color/96/000000/cosmetic-brush.png", cat: "Beauty" },
-        { name: "Home", img: "https://img.icons8.com/color/96/000000/sofa.png", cat: "Kitchen accessories" },
+        { name: "Home", img: "https://img.icons8.com/color/96/000000/sofa.png", cat: "Home & Kitchen" },
         { name: "Grocery", img: "https://img.icons8.com/color/96/000000/shopping-cart.png", cat: "Groceries" }
     ];
 
@@ -367,9 +367,13 @@ document.addEventListener('DOMContentLoaded', () => {
             .then(res => res.json())
             .then(data => {
                 if (data.feed && data.feed.length > 0) {
-                    const feedIds = new Set(data.feed.map(p => p.ID));
+                    const topRated = [...allProducts].sort((a,b) => b.Rating - a.Rating).slice(0, 5);
+                    const deals = [...allProducts].sort(() => 0.5 - Math.random()).slice(0, 5);
+                    const combinedFront = [...deals, ...topRated, ...data.feed];
+                    
+                    const feedIds = new Set(combinedFront.map(p => p.ID));
                     const restProducts = allProducts.filter(p => !feedIds.has(p.ID));
-                    currentFeedList = [...data.feed, ...restProducts];
+                    currentFeedList = [...combinedFront, ...restProducts];
                     executeSearch(); // re-render main grid with the updated order
                 }
             })
