@@ -62,13 +62,13 @@ for p in dummy_products:
     
     image_url = sanitize_url(image_url)
     if not image_url or image_url.endswith('.svg') or 'placehold' in image_url:
-        image_url = f"https://picsum.photos/seed/{current_id}/400/400"
+        image_url = f"https://loremflickr.com/400/400/{str(category).split()[0].lower()},product?random={current_id}"
     
     products.append({
         "ID": current_id,
         "Name": name,
         "Category": category.capitalize().replace('-', ' '),
-        "Price": int(p.get('price', 9.99) * 25),  # Lowered multiplier for realistic INR prices
+        "Price": int(p.get('price', 9.99) * 85),  # Lowered multiplier for realistic INR prices
         "Rating": p.get('rating', 4.0),
         "Image": image_url,
         "Description": p.get('description', '')
@@ -77,26 +77,27 @@ for p in dummy_products:
 
 # Process FakeStore products
 for p in fakestore_products:
+    category = str(p.get('category', 'General'))
     image_url = sanitize_url(p.get('image', ''))
     if not image_url or image_url.endswith('.svg'):
-        image_url = f"https://picsum.photos/seed/{current_id}/400/400"
+        image_url = f"https://loremflickr.com/400/400/{category.split()[0].lower()},product?random={current_id}"
     
     products.append({
         "ID": current_id,
         "Name": p.get('title', 'Unknown Product'),
         "Category": str(p.get('category', 'General')).capitalize().replace('-', ' '),
-        "Price": int(p.get('price', 9.99) * 25), 
+        "Price": int(p.get('price', 9.99) * 85), 
         "Rating": p.get('rating', {}).get('rate', 4.0) if isinstance(p.get('rating'), dict) else 4.0,
         "Image": image_url,
         "Description": p.get('description', '')
     })
     current_id += 1
 
-# If we need even more, fetch from Platzi Fake Store API
-if len(products) < 220:
+# Always fetch from Platzi Fake Store API for more products
+if True:
     print("Fetching products from Platzi API...")
     try:
-        platzi_products = fetch_data('https://api.escuelajs.co/api/v1/products?limit=100&offset=0')
+        platzi_products = fetch_data('https://api.escuelajs.co/api/v1/products?limit=300&offset=0')
         print(f"Fetched {len(platzi_products)} products from Platzi API.")
         
         for p in platzi_products:
@@ -112,7 +113,7 @@ if len(products) < 220:
                 "ID": current_id,
                 "Name": p.get('title', 'Unknown Product'),
                 "Category": str(p.get('category', {}).get('name', 'General')).capitalize().replace('-', ' '),
-                "Price": int(p.get('price', 9.99) * 25), 
+                "Price": int(p.get('price', 9.99) * 85), 
                 "Rating": round(random.uniform(3.5, 5.0), 1),
                 "Image": image_url,
                 "Description": p.get('description', '')

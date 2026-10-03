@@ -143,11 +143,16 @@ document.addEventListener('DOMContentLoaded', () => {
         thumbContainer.innerHTML = '';
         for (let i = 0; i < 3; i++) {
             const img = document.createElement('img');
-            img.src = product.Image;
+            let imgSrc = product.Image;
+            if (i > 0) {
+                const catStr = (product.Category || 'product').split(' ')[0].toLowerCase();
+                imgSrc = `https://loremflickr.com/400/400/${catStr},product?random=${product.ID * 10 + i}`;
+            }
+            img.src = imgSrc;
             img.style.cssText = 'width: 60px; height: 60px; object-fit: contain; border: 1px solid #ddd; border-radius: 4px; cursor: pointer; padding: 4px;';
             if (i === 0) img.style.borderColor = '#2874f0';
             img.addEventListener('click', () => {
-                document.getElementById('detail-image').src = product.Image;
+                document.getElementById('detail-image').src = imgSrc;
                 Array.from(thumbContainer.children).forEach(c => c.style.borderColor = '#ddd');
                 img.style.borderColor = '#2874f0';
             });
@@ -217,15 +222,19 @@ document.addEventListener('DOMContentLoaded', () => {
             "I've been using it for a week and I can highly recommend it. Will definitely buy from LuxStore again."
         ];
         
+        const indianNames = ["Aarav", "Neha", "Rohan", "Priya", "Vikram", "Anjali", "Kabir", "Meera", "Rahul", "Shruti"];
+        const indianLastNames = ["Sharma", "Verma", "Patel", "Singh", "Kumar", "Gupta"];
+        
         for(let i = 1; i <= 3; i++) {
             const seed = product.ID * 10 + i;
+            const reviewerName = indianNames[seed % indianNames.length] + " " + indianLastNames[seed % 6];
             const rev = document.createElement('div');
             rev.className = 'review-card';
             rev.innerHTML = `
                 <div class="review-header">
-                    <img src="https://ui-avatars.com/api/?name=User&background=random" class="review-avatar" alt="User">
+                    <img src="https://ui-avatars.com/api/?name=${encodeURIComponent(reviewerName)}&background=random" class="review-avatar" alt="User">
                     <div class="review-meta">
-                        <div class="review-name">Customer ${Math.floor(Math.random() * 9000 + 1000)}</div>
+                        <div class="review-name">${reviewerName}</div>
                         <div class="review-stars">${generateStars(product.Rating > 4.5 ? 5 : 4)}</div>
                     </div>
                 </div>
