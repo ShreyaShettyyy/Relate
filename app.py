@@ -20,7 +20,7 @@ def index():
 @app.route('/api/metadata')
 def metadata():
     customers = sorted(df_trans['CustomerID'].unique().tolist())
-    products = df_prod.to_dict('records')
+    products = df_prod.replace({float('nan'): None}).to_dict('records')
     return jsonify({"customers": customers, "products": products})
 
 @app.route('/api/product_recs')
@@ -38,7 +38,7 @@ def product_recs():
         personal_recs = recommender.get_user_frequently_bought_with(customer_id, product)
         
     def get_prod_details(names):
-        return df_prod[df_prod['Name'].isin(names)].to_dict('records')
+        return df_prod[df_prod['Name'].isin(names)].replace({float('nan'): None}).to_dict('records')
         
     return jsonify({
         "global": get_prod_details(global_recs),
@@ -73,7 +73,7 @@ def user_feed():
         final_recs = df_trans['Item'].value_counts().head(100).index.tolist()
         
     def get_prod_details(names):
-        return df_prod[df_prod['Name'].isin(names)].to_dict('records')
+        return df_prod[df_prod['Name'].isin(names)].replace({float('nan'): None}).to_dict('records')
         
     return jsonify({
         "feed": get_prod_details(final_recs)
