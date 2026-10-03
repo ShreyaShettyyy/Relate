@@ -192,74 +192,39 @@ ID,Name,Category,Price,Rating,Image,Description
 191,Rolex Datejust Women,Fashion,934999,2.86,https://cdn.dummyjson.com/product-images/womens-watches/rolex-datejust-women/thumbnail.webp,The Rolex Datejust Women's watch is an iconic timepiece designed for women. With a timeless design a
 192,Watch Gold for Women,Fashion,67999,4.24,https://cdn.dummyjson.com/product-images/womens-watches/watch-gold-for-women/thumbnail.webp,The Gold Women's Watch is a stunning accessory that combines luxury and style. Featuring a gold-plat
 193,Women's Wrist Watch,Fashion,11049,3.52,https://cdn.dummyjson.com/product-images/womens-watches/women's-wrist-watch/thumbnail.webp,The Women's Wrist Watch is a versatile and fashionable timepiece for everyday wear. With a comfortab
-194,Sleek White & Orange Wireless Gaming Controller,Electronics,5865,4.7,https://i.imgur.com/ZANVnHE.jpeg,"Elevate your gaming experience with this state-of-the-art wireless controller, featuring a crisp whi"
-195,Sleek Wireless Headphone & Inked Earbud Set,Electronics,3740,4.8,https://i.imgur.com/yVeIeDa.jpeg,Experience the fusion of style and sound with this sophisticated audio set featuring a pair of sleek
-196,Sleek Comfort-Fit Over-Ear Headphones,Electronics,2380,4.1,https://i.imgur.com/SolkFEB.jpeg,"Experience superior sound quality with our Sleek Comfort-Fit Over-Ear Headphones, designed for prolo"
-197,Efficient 2-Slice Toaster,Electronics,4080,3.8,https://i.imgur.com/keVCVIa.jpeg,"Enhance your morning routine with our sleek 2-slice toaster, featuring adjustable browning controls "
+194,Sleek White & Orange Wireless Gaming Controller,Electronics,5865,3.5,https://i.imgur.com/ZANVnHE.jpeg,"Elevate your gaming experience with this state-of-the-art wireless controller, featuring a crisp whi"
+195,Sleek Wireless Headphone & Inked Earbud Set,Electronics,3740,3.7,https://i.imgur.com/yVeIeDa.jpeg,Experience the fusion of style and sound with this sophisticated audio set featuring a pair of sleek
+196,Sleek Comfort-Fit Over-Ear Headphones,Electronics,2380,4.6,https://i.imgur.com/SolkFEB.jpeg,"Experience superior sound quality with our Sleek Comfort-Fit Over-Ear Headphones, designed for prolo"
+197,Efficient 2-Slice Toaster,Electronics,4080,4.8,https://i.imgur.com/keVCVIa.jpeg,"Enhance your morning routine with our sleek 2-slice toaster, featuring adjustable browning controls "
 198,Sleek Wireless Computer Mouse,Electronics,850,4.0,https://i.imgur.com/w3Y8NwQ.jpeg,"Experience smooth and precise navigation with this modern wireless mouse, featuring a glossy finish "
 199,Sleek Modern Laptop with Ambient Lighting,Electronics,3655,3.7,https://i.imgur.com/OKn1KFI.jpeg,"Experience next-level computing with our ultra-slim laptop, featuring a stunning display illuminated"
-200,Sleek Modern Laptop for Professionals,Electronics,8245,4.7,https://i.imgur.com/ItHcq7o.jpeg,Experience cutting-edge technology and elegant design with our latest laptop model. Perfect for prof
-201,Stylish Red & Silver Over-Ear Headphones,Electronics,3315,4.2,https://i.imgur.com/YaSqa06.jpeg,Immerse yourself in superior sound quality with these sleek red and silver over-ear headphones. Desi
-202,Sleek Mirror Finish Phone Case,Electronics,2295,4.9,https://i.imgur.com/yb9UQKL.jpeg,Enhance your smartphone's look with this ultra-sleek mirror finish phone case. Designed to offer sty
-203,Sleek Smartwatch with Vibrant Display,Electronics,1360,4.0,https://i.imgur.com/LGk9Jn2.jpeg,"Experience modern timekeeping with our high-tech smartwatch, featuring a vivid touch screen display,"
-204,Sleek Modern Leather Sofa,Home & Kitchen,4505,3.9,https://i.imgur.com/Qphac99.jpeg,Enhance the elegance of your living space with our Sleek Modern Leather Sofa. Designed with a minima
-205,Mid-Century Modern Wooden Dining Table,Home & Kitchen,2040,4.7,https://i.imgur.com/DMQHGA0.jpeg,"Elevate your dining room with this sleek Mid-Century Modern dining table, featuring an elegant walnu"
-206,Elegant Golden-Base Stone Top Dining Table,Home & Kitchen,5610,4.5,https://i.imgur.com/NWIJKUj.jpeg,"Elevate your dining space with this luxurious table, featuring a sturdy golden metal base with an in"
-207,Modern Elegance Teal Armchair,Home & Kitchen,2125,4.7,https://i.imgur.com/6wkyyIN.jpeg,"Elevate your living space with this beautifully crafted armchair, featuring a sleek wooden frame tha"
-208,Elegant Solid Wood Dining Table,Home & Kitchen,5695,4.2,https://i.imgur.com/4lTaHfF.jpeg,"Enhance your dining space with this sleek, contemporary dining table, crafted from high-quality soli"
-209,Modern Minimalist Workstation Setup,Home & Kitchen,4165,4.4,https://i.imgur.com/3oXNBst.jpeg,"Elevate your home office with our Modern Minimalist Workstation Setup, featuring a sleek wooden desk"
-210,Modern Ergonomic Office Chair,Home & Kitchen,6035,4.0,https://i.imgur.com/3dU0m72.jpeg,Elevate your office space with this sleek and comfortable Modern Ergonomic Office Chair. Designed to
-211,Futuristic Holographic Soccer Cleats,Shoes,3315,4.8,https://i.imgur.com/qNOjJje.jpeg,Step onto the field and stand out from the crowd with these eye-catching holographic soccer cleats. 
+200,Sleek Modern Laptop for Professionals,Electronics,8245,4.2,https://i.imgur.com/ItHcq7o.jpeg,Experience cutting-edge technology and elegant design with our latest laptop model. Perfect for prof
+201,Stylish Red & Silver Over-Ear Headphones,Electronics,3315,3.9,https://i.imgur.com/YaSqa06.jpeg,Immerse yourself in superior sound quality with these sleek red and silver over-ear headphones. Desi
+202,Sleek Mirror Finish Phone Case,Electronics,2295,3.7,https://i.imgur.com/yb9UQKL.jpeg,Enhance your smartphone's look with this ultra-sleek mirror finish phone case. Designed to offer sty
+203,Sleek Smartwatch with Vibrant Display,Electronics,1360,4.3,https://i.imgur.com/LGk9Jn2.jpeg,"Experience modern timekeeping with our high-tech smartwatch, featuring a vivid touch screen display,"
+204,Sleek Modern Leather Sofa,Home & Kitchen,4505,4.5,https://i.imgur.com/Qphac99.jpeg,Enhance the elegance of your living space with our Sleek Modern Leather Sofa. Designed with a minima
+205,Mid-Century Modern Wooden Dining Table,Home & Kitchen,2040,4.0,https://i.imgur.com/DMQHGA0.jpeg,"Elevate your dining room with this sleek Mid-Century Modern dining table, featuring an elegant walnu"
+206,Elegant Golden-Base Stone Top Dining Table,Home & Kitchen,5610,4.7,https://i.imgur.com/NWIJKUj.jpeg,"Elevate your dining space with this luxurious table, featuring a sturdy golden metal base with an in"
+207,Modern Elegance Teal Armchair,Home & Kitchen,2125,4.6,https://i.imgur.com/6wkyyIN.jpeg,"Elevate your living space with this beautifully crafted armchair, featuring a sleek wooden frame tha"
+208,Elegant Solid Wood Dining Table,Home & Kitchen,5695,4.7,https://i.imgur.com/4lTaHfF.jpeg,"Enhance your dining space with this sleek, contemporary dining table, crafted from high-quality soli"
+209,Modern Minimalist Workstation Setup,Home & Kitchen,4165,3.7,https://i.imgur.com/3oXNBst.jpeg,"Elevate your home office with our Modern Minimalist Workstation Setup, featuring a sleek wooden desk"
+210,Modern Ergonomic Office Chair,Home & Kitchen,6035,4.6,https://i.imgur.com/3dU0m72.jpeg,Elevate your office space with this sleek and comfortable Modern Ergonomic Office Chair. Designed to
+211,Futuristic Holographic Soccer Cleats,Shoes,3315,3.5,https://i.imgur.com/qNOjJje.jpeg,Step onto the field and stand out from the crowd with these eye-catching holographic soccer cleats. 
 212,Rainbow Glitter High Heels,Shoes,3315,4.7,https://i.imgur.com/62gGzeF.jpeg,"Step into the spotlight with these eye-catching rainbow glitter high heels. Designed to dazzle, each"
-213,Chic Summer Denim Espadrille Sandals,Shoes,2805,4.8,https://i.imgur.com/9qrmE1b.jpeg,Step into summer with style in our denim espadrille sandals. Featuring a braided jute sole for a cla
-214,Vibrant Runners: Bold Orange & Blue Sneakers,Shoes,2295,3.7,https://i.imgur.com/hKcMNJs.jpeg,Step into style with these eye-catching sneakers featuring a striking combination of orange and blue
-215,Vibrant Pink Classic Sneakers,Shoes,7140,3.5,https://i.imgur.com/mcW42Gi.jpeg,Step into style with our Vibrant Pink Classic Sneakers! These eye-catching shoes feature a bold pink
-216,Futuristic Silver and Gold High-Top Sneaker,Shoes,5780,3.5,https://i.imgur.com/npLfCGq.jpeg,"Step into the future with this eye-catching high-top sneaker, designed for those who dare to stand o"
-217,Futuristic Chic High-Heel Boots,Shoes,3060,4.5,https://i.imgur.com/HqYqLnW.jpeg,Elevate your style with our cutting-edge high-heel boots that blend bold design with avant-garde aes
-218,Elegant Patent Leather Peep-Toe Pumps with Gold-Tone Heel,Shoes,4505,4.1,https://i.imgur.com/AzAY4Ed.jpeg,"Step into sophistication with these chic peep-toe pumps, showcasing a lustrous patent leather finish"
-219,Elegant Purple Leather Loafers,Shoes,1445,4.8,https://i.imgur.com/Au8J9sX.jpeg,"Step into sophistication with our Elegant Purple Leather Loafers, perfect for making a bold statemen"
-220,Classic Blue Suede Casual Shoes,Shoes,3315,4.8,https://i.imgur.com/sC0ztOB.jpeg,"Step into comfort with our Classic Blue Suede Casual Shoes, perfect for everyday wear. These shoes f"
-221,cobalt lark prototype,Electronics,850,4.3,https://picsum.photos/seed/222/400/400,This cobalt lark prototype introduces the next evolution of our cobalt lark technology.
-222,cobalt lark flagship,Electronics,850,4.8,https://picsum.photos/seed/223/400/400,The cobalt lark flagship extends project 294 and continues the cobalt lark mission.
-223,indigo prototype,Electronics,3570,3.8,https://picsum.photos/seed/224/400/400,The indigo prototype is a hands-on exploration of the indigo design language.
-224,indigo flagship,Electronics,3570,3.5,https://picsum.photos/seed/225/400/400,"Our flagship product builds on the work of project 296, the indigo prototype initiative."
-225,azure quail prototype,Electronics,3570,5.0,https://i.imgur.com/QkIa5tT.jpeg,The azure quail prototype is a proof of concept. This azure quail prototype demonstrates core capabi
-226,azure quail flagship,Electronics,3570,4.1,https://i.imgur.com/QkIa5tT.jpeg,The azure quail flagship succeeds the azure quail prototype (project id 298). Build on the prototype
-227,vexed willow prototype,Electronics,3570,4.7,https://picsum.photos/seed/228/400/400,The vexed willow prototype is the first release in the vexed willow product line.
-228,ember swoop prototype,Electronics,3570,4.7,https://picsum.photos/seed/229/400/400,The ember swoop prototype introduces next‑gen ember swoop technology.
-229,vexed willow flagship,Electronics,3570,5.0,https://picsum.photos/seed/230/400/400,Flagship update to project 302. Every vexed willow flagship ships the vexed willow standard.
-230,ember swoop flagship,Electronics,3570,3.7,https://picsum.photos/seed/231/400/400,The ember swoop flagship extends project 303 and continues the ember swoop mission.
-231,moray prototype,Electronics,8415,4.7,https://picsum.photos/seed/232/400/400,The moray prototype is built around moray design principles.
-232,moray flagship,Electronics,8415,4.1,https://picsum.photos/seed/233/400/400,The moray flagship extends the moray prototype (id 306) with advanced features.
-233,jaded prototype,Electronics,3570,4.5,https://picsum.photos/seed/234/400/400,The jaded horizon project launches this jaded horizon prototype.
-234,jaded flagship,Electronics,3570,3.6,https://picsum.photos/seed/235/400/400,The flagship embodies the jaded horizon vision and is registered to project 309.
-235,plinth zephyr prototype,Electronics,8500,3.9,https://picsum.photos/seed/236/400/400,The plinth zephyr prototype establishes the plinth zephyr baseline for this project.
-236,plinth zephyr flagship,Electronics,8500,4.1,https://picsum.photos/seed/237/400/400,"This flagship, project 311, extends the plinth zephyr foundation established in the prototype under "
-237,Caneta azul,Electronics,850,4.4,www.google.com,Para uso acadêmico
-238,Caneta,Electronics,1020,3.6,www.gogole.com,Uso pessoal
-239,Lapis,Electronics,1020,4.5,www.gogole.com,Uso pessoal
-240,Borracha,Electronics,1020,3.9,www.gogole.com,Uso pessoal
-241,Produto!,Electronics,1020,4.7,www.gogole.com,Uso pessoal
-242,Caneta preta,Electronics,1020,4.8,www.gogole.com,Uso pessoal
-243,Vida.Zemlak,Grosery,850,5.0,https://picsum.photos/seed/244/400/400,A description
-244,Switchable high-level productivity-ae3ed095f74840bdbb4a5a171762d4de,Pet supplies_bcea4d1230be4b5bb556d0156627fb63,12410,4.9,https://martinez.net/,Extended contextually-based synergy
-245,Organic Bananas,Groceries,267,4.9,https://picsum.photos/seed/246/400/400,Premium quality organic bananas for your daily needs.
-246,Whole Wheat Bread,Groceries,314,4.2,https://picsum.photos/seed/247/400/400,Premium quality whole wheat bread for your daily needs.
-247,Almond Milk,Groceries,208,4.9,https://picsum.photos/seed/248/400/400,Premium quality almond milk for your daily needs.
-248,Farm Fresh Eggs,Groceries,501,4.2,https://picsum.photos/seed/249/400/400,Premium quality farm fresh eggs for your daily needs.
-249,Green Apples,Groceries,1050,4.4,https://picsum.photos/seed/250/400/400,Premium quality green apples for your daily needs.
-250,Basmati Rice,Groceries,1101,4.0,https://picsum.photos/seed/251/400/400,Premium quality basmati rice for your daily needs.
-251,Olive Oil,Groceries,647,4.9,https://picsum.photos/seed/252/400/400,Premium quality olive oil for your daily needs.
-252,Pasta,Groceries,371,4.3,https://picsum.photos/seed/253/400/400,Premium quality pasta for your daily needs.
-253,Tomato Ketchup,Groceries,251,4.3,https://picsum.photos/seed/254/400/400,Premium quality tomato ketchup for your daily needs.
-254,Green Tea Bags,Groceries,675,4.1,https://picsum.photos/seed/255/400/400,Premium quality green tea bags for your daily needs.
-255,Dark Chocolate,Groceries,254,4.5,https://picsum.photos/seed/256/400/400,Premium quality dark chocolate for your daily needs.
-256,Peanut Butter,Groceries,213,4.5,https://picsum.photos/seed/257/400/400,Premium quality peanut butter for your daily needs.
-257,Matte Lipstick,Beauty,866,4.4,https://picsum.photos/seed/258/400/400,Premium quality matte lipstick for your daily needs.
-258,Hydrating Face Cream,Beauty,1085,4.1,https://picsum.photos/seed/259/400/400,Premium quality hydrating face cream for your daily needs.
-259,Vitamin C Serum,Beauty,240,4.5,https://picsum.photos/seed/260/400/400,Premium quality vitamin c serum for your daily needs.
-260,Exfoliating Scrub,Beauty,1065,4.1,https://picsum.photos/seed/261/400/400,Premium quality exfoliating scrub for your daily needs.
-261,Rose Water Toner,Beauty,712,4.9,https://picsum.photos/seed/262/400/400,Premium quality rose water toner for your daily needs.
-262,SPF 50 Sunscreen,Beauty,1083,4.5,https://picsum.photos/seed/263/400/400,Premium quality spf 50 sunscreen for your daily needs.
-263,Liquid Eyeliner,Beauty,515,4.9,https://picsum.photos/seed/264/400/400,Premium quality liquid eyeliner for your daily needs.
-264,Volumizing Mascara,Beauty,266,4.9,https://picsum.photos/seed/265/400/400,Premium quality volumizing mascara for your daily needs.
+213,Chic Summer Denim Espadrille Sandals,Shoes,2805,4.6,https://i.imgur.com/9qrmE1b.jpeg,Step into summer with style in our denim espadrille sandals. Featuring a braided jute sole for a cla
+214,Vibrant Runners: Bold Orange & Blue Sneakers,Shoes,2295,4.2,https://i.imgur.com/hKcMNJs.jpeg,Step into style with these eye-catching sneakers featuring a striking combination of orange and blue
+215,Vibrant Pink Classic Sneakers,Shoes,7140,4.9,https://i.imgur.com/mcW42Gi.jpeg,Step into style with our Vibrant Pink Classic Sneakers! These eye-catching shoes feature a bold pink
+216,Futuristic Silver and Gold High-Top Sneaker,Shoes,5780,4.2,https://i.imgur.com/npLfCGq.jpeg,"Step into the future with this eye-catching high-top sneaker, designed for those who dare to stand o"
+217,Futuristic Chic High-Heel Boots,Shoes,3060,4.4,https://i.imgur.com/HqYqLnW.jpeg,Elevate your style with our cutting-edge high-heel boots that blend bold design with avant-garde aes
+218,Elegant Patent Leather Peep-Toe Pumps with Gold-Tone Heel,Shoes,4505,3.9,https://i.imgur.com/AzAY4Ed.jpeg,"Step into sophistication with these chic peep-toe pumps, showcasing a lustrous patent leather finish"
+219,Elegant Purple Leather Loafers,Shoes,1445,4.9,https://i.imgur.com/Au8J9sX.jpeg,"Step into sophistication with our Elegant Purple Leather Loafers, perfect for making a bold statemen"
+220,Classic Blue Suede Casual Shoes,Shoes,3315,3.6,https://i.imgur.com/sC0ztOB.jpeg,"Step into comfort with our Classic Blue Suede Casual Shoes, perfect for everyday wear. These shoes f"
+221,azure quail prototype,Electronics,3570,4.7,https://i.imgur.com/QkIa5tT.jpeg,The azure quail prototype is a proof of concept. This azure quail prototype demonstrates core capabi
+222,azure quail flagship,Electronics,3570,4.8,https://i.imgur.com/QkIa5tT.jpeg,The azure quail flagship succeeds the azure quail prototype (project id 298). Build on the prototype
+223,Caneta azul,Electronics,850,4.3,www.google.com,Para uso acadêmico
+224,Caneta,Electronics,1020,4.1,www.gogole.com,Uso pessoal
+225,Lapis,Electronics,1020,4.8,www.gogole.com,Uso pessoal
+226,Borracha,Electronics,1020,4.5,www.gogole.com,Uso pessoal
+227,Produto!,Electronics,1020,4.5,www.gogole.com,Uso pessoal
+228,Caneta preta,Electronics,1020,3.8,www.gogole.com,Uso pessoal
+229,Switchable high-level productivity-ae3ed095f74840bdbb4a5a171762d4de,Pet supplies_bcea4d1230be4b5bb556d0156627fb63,12410,5.0,https://martinez.net/,Extended contextually-based synergy

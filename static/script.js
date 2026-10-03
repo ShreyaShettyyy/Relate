@@ -88,8 +88,10 @@ document.addEventListener('DOMContentLoaded', () => {
     function createProductCard(product) {
         const card = document.createElement('div');
         card.className = 'product-card';
+        const images = (product.Image || '').split(',');
+        const mainImage = images[0] || 'https://placehold.co/400x400/8b5cf6/ffffff?text=No+Image';
         card.innerHTML = `
-            <img src="${product.Image}" alt="${product.Name}" loading="lazy" onerror="this.onerror=null; this.src='https://picsum.photos/seed/${product.ID}/400/400'">
+            <img src="${mainImage}" alt="${product.Name}" loading="lazy" onerror="this.onerror=null; this.src='https://placehold.co/400x400/8b5cf6/ffffff?text=Image+Not+Found'">
             <div class="card-category">${product.Category}</div>
             <div class="card-title">${product.Name}</div>
             <div class="card-rating">${generateStars(product.Rating)}</div>
@@ -133,9 +135,12 @@ document.addEventListener('DOMContentLoaded', () => {
         currentProductObj = product;
         navigateTo('product-detail-section');
         
+        const images = (product.Image || '').split(',');
+        const mainImage = images[0] || 'https://placehold.co/400x400/eeeeee/333333?text=Image+Not+Found';
+
         document.getElementById('bread-category').textContent = product.Category;
         document.getElementById('bread-name').textContent = product.Name;
-        document.getElementById('detail-image').src = product.Image;
+        document.getElementById('detail-image').src = mainImage;
         document.getElementById('detail-title').textContent = product.Name;
         
         // Thumbnails
@@ -143,10 +148,7 @@ document.addEventListener('DOMContentLoaded', () => {
         thumbContainer.innerHTML = '';
         for (let i = 0; i < 3; i++) {
             const img = document.createElement('img');
-            let imgSrc = product.Image;
-            if (i > 0) {
-                imgSrc = `https://picsum.photos/seed/${product.ID * 10 + i}/400/400`;
-            }
+            let imgSrc = images[i] || images[0] || '';
             img.src = imgSrc;
             img.onerror = () => { img.src = `https://placehold.co/400x400/eeeeee/333333?text=View+${i+1}`; };
             img.style.cssText = 'width: 60px; height: 60px; object-fit: contain; border: 1px solid #ddd; border-radius: 4px; cursor: pointer; padding: 4px;';
