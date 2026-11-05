@@ -1,108 +1,14 @@
-import pandas as pd
-from mlxtend.frequent_patterns import apriori, association_rules
-from sklearn.metrics.pairwise import cosine_similarity
-import numpy as np
+"""
+Backward-compatibility alias for services.recommendation_service.
+"""
+from services.recommendation_service import (
+    RecommenderSystem,
+    get_product_dict_list,
+    get_product_dict_list_with_reasons,
+)
 
-class RecommenderSystem:
-    def __init__(self, transactions_df):
-        self.transactions_df = transactions_df
-        self.frequent_itemsets = None
-        self.rules = None
-
-    def _prepare_market_basket_data(self):
-        basket = (self.transactions_df
-                  .groupby(['TransactionID', 'Item'])['Item']
-                  .count().unstack().reset_index().fillna(0)
-                  .set_index('TransactionID'))
-        
-        def encode_units(x):
-            if x <= 0: return 0
-            if x >= 1: return 1
-        
-        return basket.map(encode_units)
-
-    def train_market_basket(self, min_support=0.05, min_threshold=1.0):
-        print("Training Market Basket Model...")
-        basket_sets = self._prepare_market_basket_data()
-        self.frequent_itemsets = apriori(basket_sets, min_support=min_support, use_colnames=True)
-        if self.frequent_itemsets.empty:
-            print("No frequent itemsets found.")
-            return
-        self.rules = association_rules(self.frequent_itemsets, metric="lift", min_threshold=min_threshold)
-        print("Market Basket Model trained successfully.")
-
-    def get_frequently_bought_with(self, item, top_n=3):
-        recommendations = set()
-        
-        if self.rules is not None and not self.rules.empty:
-            relevant_rules = self.rules[self.rules['antecedents'].apply(lambda x: item in x)]
-            if not relevant_rules.empty:
-                relevant_rules = relevant_rules.sort_values(['lift', 'confidence'], ascending=[False, False]).head(top_n)
-                for idx, row in relevant_rules.iterrows():
-                    for consequent in row['consequents']:
-                        recommendations.add(consequent)
-        
-        # Fallback if apriori rules didn't catch anything or didn't find enough
-        if len(recommendations) < top_n:
-            txns_with_item = self.transactions_df[self.transactions_df['Item'] == item]['TransactionID'].unique()
-            if len(txns_with_item) > 0:
-                items_in_same_txns = self.transactions_df[self.transactions_df['TransactionID'].isin(txns_with_item)]
-                item_counts = items_in_same_txns[items_in_same_txns['Item'] != item]['Item'].value_counts()
-                for fallback_item in item_counts.head(top_n).index:
-                    recommendations.add(fallback_item)
-                    
-        return list(recommendations)[:top_n]
-
-    def get_user_frequently_bought_with(self, customer_id, item, top_n=3):
-        # Find transactions where THIS user bought THIS item
-        user_txns = self.transactions_df[self.transactions_df['CustomerID'] == customer_id]
-        txns_with_item = user_txns[user_txns['Item'] == item]['TransactionID'].unique()
-        
-        if len(txns_with_item) == 0:
-            return []
-            
-        # What else did they buy in these specific transactions?
-        items_in_same_txns = user_txns[user_txns['TransactionID'].isin(txns_with_item)]
-        
-        # Count frequencies of other items
-        item_counts = items_in_same_txns[items_in_same_txns['Item'] != item]['Item'].value_counts()
-        
-        return item_counts.head(top_n).index.tolist()
-
-    def get_user_feed_recommendations(self, customer_id, top_n=10):
-        # Get user's past purchases
-        user_txns = self.transactions_df[self.transactions_df['CustomerID'] == customer_id]
-        if user_txns.empty:
-            return []
-            
-        past_items = user_txns['Item'].unique().tolist()
-        
-        # Get recommendations based on past items
-        feed_recs = set()
-        
-        # First try to get rules from their past items
-        if self.rules is not None and not self.rules.empty:
-            for item in past_items:
-                relevant_rules = self.rules[self.rules['antecedents'].apply(lambda x: item in x)]
-                relevant_rules = relevant_rules.sort_values(['lift', 'confidence'], ascending=[False, False])
-                
-                for idx, row in relevant_rules.iterrows():
-                    for consequent in row['consequents']:
-                        if consequent not in past_items: # recommend new things
-                            feed_recs.add(consequent)
-                            if len(feed_recs) >= top_n:
-                                break
-                    if len(feed_recs) >= top_n:
-                        break
-                if len(feed_recs) >= top_n:
-                    break
-                    
-        return list(feed_recs)[:top_n]
-
-if __name__ == "__main__":
-    df = pd.read_csv('transactions.csv')
-    rec = RecommenderSystem(df)
-    rec.train_market_basket(min_support=0.01)
-    print("Global with Bread:", rec.get_frequently_bought_with('Bread'))
-    print("User 101 with Brush:", rec.get_user_frequently_bought_with(101, 'Brush'))
-
+__all__ = [
+    "RecommenderSystem",
+    "get_product_dict_list",
+    "get_product_dict_list_with_reasons",
+]

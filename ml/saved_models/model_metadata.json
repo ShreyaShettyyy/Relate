@@ -1,0 +1,117 @@
+{
+    "model_name": "Instacart Apriori Market Basket Analysis",
+    "algorithm": "Apriori & Association Rule Mining (MLxtend)",
+    "training_timestamp": "2026-11-04 18:17:27",
+    "training_duration_seconds": 13.3,
+    "parameters": {
+        "min_support": 0.008,
+        "min_confidence": 0.1,
+        "min_lift": 1.1,
+        "train_split_ratio": 0.8,
+        "random_seed": 42
+    },
+    "dataset_statistics": {
+        "total_baskets": 121262,
+        "train_baskets": 97009,
+        "validation_baskets": 24253,
+        "unique_products": 350,
+        "sparse_matrix_shape": [
+            97009,
+            350
+        ]
+    },
+    "training_results": {
+        "frequent_itemsets_count": 292,
+        "association_rules_count": 89,
+        "top_rules": [
+            {
+                "antecedents_str": "Limes",
+                "consequents_str": "Organic Cilantro",
+                "support": 0.010514488346442082,
+                "confidence": 0.15987460815047022,
+                "lift": 4.384867362756281
+            },
+            {
+                "antecedents_str": "Organic Cilantro",
+                "consequents_str": "Limes",
+                "support": 0.010514488346442082,
+                "confidence": 0.28837998303647155,
+                "lift": 4.38486736275628
+            },
+            {
+                "antecedents_str": "Organic Yellow Onion",
+                "consequents_str": "Organic Garlic",
+                "support": 0.009432114546073045,
+                "confidence": 0.19414385741565882,
+                "lift": 4.043302160591595
+            },
+            {
+                "antecedents_str": "Organic Garlic",
+                "consequents_str": "Organic Yellow Onion",
+                "support": 0.009432114546073045,
+                "confidence": 0.19643623872906826,
+                "lift": 4.043302160591594
+            },
+            {
+                "antecedents_str": "Limes",
+                "consequents_str": "Large Lemon",
+                "support": 0.016462390087517653,
+                "confidence": 0.25031347962382444,
+                "lift": 2.967452076845605
+            },
+            {
+                "antecedents_str": "Large Lemon",
+                "consequents_str": "Limes",
+                "support": 0.016462390087517653,
+                "confidence": 0.195160699010143,
+                "lift": 2.967452076845605
+            },
+            {
+                "antecedents_str": "Organic Lemon",
+                "consequents_str": "Organic Hass Avocado",
+                "support": 0.009679514271871682,
+                "confidence": 0.23941866394696584,
+                "lift": 2.7831953470139257
+            },
+            {
+                "antecedents_str": "Organic Hass Avocado",
+                "consequents_str": "Organic Lemon",
+                "support": 0.009679514271871682,
+                "confidence": 0.11252246854403834,
+                "lift": 2.7831953470139257
+            },
+            {
+                "antecedents_str": "Organic Raspberries",
+                "consequents_str": "Organic Strawberries",
+                "support": 0.01802925501757569,
+                "confidence": 0.28909090909090907,
+                "lift": 2.4176224137931035
+            },
+            {
+                "antecedents_str": "Organic Strawberries",
+                "consequents_str": "Organic Raspberries",
+                "support": 0.01802925501757569,
+                "confidence": 0.1507758620689655,
+                "lift": 2.417622413793103
+            }
+        ]
+    },
+    "evaluation": {
+        "validation_baskets_tested": 10000,
+        "baskets_triggered": 8046,
+        "antecedent_trigger_rate": 80.46,
+        "total_rule_activations": 65021,
+        "successful_consequent_predictions": 12163,
+        "rule_validation_precision": 18.71,
+        "mean_training_confidence": 0.2116,
+        "mean_training_lift": 1.8479,
+        "max_lift": 4.3849
+    },
+    "evaluation_methodology_and_limitations": "Market Basket Analysis discovers directional co-occurrence patterns (if Antecedent -> Consequent). Unlike supervised classification with accuracy/F1-scores, association rules measure statistical dependence: Support P(A & B), Confidence P(B|A), and Lift P(B|A)/P(B). Validation evaluates whether Antecedent conditions trigger on unseen baskets and if Consequents co-occur. Limitations include sensitivity to support thresholds and inability to detect causal substitution effects.",
+    "artifact_files": {
+        "frequent_itemsets_pkl": "instacart_frequent_itemsets.pkl",
+        "association_rules_pkl": "instacart_rules.pkl",
+        "association_rules_csv": "instacart_rules.csv",
+        "metadata_json": "model_metadata.json"
+    }
+}

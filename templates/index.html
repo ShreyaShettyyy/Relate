@@ -3,310 +3,925 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>LuxStore - Premium E-Commerce</title>
-    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+    <meta name="referrer" content="no-referrer">
+    <title>Relate (LuxStore) - Intelligent Machine Learning E-Commerce</title>
+    
+    <!-- Typography & Icons -->
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Outfit:wght@300;400;500;600;700;800&family=Plus+Jakarta+Sans:wght@300;400;500;600;700&display=swap" rel="stylesheet">
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
-    <link rel="stylesheet" href="{{ url_for('static', filename='style.css') }}?v=8">
+    
+    <!-- Design System CSS -->
+    <link rel="stylesheet" href="{{ url_for('static', filename='css/style.css') }}?v=16">
+    <script>
+        // Immediate theme initialization to prevent flash
+        (function() {
+            try {
+                const savedTheme = localStorage.getItem('relate_theme') || 'dark';
+                if (savedTheme === 'light') {
+                    document.documentElement.classList.add('luxury-light-theme');
+                    document.addEventListener('DOMContentLoaded', function() {
+                        document.body.classList.remove('luxury-dark-theme');
+                        document.body.classList.add('luxury-light-theme');
+                    });
+                }
+            } catch(e) {}
+        })();
+    </script>
 </head>
-<body class="vibrant-bg">
-    <!-- Auth Page -->
-    <div id="auth-page" class="auth-page hidden">
-        <div class="auth-container glass-effect" style="position: relative;">
-            <span id="close-auth" style="position: absolute; top: 15px; right: 20px; font-size: 1.5rem; cursor: pointer; color: var(--text-muted);">&times;</span>
-            <h1 class="gradient-text" style="text-align:center; font-size: 2.5rem; margin-bottom: 2rem;"><i class="fa-solid fa-store"></i> LuxStore</h1>
-            <div id="login-form">
-                <h2 style="margin-bottom: 1rem;">Welcome Back</h2>
-                <input type="email" id="auth-email" placeholder="Email" class="auth-input" required>
-                <input type="password" id="auth-password" placeholder="Password" class="auth-input" required>
-                <button id="auth-login-btn" class="modal-btn" style="margin-top: 1rem;">Login</button>
-                <p style="text-align: center; margin-top: 1rem;">Don't have an account? <span id="show-register" class="link-text" style="cursor:pointer; color:var(--primary);">Create Account</span></p>
-            </div>
-            <div id="register-form" class="hidden">
-                <h2 style="margin-bottom: 1rem;">Create Account</h2>
-                <input type="text" id="reg-name" placeholder="Full Name" class="auth-input" required>
-                <input type="email" id="reg-email" placeholder="Email" class="auth-input" required>
-                <input type="password" id="reg-password" placeholder="Password" class="auth-input" required>
-                <input type="password" id="reg-confirm" placeholder="Confirm Password" class="auth-input" required>
-                <button id="auth-register-btn" class="modal-btn" style="margin-top: 1rem;">Sign Up</button>
-                <p style="text-align: center; margin-top: 1rem;">Already have an account? <span id="show-login" class="link-text" style="cursor:pointer; color:var(--primary);">Login</span></p>
-            </div>
-        </div>
-    </div>
+<body class="luxury-dark-theme">
 
-    <!-- Main App -->
-    <div id="app-content">
-    <header class="navbar glass-effect">
-        <div class="logo" onclick="window.location.reload()" style="cursor:pointer;"><i class="fa-solid fa-store"></i> LuxStore</div>
-        <div class="search-bar">
-            <input type="text" id="search-input" placeholder="Search products...">
-            <button id="search-btn"><i class="fa-solid fa-search"></i></button>
-        </div>
-        <div class="user-actions">
-            <div id="login-container" class="user-login">
-                <button id="login-btn" class="nav-btn"><i class="fa-solid fa-user"></i> Login</button>
-                <span id="logged-in-user" class="hidden"></span>
-                <button id="logout-btn" class="nav-btn hidden"><i class="fa-solid fa-arrow-right-from-bracket"></i></button>
+    <!-- GLOBAL NAVBAR -->
+    <header class="navbar-wrapper">
+        <div class="navbar-container">
+            <!-- Brand Logo -->
+            <div class="nav-brand" id="nav-brand-logo">
+                <div class="brand-icon"><i class="fa-solid fa-cube"></i></div>
+                <div class="brand-text">
+                    <span class="brand-name">Relate</span>
+                    <span class="brand-badge">LuxStore</span>
+                </div>
             </div>
-            <div class="icon-btn" id="nav-orders" title="My Orders"><i class="fa-solid fa-clock-rotate-left"></i></div>
-            <div class="icon-btn" id="nav-wishlist" title="Wishlist"><i class="fa-regular fa-heart"></i></div>
-            <div class="icon-btn" id="nav-cart" title="Cart"><i class="fa-solid fa-cart-shopping"></i></div>
+
+            <!-- Main Nav Links -->
+            <nav class="nav-menu">
+                <a href="#home" class="nav-link active" data-target="catalog-section" id="nav-link-home">Home</a>
+                <a href="#shop" class="nav-link" data-target="shop-section" id="nav-link-shop">Shop</a>
+                <div class="nav-dropdown-trigger" id="categories-dropdown-btn">
+                    <span>Categories <i class="fa-solid fa-chevron-down nav-arrow"></i></span>
+                    <div class="nav-dropdown-menu" id="nav-categories-dropdown">
+                        <!-- Populated by JS -->
+                    </div>
+                </div>
+                <a href="#about" class="nav-link" data-target="about-section" id="nav-link-about">About Relate</a>
+            </nav>
+
+            <!-- Search Bar -->
+            <div class="nav-search-bar">
+                <i class="fa-solid fa-magnifying-glass search-icon"></i>
+                <input type="text" id="global-search-input" placeholder="Search products, accessories, tech..." autocomplete="off">
+                <button class="search-clear-btn hidden" id="search-clear-btn"><i class="fa-solid fa-xmark"></i></button>
+            </div>
+
+            <!-- Action Controls -->
+            <div class="nav-actions">
+                <!-- Theme Toggle Button -->
+                <button class="nav-icon-btn" id="nav-theme-toggle-btn" title="Toggle Light / Dark Theme">
+                    <i class="fa-solid fa-sun" id="theme-icon"></i>
+                </button>
+
+                <!-- Wishlist -->
+                <button class="nav-icon-btn" id="nav-wishlist-btn" title="View Wishlist">
+                    <i class="fa-regular fa-heart"></i>
+                    <span class="nav-badge hidden" id="wishlist-badge">0</span>
+                </button>
+
+                <!-- Cart -->
+                <button class="nav-icon-btn" id="nav-cart-btn" title="Shopping Cart">
+                    <i class="fa-solid fa-bag-shopping"></i>
+                    <span class="nav-badge hidden" id="cart-badge">0</span>
+                </button>
+
+                <!-- User Profile / Auth Area -->
+                <div class="user-auth-wrapper" id="user-auth-wrapper">
+                    <!-- Guest View -->
+                    <button class="btn-primary-outline nav-auth-btn" id="login-trigger-btn">
+                        <i class="fa-regular fa-user"></i> <span>Sign In</span>
+                    </button>
+
+                    <!-- Authenticated View Dropdown -->
+                    <div class="user-profile-menu hidden" id="user-profile-dropdown">
+                        <button class="user-avatar-btn" id="user-avatar-btn">
+                            <div class="avatar-circle" id="user-avatar-initials">U</div>
+                            <span class="user-display-name" id="user-display-name">Account</span>
+                            <i class="fa-solid fa-chevron-down nav-arrow"></i>
+                        </button>
+                        <div class="user-menu-dropdown hidden" id="user-menu-dropdown-content">
+                            <div class="user-menu-header">
+                                <p class="user-menu-name" id="menu-user-name">User Name</p>
+                                <p class="user-menu-email" id="menu-user-email">user@email.com</p>
+                            </div>
+                            <div class="user-menu-divider"></div>
+                            <a href="#profile" class="user-menu-item" id="menu-go-profile"><i class="fa-regular fa-id-badge"></i> My Profile</a>
+                            <a href="#orders" class="user-menu-item" id="menu-go-orders"><i class="fa-solid fa-box-open"></i> Order History</a>
+                            <a href="#wishlist" class="user-menu-item" id="menu-go-wishlist"><i class="fa-regular fa-heart"></i> Saved Items</a>
+                            <div class="user-menu-divider"></div>
+                            <button class="user-menu-item menu-logout-btn" id="logout-btn"><i class="fa-solid fa-arrow-right-from-bracket"></i> Sign Out</button>
+                        </div>
+                    </div>
+                </div>
+            </div>
         </div>
     </header>
 
-    <nav class="flipkart-categories" id="flipkart-category-list">
-        <!-- Injected via JS -->
-    </nav>
+    <!-- MAIN APP CONTENT (SPA SECTIONS) -->
+    <main class="app-main-content">
 
-    <main class="container">
-        <!-- Product Catalog -->
-        <section id="catalog-section">
-            <h2 class="section-title" id="catalog-title" style="margin-bottom: 1.5rem;">Recommended For You</h2>
-            <div id="product-grid" class="product-grid" style="margin-bottom: 2rem;">
-                <!-- Main feed injected via JS -->
+        <!-- 1. HOMEPAGE / CATALOG SECTION -->
+        <section id="catalog-section" class="spa-section">
+            <!-- Hero Banner -->
+            <div class="hero-section">
+                <div class="hero-glow-blob blob-1"></div>
+                <div class="hero-glow-blob blob-2"></div>
+                
+                <div class="hero-content">
+                    <div class="hero-pill">
+                        <span class="pill-dot"></span> Powered by Apriori Market Basket Analysis & AI
+                    </div>
+                    <h1 class="hero-title">
+                        Intelligent Shopping, <br>
+                        <span class="gradient-text">Engineered For Relevance.</span>
+                    </h1>
+                    <p class="hero-subtitle">
+                        Experience next-generation e-commerce where product relationships, complementary accessories, and customer purchasing patterns automatically tailor your discovery.
+                    </p>
+                    <div class="hero-cta-group">
+                        <button class="btn-luxury-primary" id="hero-explore-btn">
+                            Explore Catalog <i class="fa-solid fa-arrow-right"></i>
+                        </button>
+                        <button class="btn-luxury-secondary" id="hero-about-btn">
+                            How Relate Works <i class="fa-solid fa-microchip"></i>
+                        </button>
+                    </div>
+
+                    <!-- Highlight Metrics Strip -->
+                    <div class="hero-metrics-strip">
+                        <div class="metric-item">
+                            <span class="metric-val">100%</span>
+                            <span class="metric-lbl">Complementary Accessory Matching</span>
+                        </div>
+                        <div class="metric-divider"></div>
+                        <div class="metric-item">
+                            <span class="metric-val">Apriori</span>
+                            <span class="metric-lbl">Association Rule Mining (Lift &gt; 1)</span>
+                        </div>
+                        <div class="metric-divider"></div>
+                        <div class="metric-item">
+                            <span class="metric-val">Real-Time</span>
+                            <span class="metric-lbl">Dynamic Checkout Retraining</span>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Category Pills Explorer -->
+            <div class="category-pills-container">
+                <div class="category-pills-scroller" id="category-pills-list">
+                    <!-- Injected dynamically via JS -->
+                </div>
+            </div>
+
+            <!-- Personalized Feed Block (Only for Logged-In Users) -->
+            <div class="personalized-feed-wrapper hidden" id="personalized-feed-section">
+                <div class="section-header-row">
+                    <div>
+                        <div class="section-tag"><i class="fa-solid fa-sparkles"></i> Tailored For You</div>
+                        <h2 class="section-title">Personalized Recommendations</h2>
+                        <p class="section-desc">Handpicked based on your past purchases and compatible companion accessories.</p>
+                    </div>
+                </div>
+                <div class="product-grid" id="personalized-grid">
+                    <!-- Injected by JS -->
+                </div>
+            </div>
+
+            <!-- Recently Purchased Products Block (Strictly Separate from Recommendations) -->
+            <div class="recently-purchased-wrapper hidden" id="recently-purchased-section">
+                <div class="section-header-row">
+                    <div>
+                        <div class="section-tag"><i class="fa-solid fa-clock-rotate-left"></i> Your History</div>
+                        <h2 class="section-title">Recently Purchased</h2>
+                        <p class="section-desc">Products you previously ordered. Recommendations are never conflated with this list.</p>
+                    </div>
+                </div>
+                <div class="product-grid" id="recently-purchased-grid">
+                    <!-- Injected by JS -->
+                </div>
+            </div>
+
+            <!-- Main Product Catalog -->
+            <div class="catalog-content-wrapper" id="catalog-main-area">
+                <div class="section-header-row">
+                    <div>
+                        <div class="section-tag" id="active-category-tag">Featured Catalog</div>
+                        <h2 class="section-title" id="catalog-heading">Explore All Collections</h2>
+                    </div>
+                    <div class="catalog-filter-controls">
+                        <select id="sort-select" class="luxury-select">
+                            <option value="featured">Sort by: Featured</option>
+                            <option value="rating-desc">Highest Rated</option>
+                            <option value="price-asc">Price: Low to High</option>
+                            <option value="price-desc">Price: High to Low</option>
+                            <option value="name-asc">Name: A to Z</option>
+                        </select>
+                    </div>
+                </div>
+
+                <!-- Products Grid -->
+                <div class="product-grid" id="product-grid">
+                    <!-- Populated dynamically by JS -->
+                </div>
+
+                <!-- Empty State -->
+                <div class="empty-state hidden" id="catalog-empty-state">
+                    <div class="empty-icon"><i class="fa-solid fa-magnifying-glass"></i></div>
+                    <h3>No products found</h3>
+                    <p>Try adjusting your search keywords or switching categories.</p>
+                    <button class="btn-luxury-secondary" id="reset-filter-btn">Reset All Filters</button>
+                </div>
             </div>
         </section>
 
-        <!-- Product Detail View -->
-        <section id="product-detail-section" class="hidden">
-            <div class="breadcrumb" style="margin-bottom: 1rem; color: var(--text-muted);">
-                <span id="bread-category">Category</span> &gt; <span id="bread-name" class="current" style="color: var(--text-main); font-weight: bold;">Product</span>
+        <!-- 2. PRODUCT DETAIL VIEW -->
+        <section id="product-detail-section" class="spa-section hidden">
+            <!-- Breadcrumb Navigation -->
+            <div class="breadcrumb-bar">
+                <span class="crumb-link" id="crumb-home"><i class="fa-solid fa-house"></i> Home</span>
+                <span class="crumb-sep">/</span>
+                <span class="crumb-link" id="crumb-category">Category</span>
+                <span class="crumb-sep">/</span>
+                <span class="crumb-current" id="crumb-title">Product Name</span>
             </div>
-            
-            <div class="product-detail-layout glass-effect" style="display: flex; gap: 2rem; background: white; color: black; border-radius: 4px; padding: 2rem;">
-                <div class="product-images-col" style="flex: 1; display: flex; flex-direction: column; gap: 10px; align-items: center;">
-                    <img id="detail-image" src="" alt="Product" style="width: 100%; max-width: 400px; object-fit: contain; border: 1px solid #eee; padding: 1rem;">
-                    <div id="detail-thumbnails" style="display: flex; gap: 10px; justify-content: center;">
+
+            <!-- Product Showcase Layout -->
+            <div class="product-detail-card glass-panel">
+                <!-- Gallery Column -->
+                <div class="detail-gallery-column">
+                    <div class="main-image-viewport">
+                        <img id="detail-main-img" src="" alt="Product View" referrerpolicy="no-referrer">
+                        <button class="detail-wishlist-toggle" id="detail-wishlist-btn" title="Add to Wishlist">
+                            <i class="fa-regular fa-heart"></i>
+                        </button>
+                    </div>
+                    <div class="detail-thumbnails-track" id="detail-thumbnails-track">
                         <!-- JS injected thumbnails -->
                     </div>
                 </div>
-                
-                <div class="product-info" style="flex: 2;">
-                    <h1 id="detail-title" class="detail-title" style="font-size: 1.5rem; margin-bottom: 0.5rem; font-weight: 500;">Product Name</h1>
-                    <div class="detail-rating" id="detail-rating" style="margin-bottom: 1rem; color: #388e3c; font-weight: bold; background: #e8f5e9; display: inline-block; padding: 2px 8px; border-radius: 4px; font-size: 0.9rem;">
-                        <!-- Stars -->
+
+                <!-- Info Column -->
+                <div class="detail-info-column">
+                    <div class="detail-badges-row">
+                        <span class="badge-category" id="detail-category-badge">Category</span>
+                        <span class="badge-stock in-stock"><i class="fa-solid fa-circle-check"></i> In Stock & Ready to Ship</span>
                     </div>
-                    <p class="detail-price" id="detail-price" style="font-size: 2rem; font-weight: bold; margin-bottom: 1rem;">₹0</p>
-                    
-                    <div style="margin-bottom: 1.5rem;">
-                        <h4 style="margin-bottom: 0.5rem; color: #878787;">Product Highlights</h4>
-                        <ul id="product-highlights" style="list-style-type: disc; margin-left: 1.5rem; line-height: 1.8; color: #212121;">
-                            <!-- JS injected highlights -->
+
+                    <h1 class="detail-product-title" id="detail-product-title">Product Title</h1>
+
+                    <div class="detail-rating-row">
+                        <div class="stars-box" id="detail-stars"></div>
+                        <span class="rating-number" id="detail-rating-val">4.8</span>
+                        <span class="rating-count" id="detail-reviews-trigger">(128 Verified Reviews)</span>
+                    </div>
+
+                    <div class="detail-price-box">
+                        <span class="current-price" id="detail-price">₹0</span>
+                        <span class="original-price" id="detail-mrp">₹0</span>
+                        <span class="discount-badge" id="detail-discount-badge">Save 25%</span>
+                    </div>
+
+                    <p class="detail-description" id="detail-desc">Full product description...</p>
+
+                    <div class="detail-highlights-box">
+                        <h4>Key Specifications & Highlights</h4>
+                        <ul id="detail-highlights-list">
+                            <!-- Injected by JS -->
                         </ul>
                     </div>
 
-                    <p class="detail-desc" id="detail-desc" style="color: #212121; margin-bottom: 1.5rem;">Description</p>
-                    
-                    <div class="action-buttons" style="display: flex; gap: 1rem; margin-bottom: 2rem;">
-                        <button class="modal-btn" id="add-to-cart" style="background: #ff9f00; border-radius: 2px; padding: 1rem 2rem; flex: 1; font-weight: bold; font-size: 1.1rem; box-shadow: 0 1px 2px 0 rgba(0,0,0,.2);"><i class="fa-solid fa-cart-plus"></i> ADD TO CART</button>
-                        <button class="modal-btn" id="buy-now" style="background: #fb641b; border-radius: 2px; padding: 1rem 2rem; flex: 1; font-weight: bold; font-size: 1.1rem; box-shadow: 0 1px 2px 0 rgba(0,0,0,.2);"><i class="fa-solid fa-bolt"></i> BUY NOW</button>
-                        <button class="wishlist-btn" id="wishlist-toggle" style="background: white; border: 1px solid #e0e0e0; color: #c2c2c2; padding: 0 1.5rem;"><i class="fa-solid fa-heart"></i></button>
-                    </div>
-
-                    <div class="guarantees" style="display: flex; gap: 1.5rem; flex-wrap: wrap; border-top: 1px solid #f0f0f0; padding-top: 1rem;">
-                        <div class="guarantee" style="display: flex; align-items: center; gap: 8px; font-size: 0.9rem; color: #212121;"><i class="fa-solid fa-arrow-rotate-left" style="color:var(--primary); font-size:1.2rem;"></i> 10 Days Return Policy</div>
-                        <div class="guarantee" style="display: flex; align-items: center; gap: 8px; font-size: 0.9rem; color: #212121;"><i class="fa-solid fa-money-bill-wave" style="color:var(--primary); font-size:1.2rem;"></i> Cash on Delivery available</div>
-                        <div class="guarantee" style="display: flex; align-items: center; gap: 8px; font-size: 0.9rem; color: #212121;"><i class="fa-solid fa-shield-halved" style="color:#2874f0; font-size:1.2rem;"></i> Flipkart Assured</div>
-                    </div>
-                </div>
-            </div>
-
-            <!-- Recommendations -->
-            <div class="recommendations-container">
-                <div id="personal-recs-block" class="rec-block hidden">
-                    <h3 class="rec-title gradient-text"><i class="fa-solid fa-wand-magic-sparkles"></i> Since you bought this, you usually add:</h3>
-                    <div id="personal-recs-list" class="rec-carousel"></div>
-                </div>
-
-                <div id="global-recs-block" class="rec-block hidden">
-                    <h3 class="rec-title">Frequently Bought Together</h3>
-                    <div id="global-recs-list" class="rec-carousel"></div>
-                </div>
-                
-                <div class="rec-block" id="similar-recs-block">
-                    <h3 class="rec-title"><i class="fa-solid fa-clone"></i> Similar Products in <span id="sim-cat">Category</span></h3>
-                    <div id="similar-recs-list" class="rec-carousel"></div>
-                </div>
-            </div>
-
-            <!-- Reviews -->
-            <div class="reviews-section glass-effect">
-                <h3 class="rec-title">Customer Reviews</h3>
-                <div id="reviews-container">
-                    <!-- Injected via JS -->
-                </div>
-            </div>
-        </section>
-
-        <!-- Orders Section -->
-        <section id="orders-section" class="hidden glass-effect" style="padding: 2rem; border-radius: 16px; margin-top: 2rem;">
-            <div class="breadcrumb" style="margin-bottom: 2rem;">
-                <span class="current">My Purchases</span>
-            </div>
-            <h2 class="gradient-text" style="margin-top: 1rem; margin-bottom: 2rem;"><i class="fa-solid fa-clock-rotate-left"></i> Your Past Purchases</h2>
-            <div id="orders-page-list">
-                <!-- Advanced order items injected here -->
-            </div>
-        </section>
-
-        <!-- Upsell Section -->
-        <section id="upsell-section" class="hidden glass-effect" style="padding: 2rem; border-radius: 16px; margin-top: 2rem;">
-            <div class="breadcrumb" style="margin-bottom: 2rem;">
-                <span class="back-link" onclick="document.getElementById('catalog-section').classList.remove('hidden'); document.getElementById('upsell-section').classList.add('hidden');">Home</span> > <span class="current">Recommendations</span>
-            </div>
-            <h2 class="gradient-text" style="text-align: center; font-size: 2rem; margin-bottom: 1rem;"><i class="fa-solid fa-gift"></i> Wait! Before you checkout...</h2>
-            <p style="text-align: center; color: var(--text-muted); margin-bottom: 2rem;">Check out these personalized recommendations based on your selection.</p>
-            
-            <div style="display: flex; flex-direction: column; gap: 2rem;">
-                <div id="upsell-personal-block" class="hidden" style="background: rgba(255,255,255,0.05); padding: 1.5rem; border-radius: 12px; border: 1px solid var(--primary);">
-                    <h3 style="color: var(--primary);"><i class="fa-solid fa-wand-magic-sparkles"></i> You usually buy this with:</h3>
-                    <div id="upsell-personal-item" style="display: flex; align-items: center; gap: 15px; margin-top: 1rem;"></div>
-                </div>
-                
-                <div id="upsell-global-block" class="hidden" style="background: rgba(255,255,255,0.05); padding: 1.5rem; border-radius: 12px; border: 1px solid var(--border);">
-                    <h3><i class="fa-solid fa-users"></i> Most people buy this with:</h3>
-                    <div id="upsell-global-item" style="display: flex; align-items: center; gap: 15px; margin-top: 1rem;"></div>
-                </div>
-            </div>
-            
-            <div style="margin-top: 3rem; text-align: center; border-top: 1px solid var(--border); padding-top: 2rem; display: flex; justify-content: center; gap: 15px;">
-                <button id="upsell-skip-btn" class="modal-btn" style="background: transparent; border: 2px solid var(--border); color: var(--text-main);">No thanks, just my item</button>
-                <button id="upsell-accept-btn" class="modal-btn" style="background: #10b981;">Add selected to cart & Checkout</button>
-            </div>
-        </section>
-
-        <!-- Checkout Section -->
-        <section id="checkout-section" class="hidden glass-effect" style="padding: 2rem; border-radius: 16px; margin-top: 2rem;">
-            <div class="breadcrumb" style="margin-bottom: 2rem;">
-                <span class="current">Checkout</span>
-            </div>
-            <h2>Complete Your Purchase</h2>
-            
-            <div class="checkout-grid" style="margin-top: 2rem;">
-                <div class="checkout-form">
-                    <h3>Shipping Address</h3>
-                    <input type="text" id="ship-name" placeholder="Full Name" required style="width:100%; padding: 0.8rem; border-radius: 8px; border: 1px solid var(--border); margin-bottom: 1rem;">
-                    <input type="text" id="ship-street" placeholder="Street Address" required style="width:100%; padding: 0.8rem; border-radius: 8px; border: 1px solid var(--border); margin-bottom: 1rem;">
-                    <div style="display:flex; gap:10px; margin-bottom: 1rem;">
-                        <input type="text" id="ship-city" placeholder="City" required style="flex:1; padding: 0.8rem; border-radius: 8px; border: 1px solid var(--border);">
-                        <input type="text" id="ship-pin" placeholder="Postal Code" required style="flex:1; padding: 0.8rem; border-radius: 8px; border: 1px solid var(--border);">
-                    </div>
-
-                    <h3 style="margin-top:20px;">Payment Method</h3>
-                    <div class="payment-options">
-                        <label><input type="radio" name="payment" value="upi" checked> UPI / Wallets</label>
-                        <div id="upi-options" class="upi-apps">
-                            <button class="upi-btn selected" data-app="Google Pay"><img src="https://upload.wikimedia.org/wikipedia/commons/f/f2/Google_Pay_Logo.svg" alt="GPay" style="height:15px;"> Google Pay</button>
-                            <button class="upi-btn" data-app="PhonePe"><img src="https://upload.wikimedia.org/wikipedia/commons/7/71/PhonePe_Logo.svg" alt="PhonePe" style="height:15px;"> PhonePe</button>
-                            <button class="upi-btn" data-app="Paytm"><img src="https://upload.wikimedia.org/wikipedia/commons/4/42/Paytm_logo.png" alt="Paytm" style="height:10px;"> Paytm</button>
+                    <!-- Actions -->
+                    <div class="detail-actions-row">
+                        <div class="quantity-stepper">
+                            <button class="qty-btn" id="qty-minus"><i class="fa-solid fa-minus"></i></button>
+                            <input type="number" id="detail-qty-input" value="1" min="1" max="10" readonly>
+                            <button class="qty-btn" id="qty-plus"><i class="fa-solid fa-plus"></i></button>
                         </div>
-                        <label><input type="radio" name="payment" value="card"> Credit / Debit Card</label>
-                        <label><input type="radio" name="payment" value="cod"> Cash on Delivery</label>
+                        <button class="btn-luxury-primary flex-1" id="detail-add-cart-btn">
+                            <i class="fa-solid fa-bag-shopping"></i> Add to Cart
+                        </button>
+                        <button class="btn-luxury-buy flex-1" id="detail-buy-now-btn">
+                            <i class="fa-solid fa-bolt"></i> Buy Now
+                        </button>
+                    </div>
+
+                    <!-- Trust Perks -->
+                    <div class="detail-trust-grid">
+                        <div class="trust-item"><i class="fa-solid fa-truck-fast"></i> <span>Free Express Delivery</span></div>
+                        <div class="trust-item"><i class="fa-solid fa-shield-halved"></i> <span>1 Year Warranty</span></div>
+                        <div class="trust-item"><i class="fa-solid fa-rotate-left"></i> <span>7-Day Return Policy</span></div>
                     </div>
                 </div>
+            </div>
 
-                <div class="checkout-summary">
-                    <h3>Order Summary</h3>
-                    <div class="summary-item" style="display:flex; justify-content:space-between; margin-top:1rem;"><span id="checkout-item-name">Product</span> <span id="checkout-item-price">₹0</span></div>
-                    <div class="summary-item" style="display:flex; justify-content:space-between; margin-top:1rem; padding-bottom:1rem; border-bottom:1px solid var(--border);"><span>Shipping</span> <span>Free</span></div>
-                    
-                    <div class="coupon-box" style="display:flex; gap:10px; margin-top: 1rem;">
-                        <input type="text" id="coupon-code" placeholder="Enter Coupon Code" style="flex:1; padding:0.5rem; border-radius:4px; border:1px solid var(--border);">
-                        <button id="apply-coupon" class="modal-btn" style="padding:0.5rem 1rem;">Apply</button>
+            <!-- ML RECOMMENDATION RAILS -->
+
+            <!-- RAIL 0: PERSONAL CO-PURCHASE PATTERN (IF AND ONLY IF BUYER HAS BOUGHT WITH THIS PRODUCT BEFORE) -->
+            <div class="recommendation-rail-wrapper hidden" id="rail-personal-wrapper">
+                <div class="rail-header">
+                    <div class="rail-title-group">
+                        <span class="rail-badge personal-badge"><i class="fa-solid fa-user-check"></i> Your Personal Purchase History</span>
+                        <h3 class="rail-title">You Usually Buy This Product With...</h3>
+                        <p class="rail-subtitle">Complementary products you previously bought alongside this item in your past orders.</p>
                     </div>
-                    <div id="coupon-msg" class="coupon-msg" style="margin-top:0.5rem; font-size:0.9rem;"></div>
+                </div>
+                <div class="product-grid rail-grid" id="personal-copurchase-grid">
+                    <!-- Injected by JS if and only if buyer has past co-purchases -->
+                </div>
+            </div>
 
-                    <div class="summary-total" style="display:flex; justify-content:space-between; font-weight:bold; font-size:1.2rem; margin-top: 2rem;">
-                        <span>Total:</span> <span id="checkout-total">₹0</span>
+            <!-- RAIL 1: FREQUENTLY BOUGHT TOGETHER -->
+            <div class="recommendation-rail-wrapper" id="rail-fbt-wrapper">
+                <div class="rail-header">
+                    <div class="rail-title-group">
+                        <span class="rail-badge apriori-badge"><i class="fa-solid fa-link"></i> Apriori Market Basket Analysis</span>
+                        <h3 class="rail-title">Frequently Bought Together</h3>
+                        <p class="rail-subtitle">Complementary items customers frequently purchase together in a single basket (High Lift & Confidence).</p>
                     </div>
+                    <button class="btn-luxury-secondary btn-sm" id="bundle-add-all-btn">
+                        <i class="fa-solid fa-cart-plus"></i> Add All to Cart
+                    </button>
+                </div>
+                <div class="product-grid rail-grid" id="fbt-grid">
+                    <!-- Injected by JS -->
+                </div>
+            </div>
 
-                    <button id="place-order-btn" class="place-order-btn" style="margin-top: 2rem;">Place Order</button>
+            <!-- RAIL 2: RECOMMENDED ACCESSORIES -->
+            <div class="recommendation-rail-wrapper" id="rail-acc-wrapper">
+                <div class="rail-header">
+                    <div class="rail-title-group">
+                        <span class="rail-badge accessories-badge"><i class="fa-solid fa-puzzle-piece"></i> Compatibility Engine</span>
+                        <h3 class="rail-title">Recommended Accessories</h3>
+                        <p class="rail-subtitle">Essential add-ons, cables, protective gear, and companion peripherals built specifically for this device.</p>
+                    </div>
+                </div>
+                <div class="product-grid rail-grid" id="acc-grid">
+                    <!-- Injected by JS -->
+                </div>
+            </div>
+
+            <!-- RAIL 3: SIMILAR PRODUCTS -->
+            <div class="recommendation-rail-wrapper" id="rail-sim-wrapper">
+                <div class="rail-header">
+                    <div class="rail-title-group">
+                        <span class="rail-badge similarity-badge"><i class="fa-solid fa-clone"></i> TF-IDF Attribute Similarity</span>
+                        <h3 class="rail-title">Similar Products</h3>
+                        <p class="rail-subtitle">Alternative options within the same category to consider.</p>
+                    </div>
+                </div>
+                <div class="product-grid rail-grid" id="sim-grid">
+                    <!-- Injected by JS -->
+                </div>
+            </div>
+
+            <!-- RAIL 4: YOU MAY ALSO LIKE -->
+            <div class="recommendation-rail-wrapper" id="rail-yml-wrapper">
+                <div class="rail-header">
+                    <div class="rail-title-group">
+                        <span class="rail-badge discovery-badge"><i class="fa-solid fa-compass"></i> Collaborative Discovery</span>
+                        <h3 class="rail-title">You May Also Like</h3>
+                        <p class="rail-subtitle">Curated cross-category lifestyle products that customer segments love.</p>
+                    </div>
+                </div>
+                <div class="product-grid rail-grid" id="yml-grid">
+                    <!-- Injected by JS -->
                 </div>
             </div>
         </section>
 
-        <!-- Payment Processing Page -->
-        <section id="payment-processing-section" class="hidden" style="height: 60vh; display: flex; align-items: center; justify-content: center; flex-direction: column;">
-            <div class="glass-effect" style="padding: 4rem; text-align: center; border-radius: 20px; width: 400px; max-width: 90%;">
-                <img id="payment-app-logo" src="https://upload.wikimedia.org/wikipedia/commons/f/f2/Google_Pay_Logo.svg" alt="App" style="height: 40px; margin-bottom: 2rem;">
-                
-                <h2 id="processing-text">Enter UPI PIN</h2>
-                <div style="font-size: 2.5rem; font-weight: bold; margin-top: 1rem; margin-bottom: 2rem; color: var(--text-main);" id="payment-amount">₹0</div>
-                
-                <div id="pin-container" style="margin-bottom: 2rem;">
-                    <input type="password" id="upi-pin-input" maxlength="6" placeholder="******" style="letter-spacing: 15px; text-align: center; font-size: 2rem; padding: 15px; border-radius: 10px; border: 1px solid var(--border); width: 100%; background: rgba(255,255,255,0.05); color: white;">
+        <!-- 3. ABOUT RELATE PROJECT PAGE -->
+        <section id="about-section" class="spa-section hidden">
+            <div class="about-hero-box glass-panel">
+                <div class="about-hero-tag"><i class="fa-solid fa-brain"></i> Machine Learning Showcase</div>
+                <h1 class="about-title">About <span class="gradient-text">Relate (LuxStore)</span></h1>
+                <p class="about-lead">
+                    Relate is an intelligent e-commerce platform that seamlessly merges online shopping with data-driven machine learning. It discovers real-world product relationships, mines transaction baskets, and delivers context-aware product and accessory recommendations in real time.
+                </p>
+            </div>
+
+            <!-- Project Objectives -->
+            <div class="about-block">
+                <h2 class="about-section-heading"><i class="fa-solid fa-bullseye"></i> Project Objectives</h2>
+                <div class="about-objectives-grid">
+                    <div class="obj-card glass-panel">
+                        <div class="obj-icon"><i class="fa-solid fa-user-gear"></i></div>
+                        <h4>Personalized Experiences</h4>
+                        <p>Deliver individualized product feeds based on customer transaction histories and category affinities rather than static trending lists.</p>
+                    </div>
+                    <div class="obj-card glass-panel">
+                        <div class="obj-icon"><i class="fa-solid fa-diagram-project"></i></div>
+                        <h4>Discover Product Relationships</h4>
+                        <p>Identify which items naturally complement each other using mathematical Market Basket Analysis (Apriori algorithm).</p>
+                    </div>
+                    <div class="obj-card glass-panel">
+                        <div class="obj-icon"><i class="fa-solid fa-magnifying-glass-chart"></i></div>
+                        <h4>Analyze Purchasing Patterns</h4>
+                        <p>Evaluate multi-item transaction logs to calculate Support, Confidence, and Lift metrics for bundle detection.</p>
+                    </div>
+                    <div class="obj-card glass-panel">
+                        <div class="obj-icon"><i class="fa-solid fa-bolt"></i></div>
+                        <h4>Real-Time Model Updates</h4>
+                        <p>Dynamically append new customer checkouts to the transaction dataset and retrain association rules on-the-fly.</p>
+                    </div>
                 </div>
+            </div>
+
+            <!-- Machine Learning Algorithms Explained -->
+            <div class="about-block">
+                <h2 class="about-section-heading"><i class="fa-solid fa-microchip"></i> Machine Learning Algorithms & Mathematical Foundations</h2>
                 
-                <button id="submit-pin-btn" class="modal-btn" style="width: 100%; font-size: 1.2rem; padding: 1rem;">Submit & Pay</button>
-                <div class="spinner hidden" id="payment-spinner" style="margin: 2rem auto 0 auto;"></div>
+                <div class="ml-explainer-cards">
+                    <!-- Apriori -->
+                    <div class="ml-card glass-panel">
+                        <div class="ml-card-header">
+                            <span class="ml-badge">Algorithm 1</span>
+                            <h3>Apriori Algorithm (Market Basket Analysis)</h3>
+                        </div>
+                        <p class="ml-card-text">
+                            The Apriori algorithm mines frequent itemsets across transaction logs by enforcing the <strong>Apriori Principle</strong> (anti-monotonicity): all non-empty subsets of a frequent itemset must also be frequent.
+                        </p>
+                        <div class="formula-box">
+                            <div class="formula-title">Anti-Monotone Property:</div>
+                            <code>If itemset X is not frequent, no superset (X ∪ Y) can be frequent.</code>
+                        </div>
+                        <p class="ml-card-text">
+                            In Relate, transactions are converted into a binary one-hot matrix ($TransactionID \times Item$). Apriori generates candidate $k$-itemsets from ($k-1$)-itemsets and prunes any combination falling below the minimum support threshold ($\text{min\_support} = 0.001$).
+                        </p>
+                    </div>
+
+                    <!-- Association Rules -->
+                    <div class="ml-card glass-panel">
+                        <div class="ml-card-header">
+                            <span class="ml-badge">Algorithm 2</span>
+                            <h3>Association Rule Mining (Support, Confidence, Lift)</h3>
+                        </div>
+                        <p class="ml-card-text">
+                            From frequent itemsets, association rules in the form $A \rightarrow B$ are constructed, where $A$ is the antecedent (e.g. <em>iPhone 13 Pro</em>) and $B$ is the consequent (e.g. <em>Screen Protector</em>).
+                        </p>
+                        
+                        <div class="formulas-grid">
+                            <div class="formula-card">
+                                <h5>Support</h5>
+                                <div class="math-expr">$$\text{Support}(A \rightarrow B) = \frac{\text{Transactions containing } A \text{ and } B}{\text{Total Transactions } N}$$</div>
+                                <span class="formula-desc">Measures how frequently the combination occurs.</span>
+                            </div>
+                            <div class="formula-card">
+                                <h5>Confidence</h5>
+                                <div class="math-expr">$$\text{Confidence}(A \rightarrow B) = \frac{\text{Support}(A \cup B)}{\text{Support}(A)}$$</div>
+                                <span class="formula-desc">Probability that $B$ is bought given that $A$ was bought.</span>
+                            </div>
+                            <div class="formula-card">
+                                <h5>Lift</h5>
+                                <div class="math-expr">$$\text{Lift}(A \rightarrow B) = \frac{\text{Confidence}(A \rightarrow B)}{\text{Support}(B)}$$</div>
+                                <span class="formula-desc"><strong>Lift &gt; 1:</strong> Positive dependency; items are complementary.</span>
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- Personalized Hybrid Logic -->
+                    <div class="ml-card glass-panel">
+                        <div class="ml-card-header">
+                            <span class="ml-badge">Algorithm 3</span>
+                            <h3>Personalized Hybrid Recommendation Architecture</h3>
+                        </div>
+                        <p class="ml-card-text">
+                            Relate combines collaborative transaction rules with content-based TF-IDF attribute similarity and category-level compatibility constraints:
+                        </p>
+                        <ul class="ml-bullet-list">
+                            <li><strong>Accessory Compatibility Matrix:</strong> Guarantees that smartphones pair with chargers, cables, and cases; laptops pair with wireless mice, stands, and hubs; and cameras pair with memory cards, tripods, and lenses.</li>
+                            <li><strong>Content Similarity:</strong> Uses Scikit-learn TF-IDF Vectorizer and Cosine Similarity to find direct competing products within the same category.</li>
+                            <li><strong>Negative History Filtering:</strong> Excludes non-replenishable hardware already purchased by the customer while preserving complementary add-ons.</li>
+                        </ul>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Workflow Diagram -->
+            <div class="about-block">
+                <h2 class="about-section-heading"><i class="fa-solid fa-arrows-split-up-and-left"></i> End-to-End System Workflow</h2>
+                <div class="workflow-diagram glass-panel">
+                    <div class="workflow-step">
+                        <div class="step-num">1</div>
+                        <h4>Customer Transactions</h4>
+                        <p>Purchase logs with Transaction ID, Customer ID, and Items.</p>
+                    </div>
+                    <div class="workflow-connector"><i class="fa-solid fa-arrow-right"></i></div>
+                    <div class="workflow-step">
+                        <div class="step-num">2</div>
+                        <h4>One-Hot Matrix</h4>
+                        <p>Pandas converts raw rows to binary basket vectors.</p>
+                    </div>
+                    <div class="workflow-connector"><i class="fa-solid fa-arrow-right"></i></div>
+                    <div class="workflow-step">
+                        <div class="step-num">3</div>
+                        <h4>Apriori & Rules</h4>
+                        <p>MLxtend extracts frequent itemsets and association rules.</p>
+                    </div>
+                    <div class="workflow-connector"><i class="fa-solid fa-arrow-right"></i></div>
+                    <div class="workflow-step">
+                        <div class="step-num">4</div>
+                        <h4>Multi-Rail Engine</h4>
+                        <p>Ranks FBT, Accessories, Similar, and Discovery items.</p>
+                    </div>
+                    <div class="workflow-connector"><i class="fa-solid fa-arrow-right"></i></div>
+                    <div class="workflow-step">
+                        <div class="step-num">5</div>
+                        <h4>Storefront Feed</h4>
+                        <p>Live recommendations rendered via GSAP animations.</p>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Technology Stack -->
+            <div class="about-block">
+                <h2 class="about-section-heading"><i class="fa-solid fa-layer-group"></i> Technology Stack</h2>
+                <div class="tech-stack-grid">
+                    <div class="tech-chip"><i class="fa-brands fa-python"></i> <span>Python 3.14</span></div>
+                    <div class="tech-chip"><i class="fa-solid fa-flask"></i> <span>Flask Backend</span></div>
+                    <div class="tech-chip"><i class="fa-solid fa-table"></i> <span>Pandas & NumPy</span></div>
+                    <div class="tech-chip"><i class="fa-solid fa-chart-line"></i> <span>MLxtend (Apriori)</span></div>
+                    <div class="tech-chip"><i class="fa-solid fa-brain"></i> <span>Scikit-Learn (TF-IDF)</span></div>
+                    <div class="tech-chip"><i class="fa-brands fa-node-js"></i> <span>Node.js & Nodemailer</span></div>
+                    <div class="tech-chip"><i class="fa-brands fa-js"></i> <span>Vanilla ES6+ JS</span></div>
+                    <div class="tech-chip"><i class="fa-solid fa-wand-magic-sparkles"></i> <span>GSAP Animations</span></div>
+                    <div class="tech-chip"><i class="fa-brands fa-html5"></i> <span>Modern HTML5 & CSS3</span></div>
+                </div>
+            </div>
+        </section>
+
+        <!-- 4. USER PROFILE SECTION -->
+        <section id="profile-section" class="spa-section hidden">
+            <div class="profile-layout-container">
+                <!-- Sidebar -->
+                <aside class="profile-sidebar glass-panel">
+                    <div class="profile-user-summary">
+                        <div class="profile-big-avatar" id="profile-avatar-circle">U</div>
+                        <h3 class="profile-user-name" id="profile-summary-name">User Name</h3>
+                        <p class="profile-user-email" id="profile-summary-email">user@email.com</p>
+                        <span class="profile-cust-id" id="profile-summary-id">Customer ID: #1101</span>
+                    </div>
+
+                    <nav class="profile-nav-tabs">
+                        <button class="profile-tab-btn active" data-tab="tab-personal-info">
+                            <i class="fa-regular fa-user"></i> Personal Information
+                        </button>
+                        <button class="profile-tab-btn" data-tab="tab-order-history">
+                            <i class="fa-solid fa-box-open"></i> Order History
+                        </button>
+                        <button class="profile-tab-btn" data-tab="tab-security">
+                            <i class="fa-solid fa-shield-halved"></i> Security & Password
+                        </button>
+                        <button class="profile-tab-btn" data-tab="tab-profile-wishlist">
+                            <i class="fa-regular fa-heart"></i> Saved Wishlist
+                        </button>
+                    </nav>
+
+                    <button class="btn-luxury-secondary btn-block" id="profile-logout-btn" style="margin-top: 2rem;">
+                        <i class="fa-solid fa-arrow-right-from-bracket"></i> Sign Out
+                    </button>
+                </aside>
+
+                <!-- Main Content Pane -->
+                <div class="profile-content-pane glass-panel">
+                    
+                    <!-- TAB 1: PERSONAL INFORMATION -->
+                    <div class="profile-tab-content active" id="tab-personal-info">
+                        <div class="tab-header">
+                            <h2>Personal Information</h2>
+                            <p>Manage your account profile and contact details.</p>
+                        </div>
+                        
+                        <form id="profile-update-form" class="profile-form">
+                            <div class="form-group">
+                                <label for="profile-name-input">Full Name</label>
+                                <input type="text" id="profile-name-input" class="luxury-input" required>
+                            </div>
+                            <div class="form-group">
+                                <label for="profile-email-input">Registered Email Address</label>
+                                <input type="email" id="profile-email-input" class="luxury-input" disabled title="Email address cannot be changed">
+                                <small class="form-hint">Email address is linked to your account customer ID.</small>
+                            </div>
+                            <div class="form-row">
+                                <div class="form-group flex-1">
+                                    <label>Customer Identifier</label>
+                                    <input type="text" id="profile-id-input" class="luxury-input" disabled>
+                                </div>
+                                <div class="form-group flex-1">
+                                    <label>Member Since</label>
+                                    <input type="text" id="profile-since-input" class="luxury-input" disabled value="2026">
+                                </div>
+                            </div>
+                            <button type="submit" class="btn-luxury-primary" id="save-profile-btn">
+                                <i class="fa-solid fa-check"></i> Save Changes
+                            </button>
+                        </form>
+                    </div>
+
+                    <!-- TAB 2: ORDER HISTORY -->
+                    <div class="profile-tab-content" id="tab-order-history">
+                        <div class="tab-header">
+                            <h2>Order History</h2>
+                            <p>Review your completed purchases. Notice that recently purchased items remain strictly separated from recommendations.</p>
+                        </div>
+
+                        <div class="orders-list-wrapper" id="profile-orders-list">
+                            <!-- Populated by JS -->
+                        </div>
+                    </div>
+
+                    <!-- TAB 3: SECURITY & PASSWORD -->
+                    <div class="profile-tab-content" id="tab-security">
+                        <div class="tab-header">
+                            <h2>Security & Password</h2>
+                            <p>Update your password to keep your account safe.</p>
+                        </div>
+
+                        <form id="profile-password-form" class="profile-form">
+                            <div class="form-group">
+                                <label for="security-current-pwd">Current Password</label>
+                                <input type="password" id="security-current-pwd" class="luxury-input" required placeholder="Enter current password">
+                            </div>
+                            <div class="form-group">
+                                <label for="security-new-pwd">New Password</label>
+                                <input type="password" id="security-new-pwd" class="luxury-input" required placeholder="Minimum 4 characters">
+                            </div>
+                            <div class="form-group">
+                                <label for="security-confirm-pwd">Confirm New Password</label>
+                                <input type="password" id="security-confirm-pwd" class="luxury-input" required placeholder="Re-type new password">
+                            </div>
+                            <button type="submit" class="btn-luxury-primary" id="save-password-btn">
+                                <i class="fa-solid fa-key"></i> Update Password
+                            </button>
+                        </form>
+                    </div>
+
+                    <!-- TAB 4: SAVED WISHLIST -->
+                    <div class="profile-tab-content" id="tab-profile-wishlist">
+                        <div class="tab-header">
+                            <h2>Saved Items</h2>
+                            <p>Products you have marked for later.</p>
+                        </div>
+                        <div class="product-grid" id="profile-wishlist-grid">
+                            <!-- Populated by JS -->
+                        </div>
+                    </div>
+
+                </div>
             </div>
         </section>
 
     </main>
-    
-    <!-- Cart Modal -->
-    <div id="cart-modal" class="modal hidden">
-        <div class="modal-content glass-effect">
-            <span class="close-modal" id="close-cart">&times;</span>
-            <h2>Your Cart</h2>
-            <div id="cart-items" style="margin-top: 1rem; max-height: 300px; overflow-y: auto;">
-                <!-- Cart items injected here -->
+
+    <!-- SHOPPING CART SLIDE-OVER DRAWER -->
+    <div class="drawer-overlay hidden" id="cart-drawer-overlay">
+        <div class="cart-drawer glass-panel" id="cart-drawer">
+            <div class="cart-drawer-header">
+                <h3><i class="fa-solid fa-bag-shopping"></i> Shopping Bag</h3>
+                <button class="drawer-close-btn" id="close-cart-drawer"><i class="fa-solid fa-xmark"></i></button>
             </div>
-            <div class="cart-total" style="font-size: 1.2rem; font-weight: bold; margin-top: 1rem; text-align: right;">
-                Total: <span id="cart-total-price">₹0</span>
+
+            <div class="cart-items-scroller" id="cart-items-container">
+                <!-- Injected via JS -->
             </div>
-            <button id="checkout-cart-btn" class="modal-btn" style="margin-top: 1rem;">Proceed to Checkout</button>
+
+            <div class="cart-drawer-footer">
+                <div class="cart-summary-row">
+                    <span>Subtotal</span>
+                    <span id="cart-subtotal-val">₹0</span>
+                </div>
+                <div class="cart-summary-row">
+                    <span>Shipping</span>
+                    <span class="text-free">FREE</span>
+                </div>
+                <div class="cart-summary-divider"></div>
+                <div class="cart-summary-row total-row">
+                    <span>Estimated Total</span>
+                    <span id="cart-total-val" class="gradient-text">₹0</span>
+                </div>
+                
+                <button class="btn-luxury-primary btn-block" id="proceed-checkout-btn">
+                    Proceed to Checkout <i class="fa-solid fa-arrow-right"></i>
+                </button>
+            </div>
         </div>
     </div>
 
-    <!-- Wishlist Modal -->
-    <div id="wishlist-modal" class="modal hidden">
-        <div class="modal-content glass-effect">
-            <span class="close-modal" id="close-wishlist">&times;</span>
-            <h2>Your Wishlist</h2>
-            <div id="wishlist-items" style="margin-top: 1rem; max-height: 400px; overflow-y: auto;">
-                <!-- Wishlist items injected here -->
+    <!-- SMART UPSELL MODAL (BEFORE CHECKOUT) -->
+    <div class="modal-backdrop hidden" id="upsell-modal-backdrop">
+        <div class="upsell-modal glass-panel">
+            <div class="modal-header">
+                <div>
+                    <span class="rail-badge apriori-badge"><i class="fa-solid fa-wand-magic-sparkles"></i> Companion Add-Ons</span>
+                    <h3>Complete Your Experience</h3>
+                    <p>Customers also frequently pair these compatible accessories with your items:</p>
+                </div>
+                <button class="modal-close-icon" id="close-upsell-modal"><i class="fa-solid fa-xmark"></i></button>
+            </div>
+
+            <div class="upsell-items-list" id="upsell-items-list">
+                <!-- Injected by JS -->
+            </div>
+
+            <div class="modal-footer-actions">
+                <button class="btn-luxury-secondary" id="skip-upsell-btn">No thanks, proceed</button>
+                <button class="btn-luxury-primary" id="confirm-checkout-btn">
+                    <i class="fa-solid fa-lock"></i> Complete Order
+                </button>
             </div>
         </div>
     </div>
-    <!-- Empty chunk since Orders Modal was moved -->
 
-    <!-- Empty chunk since Upsell Modal was moved -->
+    <!-- AUTHENTICATION MODAL (LOGIN, REGISTER, FORGOT PASSWORD) -->
+    <div class="modal-backdrop hidden" id="auth-modal-backdrop">
+        <div class="auth-modal-card glass-panel" id="auth-modal-card">
+            <button class="modal-close-icon" id="close-auth-modal"><i class="fa-solid fa-xmark"></i></button>
 
-    <!-- Empty chunk since Checkout and Processing Modals were moved -->
-
-    <!-- Tracking Modal -->
-    <div id="tracking-modal" class="modal hidden">
-        <div class="modal-content glass-effect" style="max-width: 600px; text-align: center;">
-            <span class="close-modal" id="close-tracking">&times;</span>
-            <h2 style="color: #10b981;">Order Placed Successfully! 🎉</h2>
-            <p style="font-weight: 600; margin-bottom: 2rem;">Order #<span id="order-number"></span></p>
-            
-            <div class="tracking-container">
-                <div class="track-step active">
-                    <div class="track-icon"><i class="fa-solid fa-box"></i></div>
-                    <p>Processing</p>
-                </div>
-                <div class="track-line"></div>
-                <div class="track-step">
-                    <div class="track-icon"><i class="fa-solid fa-truck-fast"></i></div>
-                    <p>Shipped</p>
-                </div>
-                <div class="track-line"></div>
-                <div class="track-step">
-                    <div class="track-icon"><i class="fa-solid fa-house-chimney"></i></div>
-                    <p>Delivered</p>
-                </div>
+            <!-- Brand Header -->
+            <div class="auth-header">
+                <div class="brand-icon"><i class="fa-solid fa-cube"></i></div>
+                <h2 class="auth-title">Welcome to <span class="gradient-text">Relate</span></h2>
+                <p class="auth-subtitle" id="auth-subtitle-text">Sign in to access personalized recommendations.</p>
             </div>
-            
-            <button class="modal-btn" onclick="document.getElementById('tracking-modal').classList.add('hidden')" style="margin-top: 2rem;">Continue Shopping</button>
+
+            <!-- VIEW 1: LOGIN FORM -->
+            <div class="auth-view" id="auth-login-view">
+                <form id="login-form">
+                    <div class="form-group">
+                        <label>Email Address</label>
+                        <input type="email" id="login-email" class="luxury-input" placeholder="name@example.com" required>
+                    </div>
+                    <div class="form-group">
+                        <div class="label-with-link">
+                            <label>Password</label>
+                            <span class="link-action" id="trigger-forgot-password">Forgot password?</span>
+                        </div>
+                        <input type="password" id="login-password" class="luxury-input" placeholder="••••••••" required>
+                    </div>
+                    <button type="submit" class="btn-luxury-primary btn-block" id="login-submit-btn">
+                        Sign In <i class="fa-solid fa-arrow-right"></i>
+                    </button>
+                </form>
+
+                <p class="auth-switch-text">
+                    Don't have an account? <span class="link-action" id="trigger-switch-register">Create one</span>
+                </p>
+            </div>
+
+            <!-- VIEW 2: REGISTER FORM -->
+            <div class="auth-view hidden" id="auth-register-view">
+                <form id="register-form">
+                    <div class="form-group">
+                        <label>Full Name</label>
+                        <input type="text" id="reg-name" class="luxury-input" placeholder="Your name" required>
+                    </div>
+                    <div class="form-group">
+                        <label>Email Address</label>
+                        <input type="email" id="reg-email" class="luxury-input" placeholder="name@example.com" required>
+                    </div>
+                    <div class="form-group">
+                        <label>Password</label>
+                        <input type="password" id="reg-password" class="luxury-input" placeholder="At least 4 characters" required>
+                    </div>
+                    <div class="form-group">
+                        <label>Confirm Password</label>
+                        <input type="password" id="reg-confirm" class="luxury-input" placeholder="Re-enter password" required>
+                    </div>
+                    <button type="submit" class="btn-luxury-primary btn-block" id="reg-submit-btn">
+                        Create Account <i class="fa-solid fa-arrow-right"></i>
+                    </button>
+                </form>
+
+                <p class="auth-switch-text">
+                    Already have an account? <span class="link-action" id="trigger-switch-login">Sign in</span>
+                </p>
+            </div>
+
+            <!-- VIEW 3: FORGOT PASSWORD 3-STEP WIZARD -->
+            <div class="auth-view hidden" id="auth-forgot-view">
+                <!-- Step 1: Enter Email -->
+                <div id="fp-step-1">
+                    <p class="fp-instruction">Enter your registered email address and we'll send a secure 6-digit verification code via Nodemailer.</p>
+                    <form id="fp-email-form">
+                        <div class="form-group">
+                            <label>Registered Email</label>
+                            <input type="email" id="fp-email-input" class="luxury-input" placeholder="name@example.com" required>
+                        </div>
+                        <button type="submit" class="btn-luxury-primary btn-block" id="fp-send-otp-btn">
+                            Send Verification Code <i class="fa-regular fa-paper-plane"></i>
+                        </button>
+                    </form>
+                </div>
+
+                <!-- Step 2: Enter OTP -->
+                <div id="fp-step-2" class="hidden">
+                    <p class="fp-instruction">A 6-digit code has been dispatched to <strong id="fp-target-email-display">email</strong>. Enter it below:</p>
+                    <form id="fp-otp-form">
+                        <div class="form-group">
+                            <label>6-Digit Verification Code</label>
+                            <input type="text" id="fp-otp-input" class="luxury-input otp-input" maxlength="6" placeholder="123456" required autocomplete="off">
+                            <div class="otp-timer-row">
+                                <span id="otp-timer-display" class="timer-text">Code expires in: <strong>05:00</strong></span>
+                                <button type="button" id="otp-resend-btn" class="resend-btn" disabled>Resend Code</button>
+                            </div>
+                        </div>
+                        <button type="submit" class="btn-luxury-primary btn-block" id="fp-verify-otp-btn">
+                            Verify Code <i class="fa-solid fa-shield-check"></i>
+                        </button>
+                    </form>
+                </div>
+
+                <!-- Step 3: Enter New Password -->
+                <div id="fp-step-3" class="hidden">
+                    <p class="fp-instruction">Code verified! Enter your new password below:</p>
+                    <form id="fp-new-pwd-form">
+                        <div class="form-group">
+                            <label>New Password</label>
+                            <input type="password" id="fp-new-pwd-input" class="luxury-input" placeholder="At least 4 characters" required>
+                        </div>
+                        <div class="form-group">
+                            <label>Confirm New Password</label>
+                            <input type="password" id="fp-confirm-pwd-input" class="luxury-input" placeholder="Re-enter new password" required>
+                        </div>
+                        <button type="submit" class="btn-luxury-primary btn-block" id="fp-reset-submit-btn">
+                            Reset Password & Sign In <i class="fa-solid fa-lock"></i>
+                        </button>
+                    </form>
+                </div>
+
+                <p class="auth-switch-text">
+                    Remember your password? <span class="link-action" id="trigger-back-login">Back to Sign in</span>
+                </p>
+            </div>
+
         </div>
     </div>
 
-    <!-- Toast Notification -->
-    <div id="toast" class="toast hidden"></div>
-    
-    </div> <!-- End of App Content -->
-    
-    <script src="{{ url_for('static', filename='script.js') }}?v=8"></script>
+    <!-- TOAST NOTIFICATION CONTAINER -->
+    <div class="toast-container" id="toast-container"></div>
+
+    <!-- GLOBAL LUXURY FOOTER -->
+    <footer class="app-footer">
+        <div class="footer-container">
+            <div class="footer-brand-col">
+                <div class="nav-brand">
+                    <div class="brand-icon"><i class="fa-solid fa-cube"></i></div>
+                    <div class="brand-text">
+                        <span class="brand-name">Relate</span>
+                        <span class="brand-badge">LuxStore</span>
+                    </div>
+                </div>
+                <p class="footer-tagline">
+                    An advanced machine learning-powered e-commerce ecosystem discovering product relationships and generating personalized recommendations from customer purchase patterns.
+                </p>
+                <div class="footer-badge-strip">
+                    <span class="footer-tech-pill"><i class="fa-solid fa-microchip"></i> Apriori Algorithm</span>
+                    <span class="footer-tech-pill"><i class="fa-solid fa-brain"></i> TF-IDF Cosine Similarity</span>
+                    <span class="footer-tech-pill"><i class="fa-solid fa-bolt"></i> Real-Time Retraining</span>
+                </div>
+            </div>
+
+            <div class="footer-links-col">
+                <h4>Navigation</h4>
+                <ul>
+                    <li><a href="#home" class="footer-nav-link" data-target="catalog-section">Home</a></li>
+                    <li><a href="#shop" class="footer-nav-link" data-target="catalog-section">Shop Collection</a></li>
+                    <li><a href="#about" class="footer-nav-link" data-target="about-section">About Relate</a></li>
+                    <li><a href="#profile" class="footer-nav-link" data-target="profile-section">User Profile</a></li>
+                </ul>
+            </div>
+
+            <div class="footer-links-col">
+                <h4>Recommendation Rails</h4>
+                <ul>
+                    <li><span class="footer-sub-link">Frequently Bought Together</span></li>
+                    <li><span class="footer-sub-link">Recommended Accessories</span></li>
+                    <li><span class="footer-sub-link">Similar Competing Products</span></li>
+                    <li><span class="footer-sub-link">Personalized Discovery Feed</span></li>
+                </ul>
+            </div>
+
+            <div class="footer-links-col">
+                <h4>Architecture</h4>
+                <ul>
+                    <li><span class="footer-sub-link">Python Flask REST API</span></li>
+                    <li><span class="footer-sub-link">MLxtend Association Mining</span></li>
+                    <li><span class="footer-sub-link">Node.js Nodemailer OTP</span></li>
+                    <li><span class="footer-sub-link">GSAP Micro-Interactions</span></li>
+                </ul>
+            </div>
+        </div>
+
+        <div class="footer-bottom-bar">
+            <p>© 2026 Relate (LuxStore) Intelligent Recommendation System. Crafted with precision.</p>
+            <p class="footer-build-tag">Production Build v2.0 • High-Performance Machine Learning</p>
+        </div>
+    </footer>
+
+    <!-- GSAP Animation Library & Plugins (CDN) -->
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/gsap/3.12.5/gsap.min.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/gsap/3.12.5/ScrollTrigger.min.js"></script>
+
+    <!-- Application Script -->
+    <script src="{{ url_for('static', filename='js/script.js') }}?v=16"></script>
 </body>
 </html>
