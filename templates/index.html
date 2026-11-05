@@ -13,7 +13,7 @@
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
     
     <!-- Design System CSS -->
-    <link rel="stylesheet" href="{{ url_for('static', filename='css/style.css') }}?v=20">
+    <link rel="stylesheet" href="{{ url_for('static', filename='css/style.css') }}?v=22">
     <script>
         // Default to light theme when first opened
         (function() {
@@ -50,24 +50,21 @@
             <nav class="nav-menu">
                 <a href="#home" class="nav-link active" data-target="catalog-section" id="nav-link-home">BOTANICALS</a>
                 <a href="#shop" class="nav-link" data-target="catalog-section" id="nav-link-shop">LIVING</a>
-                <div class="nav-dropdown-trigger" id="categories-dropdown-btn">
-                    <span>APOTHECARY <i class="fa-solid fa-chevron-down nav-arrow"></i></span>
-                    <div class="nav-dropdown-menu" id="nav-categories-dropdown">
-                        <!-- Populated by JS -->
-                    </div>
-                </div>
+                <a href="#shop" class="nav-link" data-target="catalog-section" id="nav-link-apothecary">APOTHECARY</a>
                 <a href="#about" class="nav-link" data-target="about-section" id="nav-link-about">STORIES</a>
             </nav>
 
-            <!-- Search Bar -->
-            <div class="nav-search-bar">
-                <i class="fa-solid fa-magnifying-glass search-icon"></i>
-                <input type="text" id="global-search-input" placeholder="Search..." autocomplete="off">
-                <button class="search-clear-btn hidden" id="search-clear-btn"><i class="fa-solid fa-xmark"></i></button>
-            </div>
-
             <!-- Action Controls -->
             <div class="nav-actions">
+                <!-- Search Bar (Expandable on click) -->
+                <div class="nav-search-bar" id="nav-search-wrapper">
+                    <button class="nav-icon-btn search-trigger-btn" id="search-trigger-btn" title="Search">
+                        <i class="fa-solid fa-magnifying-glass search-icon"></i>
+                    </button>
+                    <input type="text" id="global-search-input" placeholder="Search..." autocomplete="off">
+                    <button class="search-clear-btn hidden" id="search-clear-btn"><i class="fa-solid fa-xmark"></i></button>
+                </div>
+
                 <!-- Theme Toggle Button -->
                 <button class="nav-icon-btn" id="nav-theme-toggle-btn" title="Toggle theme">
                     <i class="fa-solid fa-moon" id="theme-icon"></i>
@@ -1069,6 +1066,6 @@
     <script src="https://checkout.razorpay.com/v1/checkout.js"></script>
 
     <!-- Application Script -->
-    <script src="{{ url_for('static', filename='js/script.js') }}?v=21"></script>
+    <script src="{{ url_for('static', filename='js/script.js') }}?v=22"></script>
 </body>
 </html>

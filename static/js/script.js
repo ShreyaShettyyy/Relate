@@ -195,6 +195,16 @@ document.addEventListener('DOMContentLoaded', () => {
     // -------------------------------------------------------------
     // PRODUCT CARDS & GRID RENDERING
     // -------------------------------------------------------------
+    function getProductSubtitle(product) {
+        const customSubtitles = {
+            'Lavender Dew Essence': 'Soothing Scented Oil',
+            'Moss & Fern Candle': 'Stone Vessel Candle',
+            'Eucalyptus Linen Mist': 'Eucalyptus Linen Mist',
+            'Jade Stone Incense Holder': 'Soothing Scented Oil'
+        };
+        return customSubtitles[product.Name] || product.Category || 'Botanicals';
+    }
+
     function createProductCard(product, reason = null) {
         const card = document.createElement('div');
         card.className = 'product-card';
@@ -230,7 +240,7 @@ document.addEventListener('DOMContentLoaded', () => {
             <div class="card-body">
                 ${reasonHtml}
                 <h4 class="card-title" title="${product.Name}">${product.Name}</h4>
-                <div class="card-category-desc">${product.Category || 'Botanicals'}</div>
+                <div class="card-category-desc">${getProductSubtitle(product)}</div>
                 <div class="card-price">${formatPrice(product.Price)}</div>
                 <button class="botanical-card-btn" data-id="${product.ID}">VIEW PRODUCT</button>
             </div>
@@ -447,7 +457,16 @@ document.addEventListener('DOMContentLoaded', () => {
         'laptop': ['laptops', 'macbook', 'asus', 'dell', 'lenovo', 'computer', 'electronics'],
         'laptops': ['laptops', 'macbook', 'asus', 'dell', 'lenovo', 'computer', 'electronics'],
         'computer': ['laptops', 'macbook', 'asus', 'dell', 'lenovo', 'electronics'],
-        'electronics': ['laptops', 'smartphones', 'cameras', 'citrus eau de parfum']
+        'electronics': ['laptops', 'smartphones', 'cameras', 'citrus eau de parfum'],
+        'candle': ['moss & fern candle', 'candle', 'botanicals', 'scented'],
+        'candles': ['moss & fern candle', 'candle', 'botanicals', 'scented'],
+        'oil': ['lavender dew essence', 'oil', 'botanicals', 'essence', 'soothing'],
+        'oils': ['lavender dew essence', 'oil', 'botanicals', 'essence'],
+        'mist': ['eucalyptus linen mist', 'mist', 'botanicals', 'linen'],
+        'incense': ['jade stone incense holder', 'incense', 'botanicals', 'holder'],
+        'lavender': ['lavender dew essence', 'lavender', 'botanicals'],
+        'eucalyptus': ['eucalyptus linen mist', 'eucalyptus', 'botanicals'],
+        'jade': ['jade stone incense holder', 'jade', 'botanicals']
     };
 
     function matchProductWithQuery(p, query) {
@@ -1997,7 +2016,34 @@ document.addEventListener('DOMContentLoaded', () => {
         }
     }
 
+    const searchWrapper = document.getElementById('nav-search-wrapper');
+    const searchTriggerBtn = document.getElementById('search-trigger-btn');
+
+    if (searchTriggerBtn && searchWrapper) {
+        searchTriggerBtn.addEventListener('click', (e) => {
+            e.stopPropagation();
+            if (!searchWrapper.classList.contains('expanded')) {
+                searchWrapper.classList.add('expanded');
+                if (searchInput) searchInput.focus();
+            } else if (searchInput && searchInput.value.trim().length > 0) {
+                performImmediateSearch();
+            } else {
+                searchWrapper.classList.remove('expanded');
+            }
+        });
+    }
+
     if (searchInput) {
+        if (searchWrapper) {
+            searchInput.addEventListener('blur', () => {
+                setTimeout(() => {
+                    if (!searchInput.value.trim()) {
+                        searchWrapper.classList.remove('expanded');
+                    }
+                }, 200);
+            });
+        }
+
         searchInput.addEventListener('input', () => {
             const val = searchInput.value;
             if (clearBtn) clearBtn.classList.toggle('hidden', val.length === 0);
@@ -2022,7 +2068,11 @@ document.addEventListener('DOMContentLoaded', () => {
     const searchIconBtn = document.querySelector('.nav-search-bar .search-icon');
     if (searchIconBtn) {
         searchIconBtn.style.cursor = 'pointer';
-        searchIconBtn.addEventListener('click', () => {
+        searchIconBtn.addEventListener('click', (e) => {
+            e.stopPropagation();
+            if (searchWrapper && !searchWrapper.classList.contains('expanded')) {
+                searchWrapper.classList.add('expanded');
+            }
             if (searchInput) searchInput.focus();
             performImmediateSearch();
         });
@@ -2056,18 +2106,35 @@ document.addEventListener('DOMContentLoaded', () => {
     document.getElementById('nav-brand-logo').addEventListener('click', () => {
         navigateTo('catalog-section');
         setCategory('All');
+        window.scrollTo({ top: 0, behavior: 'smooth' });
     });
 
     document.getElementById('nav-link-home').addEventListener('click', (e) => {
         e.preventDefault();
         navigateTo('catalog-section');
+        setCategory('Botanicals');
+        const catArea = document.getElementById('catalog-main-area');
+        if (catArea) catArea.scrollIntoView({ behavior: 'smooth' });
     });
 
     document.getElementById('nav-link-shop').addEventListener('click', (e) => {
         e.preventDefault();
         navigateTo('catalog-section');
-        document.getElementById('catalog-main-area').scrollIntoView({ behavior: 'smooth' });
+        setCategory('Home & Kitchen');
+        const catArea = document.getElementById('catalog-main-area');
+        if (catArea) catArea.scrollIntoView({ behavior: 'smooth' });
     });
+
+    const apothLink = document.getElementById('nav-link-apothecary');
+    if (apothLink) {
+        apothLink.addEventListener('click', (e) => {
+            e.preventDefault();
+            navigateTo('catalog-section');
+            setCategory('Groceries');
+            const catArea = document.getElementById('catalog-main-area');
+            if (catArea) catArea.scrollIntoView({ behavior: 'smooth' });
+        });
+    }
 
     document.getElementById('nav-link-about').addEventListener('click', (e) => {
         e.preventDefault();
