@@ -222,7 +222,6 @@ document.addEventListener('DOMContentLoaded', () => {
 
         card.innerHTML = `
             <div class="card-image-box">
-                <span class="card-badge-category">${product.Category || 'General'}</span>
                 <button class="card-wishlist-btn ${isWishlisted ? 'liked' : ''}" data-id="${product.ID}" title="Save to wishlist">
                     <i class="${isWishlisted ? 'fa-solid' : 'fa-regular'} fa-heart"></i>
                 </button>
@@ -231,25 +230,15 @@ document.addEventListener('DOMContentLoaded', () => {
             <div class="card-body">
                 ${reasonHtml}
                 <h4 class="card-title" title="${product.Name}">${product.Name}</h4>
-                <div class="card-rating-row">
-                    <div class="stars-box">${generateStars(product.Rating)}</div>
-                    <span class="card-rating-num">${product.Rating || '4.5'}</span>
-                </div>
-                <div class="card-footer">
-                    <div class="card-price-group">
-                        <span class="card-price">${formatPrice(product.Price)}</span>
-                        <span class="card-mrp">${formatPrice(mrp)}</span>
-                    </div>
-                    <button class="card-add-btn" data-id="${product.ID}" title="Add to cart">
-                        <i class="fa-solid fa-plus"></i>
-                    </button>
-                </div>
+                <div class="card-category-desc">${product.Category || 'Botanicals'}</div>
+                <div class="card-price">${formatPrice(product.Price)}</div>
+                <button class="botanical-card-btn" data-id="${product.ID}">VIEW PRODUCT</button>
             </div>
         `;
 
         // Card Click opens Product Detail
         card.addEventListener('click', (e) => {
-            if (e.target.closest('.card-wishlist-btn') || e.target.closest('.card-add-btn')) {
+            if (e.target.closest('.card-wishlist-btn')) {
                 return; // Handled separately
             }
             showProductDetail(product);
@@ -265,16 +254,27 @@ document.addEventListener('DOMContentLoaded', () => {
             wishBtn.querySelector('i').className = liked ? 'fa-solid fa-heart' : 'fa-regular fa-heart';
         });
 
-        // Quick Add to Cart button click
+        // Card Action button click (VIEW PRODUCT)
+        const viewBtn = card.querySelector('.botanical-card-btn');
+        if (viewBtn) {
+            viewBtn.addEventListener('click', (e) => {
+                e.stopPropagation();
+                showProductDetail(product);
+            });
+        }
+
+        // Quick Add to Cart button click (if present)
         const addBtn = card.querySelector('.card-add-btn');
-        addBtn.addEventListener('click', (e) => {
-            e.stopPropagation();
-            addToCart(product.ID);
-            showToast(`Added ${product.Name} to cart`, 'success');
-            if (typeof gsap !== 'undefined') {
-                gsap.fromTo(addBtn, { scale: 0.8 }, { scale: 1, duration: 0.25, ease: 'back.out(2)' });
-            }
-        });
+        if (addBtn) {
+            addBtn.addEventListener('click', (e) => {
+                e.stopPropagation();
+                addToCart(product.ID);
+                showToast(`Added ${product.Name} to cart`, 'success');
+                if (typeof gsap !== 'undefined') {
+                    gsap.fromTo(addBtn, { scale: 0.8 }, { scale: 1, duration: 0.25, ease: 'back.out(2)' });
+                }
+            });
+        }
 
         return card;
     }

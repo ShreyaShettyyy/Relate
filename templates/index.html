@@ -9,11 +9,11 @@
     <!-- Typography & Icons -->
     <link rel="preconnect" href="https://fonts.googleapis.com">
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-    <link href="https://fonts.googleapis.com/css2?family=Outfit:wght@300;400;500;600;700;800&family=Plus+Jakarta+Sans:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+    <link href="https://fonts.googleapis.com/css2?family=Cormorant+Garamond:ital,wght@0,400;0,500;0,600;0,700;1,400&family=Playfair+Display:ital,wght@0,400;0,500;0,600;0,700;1,400&family=Plus+Jakarta+Sans:wght@300;400;500;600;700&family=Outfit:wght@300;400;500;600;700&display=swap" rel="stylesheet">
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
     
     <!-- Design System CSS -->
-    <link rel="stylesheet" href="{{ url_for('static', filename='css/style.css') }}?v=16">
+    <link rel="stylesheet" href="{{ url_for('static', filename='css/style.css') }}?v=18">
     <script>
         // Default to light theme when first opened
         (function() {
@@ -38,35 +38,31 @@
 </head>
 <body class="luxury-light-theme">
 
-    <!-- GLOBAL NAVBAR -->
+    <!-- BOTANICAL DEW & SAGE MIST NAVBAR -->
     <header class="navbar-wrapper">
         <div class="navbar-container">
             <!-- Brand Logo -->
             <div class="nav-brand" id="nav-brand-logo">
-                <div class="brand-icon"><i class="fa-solid fa-cube"></i></div>
-                <div class="brand-text">
-                    <span class="brand-name">Relate</span>
-                    <span class="brand-badge">Store</span>
-                </div>
+                <span class="brand-name">RELATE</span>
             </div>
 
             <!-- Main Nav Links -->
             <nav class="nav-menu">
-                <a href="#home" class="nav-link active" data-target="catalog-section" id="nav-link-home">Home</a>
-                <a href="#shop" class="nav-link" data-target="shop-section" id="nav-link-shop">Shop</a>
+                <a href="#home" class="nav-link active" data-target="catalog-section" id="nav-link-home">BOTANICALS</a>
+                <a href="#shop" class="nav-link" data-target="catalog-section" id="nav-link-shop">LIVING</a>
                 <div class="nav-dropdown-trigger" id="categories-dropdown-btn">
-                    <span>Categories <i class="fa-solid fa-chevron-down nav-arrow"></i></span>
+                    <span>APOTHECARY <i class="fa-solid fa-chevron-down nav-arrow"></i></span>
                     <div class="nav-dropdown-menu" id="nav-categories-dropdown">
                         <!-- Populated by JS -->
                     </div>
                 </div>
-                <a href="#about" class="nav-link" data-target="about-section" id="nav-link-about">About</a>
+                <a href="#about" class="nav-link" data-target="about-section" id="nav-link-about">STORIES</a>
             </nav>
 
             <!-- Search Bar -->
             <div class="nav-search-bar">
                 <i class="fa-solid fa-magnifying-glass search-icon"></i>
-                <input type="text" id="global-search-input" placeholder="Search products..." autocomplete="off">
+                <input type="text" id="global-search-input" placeholder="Search..." autocomplete="off">
                 <button class="search-clear-btn hidden" id="search-clear-btn"><i class="fa-solid fa-xmark"></i></button>
             </div>
 
@@ -77,23 +73,11 @@
                     <i class="fa-solid fa-moon" id="theme-icon"></i>
                 </button>
 
-                <!-- Wishlist -->
-                <button class="nav-icon-btn" id="nav-wishlist-btn" title="View Wishlist">
-                    <i class="fa-regular fa-heart"></i>
-                    <span class="nav-badge hidden" id="wishlist-badge">0</span>
-                </button>
-
-                <!-- Cart -->
-                <button class="nav-icon-btn" id="nav-cart-btn" title="Shopping Cart">
-                    <i class="fa-solid fa-bag-shopping"></i>
-                    <span class="nav-badge hidden" id="cart-badge">0</span>
-                </button>
-
                 <!-- User Profile / Auth Area -->
                 <div class="user-auth-wrapper" id="user-auth-wrapper">
                     <!-- Guest View -->
-                    <button class="btn-primary-outline nav-auth-btn" id="login-trigger-btn">
-                        <i class="fa-regular fa-user"></i> <span>Sign In</span>
+                    <button class="nav-icon-btn nav-auth-btn" id="login-trigger-btn" title="Sign In">
+                        <i class="fa-regular fa-user"></i>
                     </button>
 
                     <!-- Authenticated View Dropdown -->
@@ -117,6 +101,18 @@
                         </div>
                     </div>
                 </div>
+
+                <!-- Wishlist -->
+                <button class="nav-icon-btn" id="nav-wishlist-btn" title="View Wishlist">
+                    <i class="fa-regular fa-heart"></i>
+                    <span class="nav-badge hidden" id="wishlist-badge">0</span>
+                </button>
+
+                <!-- Cart -->
+                <button class="nav-icon-btn cart-icon-btn" id="nav-cart-btn" title="Shopping Cart">
+                    <i class="fa-solid fa-bag-shopping"></i>
+                    <span class="nav-badge" id="cart-badge">0</span>
+                </button>
             </div>
         </div>
     </header>
@@ -126,27 +122,11 @@
 
         <!-- 1. HOMEPAGE / CATALOG SECTION -->
         <section id="catalog-section" class="spa-section">
-            <!-- Hero Banner -->
-            <div class="hero-section">
-                <div class="hero-glow-blob blob-1"></div>
-                <div class="hero-glow-blob blob-2"></div>
-                
-                <div class="hero-content">
-                    <h1 class="hero-title">
-                        Find What You Need, <br>
-                        <span class="gradient-text">Simply and Quickly.</span>
-                    </h1>
-                    <p class="hero-subtitle">
-                        Discover products and recommendations based on real customer purchases.
-                    </p>
-                    <div class="hero-cta-group">
-                        <button class="btn-luxury-primary" id="hero-explore-btn">
-                            Shop Now <i class="fa-solid fa-arrow-right"></i>
-                        </button>
-                        <button class="btn-luxury-secondary" id="hero-about-btn">
-                            How It Works
-                        </button>
-                    </div>
+            <!-- Hero Banner: Cultivating Calm -->
+            <div class="hero-section botanical-hero">
+                <div class="botanical-hero-content">
+                    <h1 class="hero-title botanical-title">Cultivating Calm</h1>
+                    <a href="#catalog-main-area" class="hero-explore-link" id="hero-explore-btn">EXPLORE COLLECTIONS</a>
                 </div>
             </div>
 
