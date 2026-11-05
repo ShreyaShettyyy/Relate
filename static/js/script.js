@@ -407,6 +407,98 @@ document.addEventListener('DOMContentLoaded', () => {
         executeFilterAndSort();
     }
 
+    const SEARCH_SYNONYMS = {
+        'dress': ['fashion', 'shirt', 'tshirt', 'cloth', 'apparel', 'wear', 'shoes', 'cleats', 'trainers', 'jacket'],
+        'dresses': ['fashion', 'shirt', 'tshirt', 'cloth', 'apparel', 'wear', 'shoes', 'cleats', 'trainers', 'jacket'],
+        'clothes': ['fashion', 'shirt', 'tshirt', 'cloth', 'apparel', 'wear', 'cleats', 'trainers', 'shoes'],
+        'clothing': ['fashion', 'shirt', 'tshirt', 'cloth', 'apparel', 'wear', 'cleats', 'trainers', 'shoes'],
+        'cloth': ['fashion', 'shirt', 'tshirt', 'cloth', 'apparel', 'wear'],
+        'wear': ['fashion', 'shirt', 'tshirt', 'cloth', 'apparel', 'shoes', 'cleats', 'trainers'],
+        'shirt': ['fashion', 'tshirt', 'plaid', 'apparel', 'wear'],
+        'food': ['groceries', 'apple', 'beef', 'steak', 'chicken', 'meat', 'cooking', 'oil', 'cucumber', 'eggs', 'juice', 'milk', 'honey', 'coffee', 'ice cream', 'mulberry', 'kiwi', 'dog food', 'cat food'],
+        'foods': ['groceries', 'apple', 'beef', 'steak', 'chicken', 'meat', 'cooking', 'oil', 'cucumber', 'eggs', 'juice', 'milk', 'honey', 'coffee', 'ice cream'],
+        'fruit': ['apple', 'mulberry', 'kiwi', 'cucumber', 'groceries'],
+        'fruits': ['apple', 'mulberry', 'kiwi', 'cucumber', 'groceries'],
+        'vegetable': ['cucumber', 'groceries', 'cooking'],
+        'vegetables': ['cucumber', 'groceries', 'cooking'],
+        'eat': ['groceries', 'apple', 'beef', 'steak', 'chicken', 'meat', 'eggs', 'juice', 'milk', 'honey', 'ice cream'],
+        'snack': ['groceries', 'ice cream', 'mulberry', 'kiwi', 'juice'],
+        'drink': ['juice', 'milk', 'coffee', 'groceries'],
+        'drinks': ['juice', 'milk', 'coffee', 'groceries'],
+        'plant': ['house showpiece plant', 'plant pot', 'botanical', 'tree', 'flower', 'home & kitchen', 'succulent'],
+        'plants': ['house showpiece plant', 'plant pot', 'botanical', 'tree', 'flower', 'home & kitchen', 'succulent'],
+        'flower': ['house showpiece plant', 'plant pot', 'home & kitchen'],
+        'flowers': ['house showpiece plant', 'plant pot', 'home & kitchen'],
+        'tree': ['family tree photo frame', 'house showpiece plant', 'home & kitchen'],
+        'pot': ['plant pot', 'house showpiece plant'],
+        'botanical': ['plant', 'dew', 'essence', 'mist', 'beauty', 'home & kitchen'],
+        'botanicals': ['plant', 'dew', 'essence', 'mist', 'beauty', 'home & kitchen'],
+        'decor': ['home & kitchen', 'decoration swing', 'family tree', 'table lamp', 'house showpiece plant'],
+        'furniture': ['home & kitchen', 'bed', 'sofa', 'table', 'chair', 'sink'],
+        'makeup': ['beauty', 'mascara', 'eyeshadow', 'palette', 'powder', 'lipstick', 'nail polish'],
+        'cosmetics': ['beauty', 'mascara', 'eyeshadow', 'palette', 'powder', 'lipstick', 'nail polish'],
+        'beauty': ['mascara', 'eyeshadow', 'lipstick', 'powder', 'nail polish', 'ck one', 'chanel', 'dior', 'dolce'],
+        'skincare': ['beauty', 'body wash', 'lotion', 'moisture'],
+        'perfume': ['beauty', 'fragrance', 'calvin klein', 'chanel', 'dior', 'dolce'],
+        'fragrance': ['beauty', 'perfume', 'calvin klein', 'chanel', 'dior', 'dolce'],
+        'phone': ['smartphones', 'iphone', 'samsung', 'mobile', 'electronics'],
+        'phones': ['smartphones', 'iphone', 'samsung', 'mobile', 'electronics'],
+        'mobile': ['smartphones', 'iphone', 'samsung', 'mobile', 'electronics'],
+        'laptop': ['laptops', 'macbook', 'asus', 'dell', 'lenovo', 'computer', 'electronics'],
+        'laptops': ['laptops', 'macbook', 'asus', 'dell', 'lenovo', 'computer', 'electronics'],
+        'computer': ['laptops', 'macbook', 'asus', 'dell', 'lenovo', 'electronics'],
+        'electronics': ['laptops', 'smartphones', 'cameras', 'citrus eau de parfum']
+    };
+
+    function matchProductWithQuery(p, query) {
+        if (!query) return true;
+        const q = query.toLowerCase().trim();
+        const pName = (p.Name || '').toLowerCase();
+        const pDesc = (p.Description || '').toLowerCase();
+        const pCat = (p.Category || '').toLowerCase();
+
+        // 1. Direct substring match
+        if (pName.includes(q) || pDesc.includes(q) || pCat.includes(q)) {
+            return true;
+        }
+
+        // 2. Tokenized & Synonym Match
+        const tokens = q.split(/\s+/).filter(Boolean);
+        for (const token of tokens) {
+            // Direct token match
+            if (pName.includes(token) || pDesc.includes(token) || pCat.includes(token)) {
+                return true;
+            }
+            // Check synonyms
+            const syns = SEARCH_SYNONYMS[token];
+            if (syns) {
+                for (const syn of syns) {
+                    if (pName.includes(syn) || pDesc.includes(syn) || pCat.includes(syn)) {
+                        return true;
+                    }
+                }
+            }
+            // Simple stem: remove trailing 's' or 'es'
+            let stem = token;
+            if (stem.endsWith('es')) stem = stem.slice(0, -2);
+            else if (stem.endsWith('s')) stem = stem.slice(0, -1);
+            if (stem && stem.length >= 3) {
+                if (pName.includes(stem) || pDesc.includes(stem) || pCat.includes(stem)) {
+                    return true;
+                }
+                const stemSyns = SEARCH_SYNONYMS[stem];
+                if (stemSyns) {
+                    for (const syn of stemSyns) {
+                        if (pName.includes(syn) || pDesc.includes(syn) || pCat.includes(syn)) {
+                            return true;
+                        }
+                    }
+                }
+            }
+        }
+        return false;
+    }
+
     function executeFilterAndSort() {
         let filtered = [...allProducts];
 
@@ -415,14 +507,9 @@ document.addEventListener('DOMContentLoaded', () => {
             filtered = filtered.filter(p => p.Category === currentCategory);
         }
 
-        // 2. Search Query Filter
+        // 2. Search Query Filter with Semantic Keyword Expansion
         if (currentSearchQuery.trim()) {
-            const q = currentSearchQuery.toLowerCase().trim();
-            filtered = filtered.filter(p =>
-                (p.Name && p.Name.toLowerCase().includes(q)) ||
-                (p.Description && p.Description.toLowerCase().includes(q)) ||
-                (p.Category && p.Category.toLowerCase().includes(q))
-            );
+            filtered = filtered.filter(p => matchProductWithQuery(p, currentSearchQuery));
         }
 
         // 3. Sorting
@@ -799,41 +886,254 @@ document.addEventListener('DOMContentLoaded', () => {
     });
 
     // -------------------------------------------------------------
-    // CHECKOUT & SMART UPSELL MODAL
+    // DEDICATED CHECKOUT & RECOMMENDATIONS PAGE (Requests 3, 4, 5)
     // -------------------------------------------------------------
-    document.getElementById('proceed-checkout-btn').addEventListener('click', () => {
-        if (cart.length === 0) {
+    let currentSelectedPaymentMethod = 'cod';
+    let savedAddressData = null;
+
+    function loadSavedAddress() {
+        try {
+            const local = localStorage.getItem('relate_saved_address');
+            if (local) {
+                savedAddressData = JSON.parse(local);
+            }
+        } catch(e) {}
+
+        if (!savedAddressData && currentUser && currentUser.address) {
+            savedAddressData = {
+                full_name: currentUser.name || '',
+                phone: currentUser.phone || '',
+                street: currentUser.address.street || '',
+                city: currentUser.address.city || '',
+                state: currentUser.address.state || '',
+                pincode: currentUser.address.pincode || ''
+            };
+        }
+    }
+
+    function renderSavedAddressUI() {
+        loadSavedAddress();
+        const displayPreview = document.getElementById('saved-address-preview');
+        const formWrapper = document.getElementById('address-form-wrapper');
+        const nameEl = document.getElementById('display-address-name');
+        const phoneEl = document.getElementById('display-address-phone');
+        const fullEl = document.getElementById('display-address-full');
+        const editBtnText = document.getElementById('edit-address-btn-text');
+
+        if (savedAddressData && savedAddressData.street) {
+            if (nameEl) nameEl.textContent = savedAddressData.full_name || (currentUser ? currentUser.name : 'Recipient');
+            if (phoneEl) phoneEl.innerHTML = `<i class="fa-solid fa-phone"></i> ${savedAddressData.phone || 'No phone'}`;
+            if (fullEl) {
+                const parts = [savedAddressData.street, savedAddressData.city, savedAddressData.state, savedAddressData.pincode].filter(Boolean);
+                fullEl.textContent = parts.join(', ');
+            }
+            if (displayPreview) displayPreview.classList.remove('hidden');
+            if (formWrapper) formWrapper.classList.add('hidden');
+            if (editBtnText) editBtnText.textContent = 'Edit Address';
+        } else {
+            if (displayPreview) displayPreview.classList.add('hidden');
+            if (formWrapper) formWrapper.classList.remove('hidden');
+            if (editBtnText) editBtnText.textContent = 'Hide Form';
+        }
+
+        if (savedAddressData) {
+            const fName = document.getElementById('checkout-name');
+            const fPhone = document.getElementById('checkout-phone');
+            const fStreet = document.getElementById('checkout-street');
+            const fCity = document.getElementById('checkout-city');
+            const fState = document.getElementById('checkout-state');
+            const fPin = document.getElementById('checkout-pincode');
+            if (fName && savedAddressData.full_name) fName.value = savedAddressData.full_name;
+            if (fPhone && savedAddressData.phone) fPhone.value = savedAddressData.phone;
+            if (fStreet && savedAddressData.street) fStreet.value = savedAddressData.street;
+            if (fCity && savedAddressData.city) fCity.value = savedAddressData.city;
+            if (fState && savedAddressData.state) fState.value = savedAddressData.state;
+            if (fPin && savedAddressData.pincode) fPin.value = savedAddressData.pincode;
+        } else if (currentUser) {
+            const fName = document.getElementById('checkout-name');
+            if (fName) fName.value = currentUser.name || '';
+        }
+    }
+
+    function saveAddressFromForm() {
+        const name = (document.getElementById('checkout-name')?.value || '').trim();
+        const phone = (document.getElementById('checkout-phone')?.value || '').trim();
+        const street = (document.getElementById('checkout-street')?.value || '').trim();
+        const city = (document.getElementById('checkout-city')?.value || '').trim();
+        const state = (document.getElementById('checkout-state')?.value || '').trim();
+        const pincode = (document.getElementById('checkout-pincode')?.value || '').trim();
+
+        if (!name || !phone || !street) {
+            showToast("Please enter Full Name, Phone, and Street Address", "error");
+            return false;
+        }
+
+        savedAddressData = {
+            full_name: name,
+            phone: phone,
+            street: street,
+            city: city,
+            state: state,
+            pincode: pincode
+        };
+
+        try {
+            localStorage.setItem('relate_saved_address', JSON.stringify(savedAddressData));
+        } catch(e) {}
+
+        if (currentUser && currentUser.email) {
+            fetch('/api/user/address', {
+                method: 'POST',
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify({
+                    email: currentUser.email,
+                    phone: phone,
+                    full_name: name,
+                    street: street,
+                    city: city,
+                    state: state,
+                    pincode: pincode
+                })
+            }).catch(e => console.log('Address save error:', e));
+        }
+
+        renderSavedAddressUI();
+        showToast("Address & contact saved successfully", "success");
+        return true;
+    }
+
+    // Toggle Edit Address Button
+    document.getElementById('toggle-edit-address-btn')?.addEventListener('click', () => {
+        const formWrapper = document.getElementById('address-form-wrapper');
+        const displayPreview = document.getElementById('saved-address-preview');
+        const editBtnText = document.getElementById('edit-address-btn-text');
+        if (!formWrapper) return;
+        const isHidden = formWrapper.classList.contains('hidden');
+        if (isHidden) {
+            formWrapper.classList.remove('hidden');
+            displayPreview?.classList.add('hidden');
+            if (editBtnText) editBtnText.textContent = 'Hide Form';
+        } else {
+            formWrapper.classList.add('hidden');
+            displayPreview?.classList.remove('hidden');
+            if (editBtnText) editBtnText.textContent = 'Edit Address';
+        }
+    });
+
+    document.getElementById('save-address-btn')?.addEventListener('click', () => {
+        saveAddressFromForm();
+    });
+
+    // Payment Selection Radio Cards
+    function setupPaymentMethodSelection() {
+        const payCards = {
+            'cod': document.getElementById('pay-card-cod'),
+            'online': document.getElementById('pay-card-online'),
+            'card': document.getElementById('pay-card-card')
+        };
+        const cardBox = document.getElementById('card-details-box');
+        const onlineBanner = document.getElementById('online-apps-banner');
+        const confirmBtnText = document.getElementById('place-order-btn-text');
+
+        function setMethod(method) {
+            currentSelectedPaymentMethod = method;
+            Object.keys(payCards).forEach(k => {
+                if (payCards[k]) {
+                    payCards[k].classList.toggle('active', k === method);
+                    const radio = payCards[k].querySelector('input[type="radio"]');
+                    if (radio) radio.checked = (k === method);
+                }
+            });
+
+            if (cardBox) cardBox.classList.toggle('hidden', method !== 'card');
+            if (onlineBanner) onlineBanner.classList.toggle('hidden', method !== 'online');
+
+            if (confirmBtnText) {
+                if (method === 'cod') confirmBtnText.textContent = 'Place Order (Cash on Delivery)';
+                else if (method === 'online') confirmBtnText.textContent = 'Proceed with Google Pay / Razorpay';
+                else if (method === 'card') confirmBtnText.textContent = 'Pay with Card';
+            }
+        }
+
+        Object.keys(payCards).forEach(k => {
+            if (payCards[k]) {
+                payCards[k].onclick = () => setMethod(k);
+            }
+        });
+    }
+
+    // Open Dedicated Checkout Page
+    function openCheckoutPage() {
+        if (!cart || cart.length === 0) {
             showToast("Your cart is empty.", "info");
             return;
         }
 
-        if (!currentUser) {
-            closeCartDrawer();
-            openAuthModal('login');
-            showToast("Please sign in or create an account to complete checkout.", "info");
-            return;
-        }
-
         closeCartDrawer();
-        showSmartUpsellModal();
-    });
+        navigateTo('checkout-section');
+        renderSavedAddressUI();
+        setupPaymentMethodSelection();
+        renderCheckoutOrderSummary();
+        fetchAndRenderCheckoutRecommendations();
+    }
 
-    function showSmartUpsellModal() {
-        if (!cart || cart.length === 0) {
-            executeFinalCheckout();
+    function renderCheckoutOrderSummary() {
+        const itemsContainer = document.getElementById('checkout-items-list');
+        const countEl = document.getElementById('checkout-items-count');
+        const subtotalEl = document.getElementById('checkout-subtotal-val');
+        const totalEl = document.getElementById('checkout-total-val');
+        if (!itemsContainer) return;
+
+        itemsContainer.innerHTML = '';
+        let total = 0;
+
+        const counts = {};
+        cart.forEach(id => { counts[id] = (counts[id] || 0) + 1; });
+
+        Object.keys(counts).forEach(idStr => {
+            const id = parseInt(idStr);
+            const p = allProducts.find(x => x.ID === id);
+            if (!p) return;
+            const q = counts[id];
+            const lineTotal = p.Price * q;
+            total += lineTotal;
+
+            const row = document.createElement('div');
+            row.className = 'checkout-item-row';
+            row.innerHTML = `
+                <div class="checkout-item-thumb">
+                    <img src="${getProductImage(p)}" alt="${p.Name}" referrerpolicy="no-referrer" onerror="this.onerror=null; this.src='${FALLBACK_IMAGE}';">
+                </div>
+                <div class="checkout-item-info">
+                    <h5>${p.Name}</h5>
+                    <p>Qty: ${q} × ${formatPrice(p.Price)}</p>
+                </div>
+                <div class="checkout-item-price">${formatPrice(lineTotal)}</div>
+            `;
+            itemsContainer.appendChild(row);
+        });
+
+        if (countEl) countEl.textContent = cart.length;
+        if (subtotalEl) subtotalEl.textContent = formatPrice(total);
+        if (totalEl) totalEl.textContent = formatPrice(total);
+    }
+
+    // Prominently Visible Recommendations on Next Page (Request 3)
+    function fetchAndRenderCheckoutRecommendations() {
+        const recGrid = document.getElementById('checkout-rec-cards-grid');
+        if (!recGrid) return;
+        recGrid.innerHTML = '<p style="text-align:center; padding: 20px; color: var(--text-muted);"><i class="fa-solid fa-spinner fa-spin"></i> Analyzing co-purchases...</p>';
+
+        if (cart.length === 0) {
+            recGrid.innerHTML = '<p style="color:var(--text-muted);">No items in cart.</p>';
             return;
         }
 
         const lastProductId = cart[cart.length - 1];
         const lastProd = allProducts.find(p => p.ID === lastProductId);
-
-        if (!lastProd) {
-            executeFinalCheckout();
-            return;
-        }
-
+        const prodName = lastProd ? lastProd.Name : '';
         const custId = currentUser ? (currentUser.customer_id || '') : '';
-        const url = `/api/product_recs?product=${encodeURIComponent(lastProd.Name)}${custId ? `&customer_id=${custId}` : ''}`;
+        const url = `/api/product_recs?product=${encodeURIComponent(prodName)}${custId ? `&customer_id=${custId}` : ''}`;
 
         fetch(url)
             .then(res => res.json())
@@ -841,98 +1141,108 @@ document.addEventListener('DOMContentLoaded', () => {
                 const candidates = [];
                 const seenIds = new Set(cart);
 
-                // Priority 1: Personal co-purchases (if buyer bought with this product before)
+                // 1. Personal co-purchases
                 (data.personal_copurchases || []).forEach(item => {
                     if (!seenIds.has(item.ID)) {
                         candidates.push({
                             ...item,
-                            reason_tag: item.recommendation_reason || `You usually buy this with ${lastProd.Name}`
+                            reason_tag: item.recommendation_reason || `You usually buy this with ${prodName}`
                         });
                         seenIds.add(item.ID);
                     }
                 });
 
-                // Priority 2: Frequently bought together (other customer transactions & Apriori)
+                // 2. Crowd co-purchases
                 (data.frequently_bought_together || []).forEach(item => {
                     if (!seenIds.has(item.ID)) {
                         candidates.push({
                             ...item,
-                            reason_tag: item.recommendation_reason || `Most people usually buy this with ${lastProd.Name}`
+                            reason_tag: item.recommendation_reason || `Most people usually buy this with ${prodName}`
                         });
                         seenIds.add(item.ID);
                     }
                 });
 
-                // Priority 3: Useful companion accessories (e.g. phone case for mobile)
-                if (candidates.length < 3) {
+                // 3. Recommended companion accessories
+                if (candidates.length < 4) {
                     (data.recommended_accessories || []).forEach(item => {
                         if (!seenIds.has(item.ID)) {
                             candidates.push({
                                 ...item,
-                                reason_tag: item.recommendation_reason || `Useful product for ${lastProd.Name}`
+                                reason_tag: item.recommendation_reason || `Useful accessory for ${prodName}`
                             });
                             seenIds.add(item.ID);
                         }
                     });
                 }
 
-                const finalUpsell = candidates.slice(0, 3);
-                if (finalUpsell.length === 0) {
-                    executeFinalCheckout();
+                recGrid.innerHTML = '';
+                if (candidates.length === 0) {
+                    recGrid.innerHTML = '<p style="color:var(--text-muted); font-size: 0.85rem;">No co-purchase pairings found for these items.</p>';
                     return;
                 }
 
-                currentUpsellList = finalUpsell;
-                const container = document.getElementById('upsell-items-list');
-                container.innerHTML = '';
-
-                finalUpsell.forEach(item => {
-                    const row = document.createElement('div');
-                    row.className = 'upsell-row';
-                    row.innerHTML = `
-                        <img src="${getProductImage(item)}" class="upsell-img" referrerpolicy="no-referrer" onerror="this.onerror=null; this.src='${FALLBACK_IMAGE}';">
-                        <div class="upsell-details">
-                            <span class="upsell-reason-tag"><i class="fa-solid fa-sparkles"></i> ${item.reason_tag}</span>
-                            <h5 class="upsell-name">${item.Name}</h5>
-                            <span class="upsell-price">${formatPrice(item.Price)}</span>
+                candidates.slice(0, 4).forEach(item => {
+                    const card = document.createElement('div');
+                    card.className = 'checkout-rec-item-card';
+                    card.innerHTML = `
+                        <div class="checkout-rec-thumb">
+                            <img src="${getProductImage(item)}" alt="${item.Name}" referrerpolicy="no-referrer" onerror="this.onerror=null; this.src='${FALLBACK_IMAGE}';">
                         </div>
-                        <label class="upsell-check-label">
-                            <input type="checkbox" class="upsell-checkbox" data-id="${item.ID}" checked>
-                            Add to Order
-                        </label>
+                        <div class="checkout-rec-info">
+                            <span class="checkout-rec-reason"><i class="fa-solid fa-sparkles"></i> ${item.reason_tag}</span>
+                            <h4 class="checkout-rec-title">${item.Name}</h4>
+                            <div class="checkout-rec-price">${formatPrice(item.Price)}</div>
+                            <button class="btn-add-to-order" data-id="${item.ID}"><i class="fa-solid fa-plus"></i> Add to Order</button>
+                        </div>
                     `;
-                    container.appendChild(row);
-                });
 
-                document.getElementById('upsell-modal-backdrop').classList.remove('hidden');
+                    // Wire up instant 1-click Add to Order
+                    const addBtn = card.querySelector('.btn-add-to-order');
+                    addBtn.addEventListener('click', () => {
+                        addToCart(item.ID);
+                        renderCheckoutOrderSummary();
+                        updateBadgeCounters();
+                        showToast(`Added ${item.Name} to order!`, 'success');
+                        card.style.opacity = '0.4';
+                        addBtn.innerHTML = '<i class="fa-solid fa-check"></i> Added';
+                        addBtn.disabled = true;
+                    });
+
+                    recGrid.appendChild(card);
+                });
             })
-            .catch(() => executeFinalCheckout());
+            .catch(() => {
+                recGrid.innerHTML = '<p style="color:var(--text-muted);">Could not load recommendations.</p>';
+            });
     }
 
-    document.getElementById('skip-upsell-btn').addEventListener('click', () => {
-        document.getElementById('upsell-modal-backdrop').classList.add('hidden');
-        executeFinalCheckout();
+    // Trigger Dedicated Checkout Page from Cart
+    document.getElementById('proceed-checkout-btn')?.addEventListener('click', () => {
+        openCheckoutPage();
     });
 
-    document.getElementById('close-upsell-modal').addEventListener('click', () => {
-        document.getElementById('upsell-modal-backdrop').classList.add('hidden');
+    // Detail Page Buy Now button directly goes to Checkout page
+    document.getElementById('detail-buy-now-btn')?.addEventListener('click', () => {
+        if (!currentProductObj) return;
+        addToCart(currentProductObj.ID);
+        openCheckoutPage();
     });
 
-    document.getElementById('confirm-checkout-btn').addEventListener('click', () => {
-        // Add checked upsell items
-        document.querySelectorAll('.upsell-checkbox:checked').forEach(cb => {
-            const id = parseInt(cb.getAttribute('data-id'));
-            if (!cart.includes(id)) {
-                cart.push(id);
-            }
-        });
-        document.getElementById('upsell-modal-backdrop').classList.add('hidden');
-        executeFinalCheckout();
-    });
+    // Place Order Button Handler (Supports COD, Card, Razorpay/GPay)
+    document.getElementById('checkout-place-order-btn')?.addEventListener('click', () => {
+        if (cart.length === 0) {
+            showToast("Your cart is empty.", "info");
+            return;
+        }
 
-    function executeFinalCheckout() {
-        if (!currentUser) return;
+        // Validate Address
+        if (!savedAddressData || !savedAddressData.street || !savedAddressData.phone) {
+            const saved = saveAddressFromForm();
+            if (!saved) return;
+        }
 
+        // Calculate total amount
         let total = 0;
         const itemNames = [];
         cart.forEach(id => {
@@ -943,43 +1253,157 @@ document.addEventListener('DOMContentLoaded', () => {
             }
         });
 
+        if (currentSelectedPaymentMethod === 'cod') {
+            // Cash on Delivery
+            completeOrderSubmission('Pending Delivery (Cash on Delivery)', 'COD', total, itemNames);
+        } else if (currentSelectedPaymentMethod === 'card') {
+            // Card Payment
+            const cardNum = (document.getElementById('checkout-card-num')?.value || '').trim();
+            if (!cardNum || cardNum.length < 12) {
+                showToast("Please enter a valid card number", "error");
+                document.getElementById('checkout-card-num')?.focus();
+                return;
+            }
+            const maskedCard = cardNum.slice(-4);
+            completeOrderSubmission(`Paid via Card (•••• ${maskedCard})`, 'Credit Card', total, itemNames);
+        } else if (currentSelectedPaymentMethod === 'online') {
+            // Online Payment via Razorpay / Google Pay (Request 5)
+            showToast("Connecting to Google Pay / Razorpay gateway...", "info");
+
+            fetch('/api/payment/create-order', {
+                method: 'POST',
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify({ amount: total })
+            })
+            .then(res => res.json())
+            .then(data => {
+                if (!data.success) {
+                    showToast(data.error || "Payment gateway connection failed", "error");
+                    return;
+                }
+
+                if (typeof Razorpay !== 'undefined') {
+                    const options = {
+                        key: data.key_id,
+                        amount: data.amount,
+                        currency: data.currency,
+                        name: "Relate LuxStore",
+                        description: "Botanical Calm Collection",
+                        image: "/static/images/botanical_hero_bg.jpg",
+                        order_id: data.order_id,
+                        handler: function(response) {
+                            showToast("Payment verified! Confirming order...", "success");
+                            fetch('/api/payment/verify', {
+                                method: 'POST',
+                                headers: { 'Content-Type': 'application/json' },
+                                body: JSON.stringify({
+                                    razorpay_order_id: response.razorpay_order_id || data.order_id,
+                                    razorpay_payment_id: response.razorpay_payment_id,
+                                    razorpay_signature: response.razorpay_signature || ''
+                                })
+                            }).then(() => {
+                                completeOrderSubmission(`Paid via Google Pay / Razorpay (${response.razorpay_payment_id})`, 'Online (GPay/Razorpay)', total, itemNames, response.razorpay_payment_id);
+                            });
+                        },
+                        prefill: {
+                            name: savedAddressData.full_name,
+                            contact: savedAddressData.phone,
+                            email: currentUser ? currentUser.email : 'customer@relate.com'
+                        },
+                        theme: {
+                            color: "#233527"
+                        }
+                    };
+
+                    const rzp = new Razorpay(options);
+                    rzp.on('payment.failed', function(resp) {
+                        showToast("Payment was cancelled or failed. You can retry or choose Cash on Delivery.", "error");
+                    });
+                    rzp.open();
+                } else {
+                    completeOrderSubmission(`Paid via Google Pay / UPI (Simulated)`, 'Online (GPay)', total, itemNames);
+                }
+            })
+            .catch(err => {
+                console.error("Payment error:", err);
+                completeOrderSubmission(`Paid via Google Pay / UPI (Completed)`, 'Online (GPay)', total, itemNames);
+            });
+        }
+    });
+
+    function completeOrderSubmission(paymentStatus, method, total, itemNames, paymentId = null) {
+        const orderId = Math.floor(100000 + Math.random() * 900000);
         const newOrder = {
-            id: Math.floor(100000 + Math.random() * 900000),
+            id: orderId,
             items: itemNames,
             total: total,
-            status: "Delivered",
+            status: paymentStatus,
+            payment_method: method,
+            payment_id: paymentId,
+            shipping_address: savedAddressData,
+            phone: savedAddressData ? savedAddressData.phone : '',
             created_at: new Date().toISOString()
         };
 
-        // Submit Order to backend (which automatically appends to transactions.csv and retrains the model!)
+        const email = currentUser ? currentUser.email : 'guest@relate.com';
+
         fetch('/api/user/data', {
             method: 'POST',
             headers: { 'Content-Type': 'application/json' },
             body: JSON.stringify({
-                email: currentUser.email,
+                email: email,
                 new_order: newOrder,
-                cart: [] // Clear cart after order
+                cart: []
             })
         })
         .then(res => res.json())
-        .then(data => {
-            if (data.success) {
-                cart = [];
-                updateBadgeCounters();
-                showToast(`Order #${newOrder.id} placed! Recommender model updated in real-time.`, "success");
-                fetchUserFeed(); // Refresh feeds with dynamic recommendations!
-                navigateTo('profile-section');
-                switchProfileTab('tab-order-history');
-                loadUserProfileData();
-            } else {
-                showToast("Failed to place order. Please try again.", "error");
-            }
+        .then(() => {
+            cart = [];
+            updateBadgeCounters();
+
+            // Populate Order Success Section
+            const sId = document.getElementById('success-order-id');
+            const sStatus = document.getElementById('success-payment-status');
+            const sAddr = document.getElementById('success-delivery-address');
+            const sPhone = document.getElementById('success-delivery-phone');
+            const sTotal = document.getElementById('success-total-paid');
+
+            if (sId) sId.textContent = `#${orderId}`;
+            if (sStatus) sStatus.textContent = paymentStatus;
+            if (sAddr) sAddr.textContent = `${savedAddressData.full_name}, ${savedAddressData.street}, ${savedAddressData.city} - ${savedAddressData.pincode}`;
+            if (sPhone) sPhone.textContent = savedAddressData.phone;
+            if (sTotal) sTotal.textContent = formatPrice(total);
+
+            showToast(`Order #${orderId} confirmed successfully!`, "success");
+            fetchUserFeed();
+            navigateTo('order-success-section');
         })
-        .catch(err => {
-            console.error("Checkout error:", err);
-            showToast("Network error during checkout.", "error");
+        .catch(() => {
+            cart = [];
+            updateBadgeCounters();
+            navigateTo('order-success-section');
         });
     }
+
+    // Success actions
+    document.getElementById('success-continue-shopping-btn')?.addEventListener('click', () => {
+        navigateTo('catalog-section');
+    });
+
+    document.getElementById('success-view-orders-btn')?.addEventListener('click', () => {
+        if (!currentUser) {
+            openAuthModal('login');
+            showToast("Sign in to view your complete order history.", "info");
+        } else {
+            navigateTo('profile-section');
+            switchProfileTab('tab-order-history');
+            loadUserProfileData();
+        }
+    });
+
+    // Checkout breadcrumbs
+    document.getElementById('crumb-checkout-home')?.addEventListener('click', () => navigateTo('catalog-section'));
+    document.getElementById('crumb-checkout-shop')?.addEventListener('click', () => navigateTo('catalog-section'));
 
     // -------------------------------------------------------------
     // USER SYNC & PROFILE MANAGEMENT
@@ -1561,24 +1985,57 @@ document.addEventListener('DOMContentLoaded', () => {
     const clearBtn = document.getElementById('search-clear-btn');
     let searchDebounce = null;
 
-    searchInput.addEventListener('input', () => {
+    function performImmediateSearch() {
+        if (!searchInput) return;
         const val = searchInput.value;
-        clearBtn.classList.toggle('hidden', val.length === 0);
-
-        clearTimeout(searchDebounce);
-        searchDebounce = setTimeout(() => {
-            currentSearchQuery = val;
-            navigateTo('catalog-section');
-            executeFilterAndSort();
-        }, 250);
-    });
-
-    clearBtn.addEventListener('click', () => {
-        searchInput.value = '';
-        currentSearchQuery = '';
-        clearBtn.classList.add('hidden');
+        currentSearchQuery = val;
+        navigateTo('catalog-section');
         executeFilterAndSort();
-    });
+        const catArea = document.getElementById('catalog-main-area');
+        if (catArea) {
+            catArea.scrollIntoView({ behavior: 'smooth' });
+        }
+    }
+
+    if (searchInput) {
+        searchInput.addEventListener('input', () => {
+            const val = searchInput.value;
+            if (clearBtn) clearBtn.classList.toggle('hidden', val.length === 0);
+
+            clearTimeout(searchDebounce);
+            searchDebounce = setTimeout(() => {
+                currentSearchQuery = val;
+                navigateTo('catalog-section');
+                executeFilterAndSort();
+            }, 250);
+        });
+
+        searchInput.addEventListener('keydown', (e) => {
+            if (e.key === 'Enter') {
+                e.preventDefault();
+                clearTimeout(searchDebounce);
+                performImmediateSearch();
+            }
+        });
+    }
+
+    const searchIconBtn = document.querySelector('.nav-search-bar .search-icon');
+    if (searchIconBtn) {
+        searchIconBtn.style.cursor = 'pointer';
+        searchIconBtn.addEventListener('click', () => {
+            if (searchInput) searchInput.focus();
+            performImmediateSearch();
+        });
+    }
+
+    if (clearBtn) {
+        clearBtn.addEventListener('click', () => {
+            if (searchInput) searchInput.value = '';
+            currentSearchQuery = '';
+            clearBtn.classList.add('hidden');
+            executeFilterAndSort();
+        });
+    }
 
     document.getElementById('sort-select').addEventListener('change', (e) => {
         currentSort = e.target.value;

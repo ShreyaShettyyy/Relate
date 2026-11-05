@@ -67,7 +67,16 @@
                 "created_at": "2026-11-04 15:07:18"
             }
         ],
-        "customer_id": 1101
+        "customer_id": 1101,
+        "phone": "9876543210",
+        "address": {
+            "full_name": "Shreya Shetty",
+            "phone": "9876543210",
+            "street": "Lotus Court",
+            "city": "Bengaluru",
+            "state": "Karnataka",
+            "pincode": "560001"
+        }
     },
     "k@gmain.com": {
         "name": "karan",
@@ -227,7 +236,8 @@
         "password": "scrypt:32768:8:1$phFY3lwaq3et0WrT$bbd6f1eabea25442d1aaead6679cebfed1bbae7efe22812083d2044168d2710ac07ca334c47781d02a41bcae8e547b43ac6ba16e42c758ea77f3364b9a21de3f",
         "customer_id": 1106,
         "cart": [
-            11
+            47,
+            47
         ],
         "wishlist": [
             11
@@ -261,6 +271,27 @@
                 "total": 168298,
                 "status": "Delivered",
                 "created_at": "2026-11-05 21:23:45"
+            },
+            {
+                "id": 236508,
+                "items": [
+                    "Annibale Colombo Bed",
+                    "Calvin Klein CK One"
+                ],
+                "total": 165748,
+                "status": "Delivered",
+                "created_at": "2026-11-05 22:16:00"
+            },
+            {
+                "id": 721619,
+                "items": [
+                    "Bedside Table African Cherry",
+                    "Plant Pot",
+                    "Table Lamp"
+                ],
+                "total": 31022,
+                "status": "Delivered",
+                "created_at": "2026-11-05 22:17:50"
             }
         ],
         "created_at": "2026-11-05 20:31:49"

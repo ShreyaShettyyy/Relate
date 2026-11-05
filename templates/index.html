@@ -349,7 +349,239 @@
             </div>
         </section>
 
-        <!-- 3. ABOUT SECTION -->
+        <!-- 3. CHECKOUT & CO-PURCHASE RECOMMENDATIONS PAGE -->
+        <section id="checkout-section" class="spa-section hidden">
+            <!-- Breadcrumbs -->
+            <div class="breadcrumb-bar">
+                <span class="crumb-link" id="crumb-checkout-home"><i class="fa-solid fa-house"></i> Home</span>
+                <span class="crumb-sep">/</span>
+                <span class="crumb-link" id="crumb-checkout-shop">Living</span>
+                <span class="crumb-sep">/</span>
+                <span class="crumb-current">Checkout & Order Review</span>
+            </div>
+
+            <div class="checkout-page-container">
+                <!-- Left Column: Delivery Address, Payment Methods, Order Review -->
+                <div class="checkout-main-column">
+                    <!-- 1. Delivery Address Card -->
+                    <div class="checkout-card glass-panel">
+                        <div class="checkout-card-header">
+                            <h2 class="checkout-card-title"><i class="fa-solid fa-location-dot"></i> Delivery Address & Contact</h2>
+                            <button class="btn-edit-address" id="toggle-edit-address-btn" type="button">
+                                <i class="fa-solid fa-pen-to-square"></i> <span id="edit-address-btn-text">Edit Address</span>
+                            </button>
+                        </div>
+
+                        <!-- Saved Address Display -->
+                        <div class="saved-address-preview" id="saved-address-preview">
+                            <div class="address-user-line">
+                                <strong id="display-address-name">Guest User</strong>
+                                <span class="address-phone-pill" id="display-address-phone"><i class="fa-solid fa-phone"></i> Add phone number</span>
+                            </div>
+                            <p class="address-full-text" id="display-address-full">No delivery address saved yet. Please click "Edit Address" to add your details.</p>
+                        </div>
+
+                        <!-- Address Edit / Input Form -->
+                        <div class="address-form-wrapper hidden" id="address-form-wrapper">
+                            <div class="form-row-2">
+                                <div class="form-group">
+                                    <label>Full Name *</label>
+                                    <input type="text" id="checkout-name" class="luxury-input" placeholder="e.g. Shreya Shetty">
+                                </div>
+                                <div class="form-group">
+                                    <label>Phone Number *</label>
+                                    <input type="tel" id="checkout-phone" class="luxury-input" placeholder="e.g. 9876543210">
+                                </div>
+                            </div>
+                            <div class="form-group">
+                                <label>Street Address / Flat / Landmark *</label>
+                                <input type="text" id="checkout-street" class="luxury-input" placeholder="e.g. Lotus Sanctuary, 4th Avenue">
+                            </div>
+                            <div class="form-row-3">
+                                <div class="form-group">
+                                    <label>City *</label>
+                                    <input type="text" id="checkout-city" class="luxury-input" placeholder="e.g. Bengaluru">
+                                </div>
+                                <div class="form-group">
+                                    <label>State *</label>
+                                    <input type="text" id="checkout-state" class="luxury-input" placeholder="e.g. Karnataka">
+                                </div>
+                                <div class="form-group">
+                                    <label>PIN Code *</label>
+                                    <input type="text" id="checkout-pincode" class="luxury-input" placeholder="e.g. 560001" maxlength="6">
+                                </div>
+                            </div>
+                            <div class="address-form-actions">
+                                <button type="button" class="btn-luxury-secondary" id="save-address-btn">
+                                    <i class="fa-solid fa-check"></i> Save Address & Contact
+                                </button>
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- 2. Payment Options Card -->
+                    <div class="checkout-card glass-panel" style="margin-top: 24px;">
+                        <h2 class="checkout-card-title"><i class="fa-solid fa-credit-card"></i> Payment Method</h2>
+                        
+                        <div class="payment-options-grid">
+                            <!-- Option 1: Cash on Delivery -->
+                            <label class="payment-option-card active" id="pay-card-cod">
+                                <input type="radio" name="checkout_pay_method" value="cod" checked>
+                                <div class="payment-icon-box"><i class="fa-solid fa-hand-holding-dollar"></i></div>
+                                <div class="payment-text-group">
+                                    <h4>Cash on Delivery (COD)</h4>
+                                    <p>Pay with cash or UPI QR when your order arrives at your door.</p>
+                                </div>
+                            </label>
+
+                            <!-- Option 2: Online Payment (GPay, PhonePe, Paytm, UPI via Razorpay) -->
+                            <label class="payment-option-card" id="pay-card-online">
+                                <input type="radio" name="checkout_pay_method" value="online">
+                                <div class="payment-icon-box" style="color: #1e7040;"><i class="fa-brands fa-google-pay"></i></div>
+                                <div class="payment-text-group">
+                                    <h4>Online Payment (GPay, PhonePe, Paytm, UPI & Netbanking)</h4>
+                                    <p>Instant redirection and live payment via Razorpay / Google Pay.</p>
+                                </div>
+                                <span class="payment-recommended-pill">Instant & Secure</span>
+                            </label>
+
+                            <!-- Option 3: Credit / Debit Card -->
+                            <label class="payment-option-card" id="pay-card-card">
+                                <input type="radio" name="checkout_pay_method" value="card">
+                                <div class="payment-icon-box" style="color: #2e593c;"><i class="fa-regular fa-credit-card"></i></div>
+                                <div class="payment-text-group">
+                                    <h4>Credit / Debit Card</h4>
+                                    <p>Visa, MasterCard, RuPay, and American Express.</p>
+                                </div>
+                            </label>
+                        </div>
+
+                        <!-- Credit Card Details (Revealed only when card is selected) -->
+                        <div class="card-details-box hidden" id="card-details-box">
+                            <div class="form-group">
+                                <label>Card Number</label>
+                                <input type="text" id="checkout-card-num" class="luxury-input" placeholder="4532 •••• •••• 8892" maxlength="19">
+                            </div>
+                            <div class="form-row-3">
+                                <div class="form-group">
+                                    <label>Cardholder Name</label>
+                                    <input type="text" id="checkout-card-name" class="luxury-input" placeholder="e.g. Shreya Shetty">
+                                </div>
+                                <div class="form-group">
+                                    <label>Expiry (MM/YY)</label>
+                                    <input type="text" id="checkout-card-exp" class="luxury-input" placeholder="12/28" maxlength="5">
+                                </div>
+                                <div class="form-group">
+                                    <label>CVV</label>
+                                    <input type="password" id="checkout-card-cvv" class="luxury-input" placeholder="•••" maxlength="4">
+                                </div>
+                            </div>
+                        </div>
+
+                        <!-- Online Payment Info Banner (Revealed when online is selected) -->
+                        <div class="online-apps-banner hidden" id="online-apps-banner">
+                            <div class="supported-upi-icons">
+                                <span class="upi-app-badge"><i class="fa-brands fa-google"></i> Google Pay</span>
+                                <span class="upi-app-badge"><i class="fa-solid fa-mobile-screen"></i> PhonePe</span>
+                                <span class="upi-app-badge"><i class="fa-solid fa-wallet"></i> Paytm</span>
+                                <span class="upi-app-badge"><i class="fa-solid fa-qrcode"></i> Any UPI QR</span>
+                            </div>
+                            <p class="online-apps-hint">
+                                <i class="fa-solid fa-shield-halved"></i> Powered by Razorpay Standard Live/Test Gateway. Directly opens Google Pay / UPI intent or scan QR code to pay.
+                            </p>
+                        </div>
+                    </div>
+
+                    <!-- 3. Review Order Items & Final Confirmation Button -->
+                    <div class="checkout-card glass-panel" style="margin-top: 24px;">
+                        <h3 class="checkout-card-title"><i class="fa-solid fa-bag-shopping"></i> Review Order Items (<span id="checkout-items-count">0</span>)</h3>
+                        <div class="checkout-items-list" id="checkout-items-list">
+                            <!-- Populated dynamically by JS -->
+                        </div>
+
+                        <div class="checkout-pricing-summary">
+                            <div class="summary-line">
+                                <span>Subtotal</span>
+                                <span id="checkout-subtotal-val">₹0</span>
+                            </div>
+                            <div class="summary-line">
+                                <span>Botanical Shipping</span>
+                                <span style="color: #276738; font-weight: 600;">FREE</span>
+                            </div>
+                            <div class="summary-line total-line">
+                                <span>Total Amount</span>
+                                <span id="checkout-total-val">₹0</span>
+                            </div>
+                        </div>
+
+                        <button class="btn-luxury-primary checkout-confirm-btn" id="checkout-place-order-btn">
+                            <i class="fa-solid fa-lock"></i> <span id="place-order-btn-text">Confirm Order (Cash on Delivery)</span>
+                        </button>
+                    </div>
+                </div>
+
+                <!-- Right Column: Full-Sized Co-Purchase Recommendations (Prominently Visible Next Page) -->
+                <div class="checkout-recommendations-column">
+                    <div class="checkout-rec-panel glass-panel">
+                        <div class="rec-panel-header">
+                            <div class="section-tag"><i class="fa-solid fa-sparkles"></i> Better Together</div>
+                            <h3 class="rec-panel-title">Usually Purchased With Your Items</h3>
+                            <p class="rec-panel-desc">Curated co-purchases analyzed from market basket algorithm.</p>
+                        </div>
+
+                        <div class="checkout-rec-cards-grid" id="checkout-rec-cards-grid">
+                            <!-- Populated by JS with full-sized botanical cards & 1-click + Add to Order button -->
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </section>
+
+        <!-- 4. ORDER SUCCESS & CONFIRMATION SECTION -->
+        <section id="order-success-section" class="spa-section hidden">
+            <div class="order-success-container glass-panel">
+                <div class="success-icon-bubble">
+                    <i class="fa-solid fa-check"></i>
+                </div>
+                <div class="section-tag" style="justify-content: center;"><i class="fa-solid fa-sparkles"></i> Order Confirmed</div>
+                <h1 class="order-success-title">Thank You For Your Order</h1>
+                <p class="order-success-subtitle">Your botanical calm collection is being carefully packaged and prepared for shipment.</p>
+
+                <div class="success-order-details-card">
+                    <div class="detail-row">
+                        <span class="detail-lbl">Order Number</span>
+                        <strong class="detail-val" id="success-order-id">#849201</strong>
+                    </div>
+                    <div class="detail-row">
+                        <span class="detail-lbl">Payment Status</span>
+                        <strong class="detail-val" id="success-payment-status">Paid via Google Pay / Razorpay</strong>
+                    </div>
+                    <div class="detail-row">
+                        <span class="detail-lbl">Delivery To</span>
+                        <strong class="detail-val" id="success-delivery-address">Shreya Shetty, Bengaluru</strong>
+                    </div>
+                    <div class="detail-row">
+                        <span class="detail-lbl">Contact Phone</span>
+                        <strong class="detail-val" id="success-delivery-phone">9876543210</strong>
+                    </div>
+                    <div class="detail-row total-row">
+                        <span class="detail-lbl">Total Amount</span>
+                        <strong class="detail-val" id="success-total-paid">₹4,250</strong>
+                    </div>
+                </div>
+
+                <div class="success-actions-row">
+                    <button class="btn-luxury-primary" id="success-continue-shopping-btn">
+                        <i class="fa-solid fa-bag-shopping"></i> Continue Shopping
+                    </button>
+                    <button class="btn-luxury-secondary" id="success-view-orders-btn">
+                        <i class="fa-solid fa-clock-rotate-left"></i> View Order History
+                    </button>
+                </div>
+            </div>
+        </section>
+
+        <!-- 5. ABOUT SECTION -->
         <section id="about-section" class="spa-section hidden">
             <div class="about-hero-box glass-panel">
                 <h1 class="about-title">About <span class="gradient-text">Relate</span></h1>
@@ -833,7 +1065,10 @@
     <script src="https://cdnjs.cloudflare.com/ajax/libs/gsap/3.12.5/gsap.min.js"></script>
     <script src="https://cdnjs.cloudflare.com/ajax/libs/gsap/3.12.5/ScrollTrigger.min.js"></script>
 
+    <!-- Razorpay Standard Checkout SDK -->
+    <script src="https://checkout.razorpay.com/v1/checkout.js"></script>
+
     <!-- Application Script -->
-    <script src="{{ url_for('static', filename='js/script.js') }}?v=20"></script>
+    <script src="{{ url_for('static', filename='js/script.js') }}?v=21"></script>
 </body>
 </html>
