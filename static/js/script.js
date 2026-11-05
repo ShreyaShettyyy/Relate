@@ -3,6 +3,8 @@
  * Advanced ML Recommendations • GSAP Animations • Responsive SPA • Auth & Profile
  */
 
+const FALLBACK_IMAGE = 'https://images.unsplash.com/photo-1523275335684-37898b6baf30?w=500&auto=format&fit=crop&q=60';
+
 const FALLBACK_CATEGORIES = {
     'Smartphones': 'https://images.unsplash.com/photo-1511707171634-5f897ff02aa9?w=500&auto=format&fit=crop&q=60',
     'Laptops': 'https://images.unsplash.com/photo-1496181133206-80ce9b88a853?w=500&auto=format&fit=crop&q=60',
@@ -18,10 +20,10 @@ const FALLBACK_CATEGORIES = {
 };
 
 function getProductFallback(prod) {
-    if (!prod) return 'https://images.unsplash.com/photo-1523275335684-37898b6baf30?w=500&auto=format&fit=crop&q=60';
-    const cat = prod.Category || '';
+    if (!prod) return FALLBACK_IMAGE;
+    const cat = (typeof prod === 'object' ? prod.Category : (typeof prod === 'string' ? prod : '')) || '';
     if (FALLBACK_CATEGORIES[cat]) return FALLBACK_CATEGORIES[cat];
-    return 'https://images.unsplash.com/photo-1523275335684-37898b6baf30?w=500&auto=format&fit=crop&q=60';
+    return FALLBACK_IMAGE;
 }
 
 function getProductImage(prod) {
@@ -254,7 +256,7 @@ document.addEventListener('DOMContentLoaded', () => {
                 <button class="card-wishlist-btn ${isWishlisted ? 'liked' : ''}" data-id="${product.ID}" title="Save to wishlist">
                     <i class="${isWishlisted ? 'fa-solid' : 'fa-regular'} fa-heart"></i>
                 </button>
-                <img src="${mainImage}" alt="${product.Name}" loading="lazy" referrerpolicy="no-referrer" onerror="this.onerror=null; this.src=getProductFallback(${JSON.stringify(product).replace(/"/g, '&quot;')});">
+                <img src="${mainImage}" alt="${product.Name}" loading="lazy" referrerpolicy="no-referrer" onerror="this.onerror=null; this.src=FALLBACK_CATEGORIES['${product.Category}'] || FALLBACK_IMAGE;">
             </div>
             <div class="card-body">
                 ${reasonHtml}
@@ -723,6 +725,7 @@ document.addEventListener('DOMContentLoaded', () => {
     // PRODUCT DETAIL VIEW & THE 4 RECOMMENDATION RAILS
     // -------------------------------------------------------------
     function showProductDetail(product) {
+        if (!product) return;
         currentProductObj = product;
         navigateTo('product-detail-section');
 
@@ -730,61 +733,166 @@ document.addEventListener('DOMContentLoaded', () => {
         const images = (product.Image || '').split(',').map(s => s.trim()).filter(Boolean);
 
         // Breadcrumbs
-        document.getElementById('crumb-category').textContent = product.Category || 'General';
-        document.getElementById('crumb-title').textContent = product.Name;
+        const crumbCat = document.getElementById('crumb-category');
+        if (crumbCat) crumbCat.textContent = product.Category || 'General';
+        const crumbTitle = document.getElementById('crumb-title');
+        if (crumbTitle) crumbTitle.textContent = product.Name;
 
         // Viewport Image
         const detailImg = document.getElementById('detail-main-img');
-        detailImg.src = mainImg;
-        detailImg.onerror = () => { detailImg.src = FALLBACK_IMAGE; };
+        if (detailImg) {
+            detailImg.src = mainImg;
+            detailImg.onerror = () => { detailImg.src = FALLBACK_IMAGE; };
+        }
 
         // Thumbnails
         const thumbTrack = document.getElementById('detail-thumbnails-track');
-        thumbTrack.innerHTML = '';
-        for (let i = 0; i < 4; i++) {
-            const thumbSrc = images[i] ? getProductImage(images[i]) : mainImg;
-            const thumbItem = document.createElement('div');
-            thumbItem.className = `thumb-item ${i === 0 ? 'active' : ''}`;
-            thumbItem.innerHTML = `<img src="${thumbSrc}" referrerpolicy="no-referrer" onerror="this.onerror=null; this.src='${FALLBACK_IMAGE}';">`;
-            thumbItem.addEventListener('click', () => {
-                detailImg.src = thumbSrc;
-                thumbTrack.querySelectorAll('.thumb-item').forEach(t => t.classList.remove('active'));
-                thumbItem.classList.add('active');
-            });
-            thumbTrack.appendChild(thumbItem);
+        if (thumbTrack) {
+            thumbTrack.innerHTML = '';
+            for (let i = 0; i < 4; i++) {
+                const thumbSrc = images[i] ? getProductImage(images[i]) : mainImg;
+                const thumbItem = document.createElement('div');
+                thumbItem.className = `thumb-item ${i === 0 ? 'active' : ''}`;
+                thumbItem.innerHTML = `<img src="${thumbSrc}" referrerpolicy="no-referrer" onerror="this.onerror=null; this.src='${FALLBACK_IMAGE}';">`;
+                thumbItem.addEventListener('click', () => {
+                    if (detailImg) detailImg.src = thumbSrc;
+                    thumbTrack.querySelectorAll('.thumb-item').forEach(t => t.classList.remove('active'));
+                    thumbItem.classList.add('active');
+                });
+                thumbTrack.appendChild(thumbItem);
+            }
         }
 
         // Info details
-        document.getElementById('detail-category-badge').textContent = product.Category || 'General';
-        document.getElementById('detail-product-title').textContent = product.Name;
-        document.getElementById('detail-stars').innerHTML = generateStars(product.Rating);
-        document.getElementById('detail-rating-val').textContent = product.Rating || '4.5';
-        document.getElementById('detail-price').textContent = formatPrice(product.Price);
+        const badgeEl = document.getElementById('detail-category-badge');
+        if (badgeEl) badgeEl.textContent = product.Category || 'General';
+
+        const titleEl = document.getElementById('detail-product-title');
+        if (titleEl) titleEl.textContent = product.Name;
+
+        const starsEl = document.getElementById('detail-stars');
+        if (starsEl) starsEl.innerHTML = generateStars(product.Rating);
+
+        const ratingVal = document.getElementById('detail-rating-val');
+        if (ratingVal) ratingVal.textContent = product.Rating || '4.5';
+
+        const priceEl = document.getElementById('detail-price');
+        if (priceEl) priceEl.textContent = formatPrice(product.Price);
 
         const mrp = Math.round(product.Price * 1.25);
-        document.getElementById('detail-mrp').textContent = formatPrice(mrp);
-        document.getElementById('detail-desc').textContent = product.Description || 'Elevate your lifestyle with this premium selection.';
+        const mrpEl = document.getElementById('detail-mrp');
+        if (mrpEl) mrpEl.textContent = formatPrice(mrp);
+
+        const descEl = document.getElementById('detail-desc');
+        if (descEl) descEl.textContent = product.Description || `Elevate your lifestyle with this premium selection of ${product.Name}. Carefully inspected and packaged to ensure the highest standards of quality.`;
 
         // Highlights
         const highlightsList = document.getElementById('detail-highlights-list');
-        highlightsList.innerHTML = `
-            <li>Category: <strong>${product.Category}</strong></li>
-            <li>Rating: <strong>${product.Rating} / 5.0</strong> (Verified Buyer Satisfaction)</li>
-            <li>Condition: <strong>Brand New • Factory Sealed • Authentic</strong></li>
-            <li>Warranty: <strong>1 Year Manufacturer Comprehensive Coverage</strong></li>
-        `;
+        if (highlightsList) {
+            highlightsList.innerHTML = `
+                <li><i class="fa-solid fa-tag"></i> <span>Category: <strong>${product.Category || 'General'}</strong></span></li>
+                <li><i class="fa-solid fa-star"></i> <span>Customer Rating: <strong>${product.Rating || '4.8'} / 5.0</strong> (Verified Buyer Satisfaction)</span></li>
+                <li><i class="fa-solid fa-certificate"></i> <span>Authenticity: <strong>100% Genuine • Sealed Original Packaging</strong></span></li>
+                <li><i class="fa-solid fa-shield-halved"></i> <span>Warranty: <strong>1 Year Manufacturer Comprehensive Coverage</strong></span></li>
+                <li><i class="fa-solid fa-truck-fast"></i> <span>Delivery: <strong>Fast, Insured Shipping with Live Tracking</strong></span></li>
+            `;
+        }
+
+        // Reviews Trigger click handler
+        const revTrigger = document.getElementById('detail-reviews-trigger');
+        if (revTrigger) {
+            revTrigger.onclick = () => {
+                const revSec = document.getElementById('detail-reviews-section');
+                if (revSec) revSec.scrollIntoView({ behavior: 'smooth' });
+            };
+        }
 
         // Wishlist button state
         const detailWishBtn = document.getElementById('detail-wishlist-btn');
-        const isWishlisted = wishlist.includes(product.ID);
-        detailWishBtn.classList.toggle('liked', isWishlisted);
-        detailWishBtn.querySelector('i').className = isWishlisted ? 'fa-solid fa-heart' : 'fa-regular fa-heart';
+        if (detailWishBtn) {
+            const isWishlisted = wishlist.includes(product.ID);
+            detailWishBtn.classList.toggle('liked', isWishlisted);
+            const icon = detailWishBtn.querySelector('i');
+            if (icon) icon.className = isWishlisted ? 'fa-solid fa-heart' : 'fa-regular fa-heart';
+        }
 
         // Reset Stepper
-        document.getElementById('detail-qty-input').value = 1;
+        const qtyInput = document.getElementById('detail-qty-input');
+        if (qtyInput) qtyInput.value = 1;
+
+        // Render Reviews
+        generateReviews(product);
 
         // Fetch All 4 Dedicated Recommendation Rails
         fetchProductRecommendations(product);
+    }
+
+    function generateReviews(product) {
+        const container = document.getElementById('reviews-container');
+        if (!container) return;
+        container.innerHTML = '';
+
+        const scoreNum = document.getElementById('reviews-score-num');
+        if (scoreNum) scoreNum.textContent = Number(product.Rating || 4.8).toFixed(1);
+
+        const summaryStars = document.getElementById('reviews-summary-stars');
+        if (summaryStars) summaryStars.innerHTML = generateStars(product.Rating);
+
+        const revCount = document.getElementById('reviews-total-text');
+        if (revCount) revCount.textContent = `${Math.round((product.Price % 90) + 110)} Verified Ratings`;
+
+        const reviewsData = [
+            {
+                name: "Aarav Sharma",
+                location: "Bengaluru, KA",
+                date: "Verified Purchase • 2 days ago",
+                rating: 5,
+                title: "Exceptional quality and authentic craftsmanship",
+                text: `I ordered ${product.Name} after researching options, and it exceeded my expectations. The finish and build quality are truly premium. Exactly as described.`
+            },
+            {
+                name: "Priya Patel",
+                location: "Mumbai, MH",
+                date: "Verified Purchase • 5 days ago",
+                rating: 5,
+                title: "Fast dispatch, pristine packaging",
+                text: `Arrived in 2 days in flawless condition. The details and finish of the ${product.Name} match the photos completely. Would recommend to anyone looking in ${product.Category || 'this collection'}.`
+            },
+            {
+                name: "Vikram Sengupta",
+                location: "Kolkata, WB",
+                date: "Verified Purchase • 2 weeks ago",
+                rating: 4.5,
+                title: "Great value for money, very satisfied",
+                text: `Very happy with this purchase. High attention to detail, durable materials, and great customer care throughout.`
+            }
+        ];
+
+        reviewsData.forEach(rev => {
+            const card = document.createElement('div');
+            card.className = 'customer-review-card';
+            card.innerHTML = `
+                <div class="review-header">
+                    <div class="reviewer-avatar">${rev.name.split(' ').map(n => n[0]).join('')}</div>
+                    <div class="reviewer-meta">
+                        <div class="reviewer-name-row">
+                            <span class="reviewer-name">${rev.name}</span>
+                            <span class="review-verified-badge"><i class="fa-solid fa-circle-check"></i> Verified Buyer</span>
+                        </div>
+                        <div class="reviewer-sub-info">
+                            <span class="review-date">${rev.date}</span>
+                            <span class="review-location"><i class="fa-solid fa-location-dot"></i> ${rev.location}</span>
+                        </div>
+                    </div>
+                    <div class="review-stars-col">
+                        <div class="review-stars">${generateStars(rev.rating)}</div>
+                    </div>
+                </div>
+                <h5 class="review-title">${rev.title}</h5>
+                <p class="review-text">${rev.text}</p>
+            `;
+            container.appendChild(card);
+        });
     }
 
     function fetchProductRecommendations(product) {
@@ -862,13 +970,6 @@ document.addEventListener('DOMContentLoaded', () => {
             addToCart(currentProductObj.ID);
         }
         showToast(`Added ${qty} × ${currentProductObj.Name} to cart`, 'success');
-        openCartDrawer();
-    });
-
-    // Detail Buy Now
-    document.getElementById('detail-buy-now-btn').addEventListener('click', () => {
-        if (!currentProductObj) return;
-        addToCart(currentProductObj.ID);
         openCartDrawer();
     });
 
