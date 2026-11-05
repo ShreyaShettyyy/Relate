@@ -1,0 +1,25 @@
+{
+  "name": "ml-project",
+  "version": "1.0.0",
+  "description": "**Relate** is a machine learning-powered e-commerce recommendation system that discovers product relationships and delivers personalized product recommendations based on customer purchase patterns.",
+  "main": "index.js",
+  "scripts": {
+    "test": "echo \"Error: no test specified\" && exit 1"
+  },
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/Shreyas142004/ML-Project.git"
+  },
+  "keywords": [],
+  "author": "",
+  "license": "ISC",
+  "type": "commonjs",
+  "bugs": {
+    "url": "https://github.com/Shreyas142004/ML-Project/issues"
+  },
+  "homepage": "https://github.com/Shreyas142004/ML-Project#readme",
+  "dependencies": {
+    "dotenv": "^18.0.9",
+    "nodemailer": "^10.3.1"
+  }
+}

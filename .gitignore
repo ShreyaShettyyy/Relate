@@ -1,9 +1,32 @@
+# Python
 __pycache__/
 *.py[cod]
 *$py.class
+*.so
+.Python
+env/
 venv/
 .venv/
-env/
+ENV/
+
+# Development / IDE
 .idea/
 .vscode/
+*.swp
+*.swo
+
+# Environment & Logs
+.env
+.env.local
 *.log
+logs/otp_dev_log.json
+otp_dev_log.json
+scratch/
+
+# Node.js
+node_modules/
+npm-debug.log*
+
+# Large Raw Datasets (Instacart 700MB+)
+data/raw/instacart/*.csv
+!data/raw/instacart/.gitkeep

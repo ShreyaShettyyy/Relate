@@ -1,0 +1,45 @@
+{
+    "timestamp": "2026-11-04 18:17:07",
+    "dataset": "Instacart Market Basket Analysis",
+    "raw_data_dir": "D:\\Projects\\ML-Project\\data\\raw\\instacart",
+    "processed_data_dir": "D:\\Projects\\ML-Project\\data\\processed",
+    "statistics": {
+        "total_combined_records": 1884617,
+        "total_unique_orders": 180835,
+        "duplicates_removed": 0,
+        "top_products_evaluated": 350,
+        "multi_item_baskets_count": 121262
+    },
+    "top_5_products": [
+        {
+            "product_id": 24852,
+            "product_name": "Banana",
+            "order_count": 26091,
+            "sample_support": 0.14428
+        },
+        {
+            "product_id": 13176,
+            "product_name": "Bag of Organic Bananas",
+            "order_count": 21400,
+            "sample_support": 0.11834
+        },
+        {
+            "product_id": 21137,
+            "product_name": "Organic Strawberries",
+            "order_count": 14917,
+            "sample_support": 0.08249
+        },
+        {
+            "product_id": 21903,
+            "product_name": "Organic Baby Spinach",
+            "order_count": 13581,
+            "sample_support": 0.0751
+        },
+        {
+            "product_id": 47209,
+            "product_name": "Organic Hass Avocado",
+            "order_count": 10610,
+            "sample_support": 0.05867
+        }
+    ]
+}
