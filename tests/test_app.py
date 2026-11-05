@@ -71,6 +71,17 @@ class TestRelateApp(unittest.TestCase):
         res = self.client.post('/api/auth/login', json={'email': 'fake_nonexistent@test.com', 'password': 'wrong'})
         self.assertEqual(res.status_code, 401)
 
+    def test_08_cross_user_copurchase_and_useful_accessories(self):
+        """Test cross-user co-purchase logic and useful accessories without random recommendations."""
+        res = self.client.get('/api/product_recs?product=iPhone 13 Pro&customer_id=1102')
+        self.assertEqual(res.status_code, 200)
+        data = res.get_json()
+        self.assertIn('frequently_bought_together', data)
+        self.assertIn('recommended_accessories', data)
+        # Verify useful accessories exist for mobile devices (e.g. cases/chargers)
+        acc_names = [x['Name'] for x in data['recommended_accessories']]
+        self.assertTrue(any('Case' in n or 'Charger' in n or 'Screen' in n or 'Stand' in n for n in acc_names))
+
 
 if __name__ == '__main__':
     unittest.main()

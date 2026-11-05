@@ -81,27 +81,31 @@ class RecommenderSystem:
         cat_lower = str(category).lower()
         
         # 1. Tech Devices & Accessories
-        if any(k in name_lower for k in ['iphone', 'galaxy', 'oppo', 'vivo', 'realme']) and not any(k in name_lower for k in ['case', 'charger', 'stand', 'protector', 'cable', 'power bank']):
+        if any(k in name_lower for k in ['iphone', 'galaxy s', 'oppo', 'vivo', 'realme']) and not any(k in name_lower for k in ['case', 'charger', 'stand', 'protector', 'cable', 'power bank']):
             return 'smartphone_device'
-        if any(k in name_lower for k in ['case', 'screen protector', 'wall charger', 'fast charging cable', 'power bank', 'phone stand', 'airpod', 'earphone']) and ('phone' in name_lower or 'iphone' in name_lower or 'apple' in name_lower or 'charger' in name_lower or 'ear' in name_lower):
+        if any(k in name_lower for k in ['ipad', 'galaxy tab', 'tablet']):
+            return 'tablet_device'
+        if any(k in name_lower for k in ['case', 'screen protector', 'wall charger', 'fast charging cable', 'power bank', 'phone stand', 'airpod', 'earphone']) or ('charger' in name_lower and 'laptop' not in name_lower):
             return 'smartphone_accessory'
             
         if any(k in name_lower for k in ['macbook', 'laptop', 'zenbook', 'yoga', 'xps', 'matebook']) and not any(k in name_lower for k in ['sleeve', 'stand', 'hub', 'mouse', 'keyboard', 'cooling pad']):
             return 'laptop_device'
-        if any(k in name_lower for k in ['laptop sleeve', 'laptop stand', 'multiport hub', 'wireless mouse', 'cooling pad', 'mechanical keyboard', 'foldsack no. 1 backpack', 'internal ssd']):
+        if any(k in name_lower for k in ['laptop sleeve', 'laptop stand', 'multiport hub', 'wireless mouse', 'cooling pad', 'mechanical keyboard', 'foldsack', 'ssd', 'hard drive', 'gaming drive']):
             return 'laptop_accessory'
+        if any(k in name_lower for k in ['monitor', 'curved gaming']):
+            return 'monitor_device'
             
-        if any(k in name_lower for k in ['camera', 'alpha 7', 'eos r6', 'x-t5']) and not any(k in name_lower for k in ['tripod', 'sdxc', 'lens', 'battery', 'shoulder bag', 'monopod']):
+        if any(k in name_lower for k in ['camera', 'alpha 7', 'eos r6', 'x-t5']) and not any(k in name_lower for k in ['tripod', 'sdxc', 'lens', 'battery', 'shoulder bag']):
             return 'camera_device'
-        if any(k in name_lower for k in ['tripod', 'sdxc', 'zoom lens', 'battery pack', 'shoulder bag', 'monopod']) and ('camera' in name_lower or 'photo' in name_lower or 'lens' in name_lower or 'sdxc' in name_lower or 'tripod' in name_lower):
+        if any(k in name_lower for k in ['tripod', 'sdxc', 'zoom lens', 'battery pack', 'shoulder bag', 'monopod']):
             return 'camera_accessory'
 
-        # 2. Beauty & Personal Care (Category must be Beauty or name clearly cosmetic)
+        # 2. Beauty & Personal Care
         if any(k in name_lower for k in ['ck one', "j'adore", 'dolce shine', 'coco noir', 'gucci bloom', 'perfume', 'eau de']):
             return 'beauty_fragrance'
         if any(k in name_lower for k in ['mascara', 'eyeshadow', 'lipstick', 'nail polish', 'powder canister', 'palette', 'powder']) and 'protein' not in name_lower:
             return 'beauty_cosmetics'
-        if cat_lower == 'beauty' and any(k in name_lower for k in ['body wash', 'lotion', 'hand soap', 'shampoo']) and 'ice cream' not in name_lower:
+        if cat_lower == 'beauty':
             return 'beauty_skincare'
 
         # 3. Fashion Sub-domains
@@ -109,37 +113,41 @@ class RecommenderSystem:
             return 'fashion_caps'
         if any(k in name_lower for k in ['sun glasses', 'glasses', 'sunglasses']):
             return 'fashion_sunglasses'
-        if any(k in name_lower for k in ['handbag', 'bag']) and any(k in name_lower for k in ['women', 'heshe', 'prada', 'backpack']):
+        if any(k in name_lower for k in ['handbag', 'bag', 'luggage', 'carry-on']) and any(k in name_lower for k in ['women', 'heshe', 'prada', 'backpack', 'handbag', 'carry-on']):
             return 'fashion_handbags'
-        if any(k in name_lower for k in ['air jordan', 'cleats', 'future rider', 'sports sneakers', 'vibrant runners', 'high-top sneaker', 'shoes']) and not any(k in name_lower for k in ['heel', 'pump', 'slipper', 'loafer']):
+        if any(k in name_lower for k in ['sneakers', 'runners', 'cleats', 'shoes', 'air jordan', 'future rider']) and not any(k in name_lower for k in ['heel', 'pump', 'slipper', 'loafer']):
             return 'fashion_sneakers'
         if any(k in name_lower for k in ['heel', 'pump', 'slipper', 'loafer']):
             return 'fashion_dress_shoes'
-        if any(k in name_lower for k in ['rolex', 'longines', 'leather belt watch', 'watch gold', 'smartwatch', "wrist watch", 'ingenieur']):
+        if any(k in name_lower for k in ['rolex', 'longines', 'leather belt watch', 'watch gold', 'smartwatch', "wrist watch", 'ingenieur', 'watch']):
             return 'fashion_watches'
         if any(k in name_lower for k in ['white gold', 'petite micropave', 'dragon station', 'pierced owl', 'earring', 'necklace', 'bracelet', 'ring']):
             return 'fashion_jewelry'
-        if any(k in name_lower for k in ['joggers', 'sweatpants', 'shorts', 'crew neck t-shirt', 'black t-shirt', 'classic white tee']):
+        if any(k in name_lower for k in ['joggers', 'sweatpants', 'shorts', 'activewear']):
             return 'fashion_activewear'
         if any(k in name_lower for k in ['dress', 'frock', 'gown', 'skirt', 'corset']):
             return 'fashion_womens_clothing'
-        if any(k in name_lower for k in ['shirt', 'tshirt', 'jacket', 'suit', 'mens casual', 'men check']):
+        if any(k in name_lower for k in ['shirt', 'tshirt', 'jacket', 'suit', 'mens casual', 'men check', 'tee', 'hoodie']):
             return 'fashion_mens_clothing'
+        if cat_lower == 'sports accessories' or any(k in name_lower for k in ['football', 'baseball']):
+            return 'sports_accessories'
+        if cat_lower == 'vehicles & outdoors' or any(k in name_lower for k in ['motorcycle', 'z800', 'motogp', 'bicycle', 'go-kart']):
+            return 'vehicles_&_outdoors'
 
         # 4. Home & Kitchen
         if any(k in name_lower for k in ['plant pot', 'showpiece plant']):
             return 'home_plants'
-        if any(k in name_lower for k in ['pot with glass', 'pan', 'kitchen sieve', 'plate', 'lunch box', 'spoon', 'cookware', 'toaster']):
-            return 'home_kitchen'
-        if any(k in name_lower for k in ['bed', 'sofa', 'table lamp', 'african cherry', 'chair', 'armchair', 'furniture']):
+        if any(k in name_lower for k in ['bed', 'sofa', 'table lamp', 'african cherry', 'chair', 'armchair', 'furniture', 'dining table', 'workstation']):
             return 'home_furniture'
+        if any(k in name_lower for k in ['pot with glass', 'pan', 'kitchen sieve', 'plate', 'lunch box', 'spoon', 'cookware', 'toaster', 'tumbler']):
+            return 'home_kitchen'
 
         # 5. Groceries
-        if any(k in name_lower for k in ['milk', 'eggs', 'bread', 'butter', 'coffee', 'tea', 'fruit juice', 'honey jar', 'ice cream']):
+        if any(k in name_lower for k in ['milk', 'eggs', 'bread', 'butter', 'coffee', 'tea', 'fruit juice', 'honey jar', 'ice cream', 'juice']):
             return 'groceries_breakfast'
-        if any(k in name_lower for k in ['apple', 'banana', 'kiwi', 'strawberry', 'watermelon', 'orange', 'lemon', 'potatoes', 'pepper', 'cucumber']):
+        if any(k in name_lower for k in ['apple', 'banana', 'kiwi', 'strawberry', 'watermelon', 'orange', 'lemon', 'potatoes', 'pepper', 'cucumber', 'mulberry']):
             return 'groceries_produce'
-        if any(k in name_lower for k in ['steak', 'beef', 'chicken', 'fish', 'rice', 'oil', 'cat food', 'dog food']):
+        if cat_lower == 'groceries' or any(k in name_lower for k in ['steak', 'beef', 'chicken', 'fish', 'rice', 'oil', 'cat food', 'dog food', 'protein']):
             return 'groceries_pantry'
 
         # Fallback to category
@@ -152,10 +160,10 @@ class RecommenderSystem:
         """
         Finds products that THIS buyer has personally bought together with product_name
         in the same transaction basket.
-        Returns list of (item_name, 'You usually buy this product with {product_name}').
+        Returns list of (item_name, 'You usually buy this with {product_name}').
         If the buyer has NEVER bought this product with another product, returns [].
         """
-        if not customer_id:
+        if not customer_id or self.transactions_df is None or self.transactions_df.empty:
             return []
 
         # Find transactions of THIS customer containing product_name
@@ -178,7 +186,7 @@ class RecommenderSystem:
         counts = companion_rows['Item'].value_counts()
         results = []
         for item, _ in counts.items():
-            results.append((item, f"You usually buy this product with {product_name}"))
+            results.append((item, f"You usually buy this with {product_name}"))
         return results
 
     # --------------------------------------------------------------------------
@@ -188,9 +196,10 @@ class RecommenderSystem:
         """
         1. Frequently Bought Together
         - Uses Apriori association rules (Lift > 1.0, Confidence)
-        - Uses transaction co-occurrences across other accounts
+        - Uses real transaction co-occurrences across other accounts
         - Excludes items already shown in other rails or personal history
-        - Strictly avoids random or incompatible products
+        - If no co-purchase exists, falls back to domain-specific companion accessories
+        - Never randomly generates items
         """
         seen = set(exclude_items or [])
         seen.add(item_name)
@@ -198,7 +207,6 @@ class RecommenderSystem:
 
         # Step 1: Apriori Association Rules
         if self.rules is not None and not self.rules.empty:
-            # Look for rules where antecedents contains item_name
             matching_rules = self.rules[
                 self.rules['antecedents'].apply(lambda ant: item_name in ant)
             ].sort_values(by=['lift', 'confidence'], ascending=[False, False])
@@ -206,37 +214,38 @@ class RecommenderSystem:
             for _, r in matching_rules.iterrows():
                 for con_item in r['consequents']:
                     if con_item not in seen:
-                        results.append((con_item, f"Most people buy this with {item_name}"))
+                        results.append((con_item, f"Most people usually buy this with {item_name}"))
                         seen.add(con_item)
                         if len(results) >= top_n:
                             return results
 
         # Step 2: Other accounts' transaction co-purchases
-        if customer_id:
-            other_txns_df = self.transactions_df[self.transactions_df['CustomerID'] != customer_id]
-        else:
-            other_txns_df = self.transactions_df
+        if self.transactions_df is not None and not self.transactions_df.empty:
+            if customer_id:
+                other_txns_df = self.transactions_df[self.transactions_df['CustomerID'] != customer_id]
+            else:
+                other_txns_df = self.transactions_df
 
-        matching_txns = other_txns_df[other_txns_df['Item'] == item_name]['TransactionID'].unique()
-        if len(matching_txns) > 0:
-            companion_rows = other_txns_df[
-                (other_txns_df['TransactionID'].isin(matching_txns)) &
-                (~other_txns_df['Item'].isin(seen))
-            ]
-            counts = companion_rows['Item'].value_counts()
-            for item, _ in counts.items():
-                if item not in seen:
-                    results.append((item, f"Most people buy this with {item_name}"))
-                    seen.add(item)
-                    if len(results) >= top_n:
-                        return results
+            matching_txns = other_txns_df[other_txns_df['Item'] == item_name]['TransactionID'].unique()
+            if len(matching_txns) > 0:
+                companion_rows = other_txns_df[
+                    (other_txns_df['TransactionID'].isin(matching_txns)) &
+                    (~other_txns_df['Item'].isin(seen))
+                ]
+                counts = companion_rows['Item'].value_counts()
+                for item, _ in counts.items():
+                    if item not in seen:
+                        results.append((item, f"Most people usually buy this with {item_name}"))
+                        seen.add(item)
+                        if len(results) >= top_n:
+                            return results
 
-        # Step 3: Domain-specific companion accessory fallback if still under top_n
+        # Step 3: Useful companion accessory fallback if still under top_n (NEVER random)
         if len(results) < top_n:
             acc_fallback = self.get_recommended_accessories(item_name, customer_id=customer_id, top_n=top_n - len(results), exclude_items=seen)
             for acc_item, _ in acc_fallback:
                 if acc_item not in seen:
-                    results.append((acc_item, f"Useful accessory for {item_name}"))
+                    results.append((acc_item, f"Useful product for {item_name}"))
                     seen.add(acc_item)
                     if len(results) >= top_n:
                         break
@@ -251,44 +260,78 @@ class RecommenderSystem:
         2. Recommended Accessories
         - Recommends essential add-ons, cables, protective gear, and peripherals
         - EXCLUDES items already in FBT or personal co-purchases!
-        - Returns [] for categories without physical accessories (e.g. groceries)
+        - Maps all product categories to real, useful companion items (never random)
         """
         seen = set(exclude_items or [])
         seen.add(item_name)
         results = []
 
-        subcat = self._detect_subcategory(item_name)
+        item_rows = self.products_df[self.products_df['Name'] == item_name] if self.products_df is not None else pd.DataFrame()
+        cat = item_rows['Category'].iloc[0] if not item_rows.empty else ''
+        subcat = self._detect_subcategory(item_name, cat)
         if self.products_df is None or self.products_df.empty:
             return []
 
-        # Define compatible accessory target subcategories (distinct from competing alternatives)
+        # Define compatible accessory target subcategories
         target_subcats = []
-        if subcat == 'smartphone_device':
+        if subcat in ['smartphone_device', 'smartphones']:
             target_subcats = ['smartphone_accessory']
-        elif subcat == 'laptop_device':
+        elif subcat == 'smartphone_accessory':
+            target_subcats = ['smartphone_accessory', 'smartphone_device']
+        elif subcat in ['laptop_device', 'laptops']:
             target_subcats = ['laptop_accessory']
-        elif subcat == 'camera_device':
+        elif subcat == 'laptop_accessory':
+            target_subcats = ['laptop_accessory', 'laptop_device']
+        elif subcat in ['tablet_device']:
+            target_subcats = ['smartphone_accessory', 'laptop_accessory']
+        elif subcat in ['monitor_device']:
+            target_subcats = ['laptop_accessory', 'laptop_device']
+        elif subcat in ['camera_device', 'cameras']:
             target_subcats = ['camera_accessory']
-        elif subcat == 'beauty_cosmetics':
-            target_subcats = ['beauty_skincare']
+        elif subcat == 'camera_accessory':
+            target_subcats = ['camera_accessory', 'camera_device']
+        elif subcat in ['beauty_cosmetics', 'beauty']:
+            target_subcats = ['beauty_skincare', 'beauty_cosmetics', 'beauty_fragrance']
         elif subcat == 'beauty_fragrance':
-            target_subcats = ['beauty_skincare']
-        elif subcat == 'fashion_sneakers':
-            target_subcats = ['fashion_caps', 'fashion_activewear']
-        elif subcat == 'fashion_dress_shoes':
-            target_subcats = ['fashion_handbags', 'fashion_jewelry']
-        elif subcat == 'fashion_watches':
-            target_subcats = ['fashion_sunglasses', 'fashion_mens_clothing']
-        elif subcat == 'fashion_jewelry':
-            target_subcats = ['fashion_handbags', 'fashion_sunglasses']
-        elif subcat == 'fashion_womens_clothing':
-            target_subcats = ['fashion_handbags', 'fashion_jewelry', 'fashion_dress_shoes']
-        elif subcat == 'home_plants':
+            target_subcats = ['beauty_cosmetics', 'beauty_skincare']
+        elif subcat == 'beauty_skincare':
+            target_subcats = ['beauty_cosmetics', 'beauty_fragrance']
+        elif subcat in ['fashion_sneakers']:
+            target_subcats = ['fashion_activewear', 'fashion_caps', 'fashion_watches']
+        elif subcat in ['fashion_dress_shoes']:
+            target_subcats = ['fashion_handbags', 'fashion_jewelry', 'fashion_watches']
+        elif subcat in ['fashion_watches']:
+            target_subcats = ['fashion_sunglasses', 'fashion_mens_clothing', 'fashion_handbags']
+        elif subcat in ['fashion_jewelry']:
+            target_subcats = ['fashion_handbags', 'fashion_sunglasses', 'fashion_womens_clothing']
+        elif subcat in ['fashion_womens_clothing']:
+            target_subcats = ['fashion_handbags', 'fashion_jewelry', 'fashion_dress_shoes', 'fashion_sunglasses']
+        elif subcat in ['fashion_mens_clothing']:
+            target_subcats = ['fashion_watches', 'fashion_sunglasses', 'fashion_caps', 'fashion_sneakers']
+        elif subcat in ['fashion_sunglasses']:
+            target_subcats = ['fashion_caps', 'fashion_watches', 'fashion_handbags']
+        elif subcat in ['fashion_caps']:
+            target_subcats = ['fashion_sunglasses', 'fashion_sneakers', 'fashion_activewear']
+        elif subcat in ['fashion_handbags']:
+            target_subcats = ['fashion_sunglasses', 'fashion_jewelry', 'fashion_watches']
+        elif subcat in ['sports_accessories']:
+            target_subcats = ['fashion_sneakers', 'fashion_activewear', 'fashion_caps']
+        elif subcat in ['vehicles_&_outdoors']:
+            target_subcats = ['fashion_sunglasses', 'fashion_activewear', 'fashion_caps', 'fashion_handbags']
+        elif subcat in ['home_plants']:
             target_subcats = ['home_plants', 'home_furniture']
-        elif subcat == 'home_kitchen':
+        elif subcat in ['home_kitchen']:
             target_subcats = ['home_kitchen']
+        elif subcat in ['home_furniture', 'home_&_kitchen']:
+            target_subcats = ['home_furniture', 'home_kitchen', 'home_plants']
+        elif subcat in ['groceries_breakfast']:
+            target_subcats = ['groceries_breakfast', 'groceries_produce']
+        elif subcat in ['groceries_produce']:
+            target_subcats = ['groceries_produce', 'groceries_pantry']
+        elif subcat in ['groceries_pantry', 'groceries']:
+            target_subcats = ['groceries_pantry', 'groceries_produce', 'groceries_breakfast']
         else:
-            return []
+            target_subcats = [subcat]
 
         # Find candidates matching target subcategories
         candidates = []
@@ -307,7 +350,7 @@ class RecommenderSystem:
         for _, row in df_cand.iterrows():
             cand_name = row['Name']
             if cand_name not in seen:
-                results.append((cand_name, f"Essential accessory for {item_name}"))
+                results.append((cand_name, f"Useful product for {item_name}"))
                 seen.add(cand_name)
                 if len(results) >= top_n:
                     break
@@ -364,7 +407,7 @@ class RecommenderSystem:
             scored_candidates.sort(key=lambda x: (x[1], x[2]), reverse=True)
             for cand_name, _, _ in scored_candidates:
                 if cand_name not in seen:
-                    results.append((cand_name, f"Alternative to {item_name}"))
+                    results.append((cand_name, f"Similar to {item_name}"))
                     seen.add(cand_name)
                     if len(results) >= top_n:
                         return results
@@ -426,7 +469,7 @@ class RecommenderSystem:
             # General top-rated discovery fallback
             df_fallback = self.products_df[~self.products_df['Name'].isin(seen)].sort_values(by='Rating', ascending=False)
             for cand_name in df_fallback['Name']:
-                results.append((cand_name, f"Trending recommendation for you"))
+                results.append((cand_name, f"You may also like"))
                 seen.add(cand_name)
                 if len(results) >= top_n:
                     break
@@ -436,7 +479,7 @@ class RecommenderSystem:
         for _, row in df_cand.iterrows():
             cand_name = row['Name']
             if cand_name not in seen:
-                results.append((cand_name, f"Trending with shoppers who viewed {item_name}"))
+                results.append((cand_name, f"You may also like"))
                 seen.add(cand_name)
                 if len(results) >= top_n:
                     break

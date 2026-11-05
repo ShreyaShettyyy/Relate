@@ -157,7 +157,7 @@ document.addEventListener('DOMContentLoaded', () => {
         localStorage.setItem('relate_theme', theme);
     }
 
-    const currentSavedTheme = localStorage.getItem('relate_theme') || 'dark';
+    const currentSavedTheme = localStorage.getItem('relate_theme') || 'light';
     applyTheme(currentSavedTheme);
 
     if (themeToggleBtn) {
@@ -207,13 +207,13 @@ document.addEventListener('DOMContentLoaded', () => {
             const rText = reason || product.recommendation_reason;
             let iconClass = 'fa-solid fa-sparkles';
             let badgeVariant = '';
-            if (rText.startsWith('You usually buy this product with')) {
+            if (rText.startsWith('You usually buy this product with') || rText.startsWith('You usually buy this with')) {
                 iconClass = 'fa-solid fa-user-check';
                 badgeVariant = 'reason-personal';
-            } else if (rText.startsWith('Most people buy this with')) {
+            } else if (rText.startsWith('Most people buy this with') || rText.startsWith('Most people usually buy this with')) {
                 iconClass = 'fa-solid fa-users';
                 badgeVariant = 'reason-crowd';
-            } else if (rText.includes('Accessory') || rText.includes('Useful accessory') || rText.includes('Compatible')) {
+            } else if (rText.includes('Useful product') || rText.includes('Accessory') || rText.includes('Useful accessory') || rText.includes('Essential accessory') || rText.includes('Compatible')) {
                 iconClass = 'fa-solid fa-plug';
                 badgeVariant = 'reason-accessory';
             }
@@ -818,6 +818,11 @@ document.addEventListener('DOMContentLoaded', () => {
     });
 
     function showSmartUpsellModal() {
+        if (!cart || cart.length === 0) {
+            executeFinalCheckout();
+            return;
+        }
+
         const lastProductId = cart[cart.length - 1];
         const lastProd = allProducts.find(p => p.ID === lastProductId);
 
@@ -826,33 +831,72 @@ document.addEventListener('DOMContentLoaded', () => {
             return;
         }
 
-        // Fetch accessories for the last cart product
-        fetch(`/api/product_recs?product=${encodeURIComponent(lastProd.Name)}`)
+        const custId = currentUser ? (currentUser.customer_id || '') : '';
+        const url = `/api/product_recs?product=${encodeURIComponent(lastProd.Name)}${custId ? `&customer_id=${custId}` : ''}`;
+
+        fetch(url)
             .then(res => res.json())
             .then(data => {
-                const accessories = data.recommended_accessories || [];
-                const unboughtAcc = accessories.filter(acc => !cart.includes(acc.ID)).slice(0, 3);
+                const candidates = [];
+                const seenIds = new Set(cart);
 
-                if (unboughtAcc.length === 0) {
+                // Priority 1: Personal co-purchases (if buyer bought with this product before)
+                (data.personal_copurchases || []).forEach(item => {
+                    if (!seenIds.has(item.ID)) {
+                        candidates.push({
+                            ...item,
+                            reason_tag: item.recommendation_reason || `You usually buy this with ${lastProd.Name}`
+                        });
+                        seenIds.add(item.ID);
+                    }
+                });
+
+                // Priority 2: Frequently bought together (other customer transactions & Apriori)
+                (data.frequently_bought_together || []).forEach(item => {
+                    if (!seenIds.has(item.ID)) {
+                        candidates.push({
+                            ...item,
+                            reason_tag: item.recommendation_reason || `Most people usually buy this with ${lastProd.Name}`
+                        });
+                        seenIds.add(item.ID);
+                    }
+                });
+
+                // Priority 3: Useful companion accessories (e.g. phone case for mobile)
+                if (candidates.length < 3) {
+                    (data.recommended_accessories || []).forEach(item => {
+                        if (!seenIds.has(item.ID)) {
+                            candidates.push({
+                                ...item,
+                                reason_tag: item.recommendation_reason || `Useful product for ${lastProd.Name}`
+                            });
+                            seenIds.add(item.ID);
+                        }
+                    });
+                }
+
+                const finalUpsell = candidates.slice(0, 3);
+                if (finalUpsell.length === 0) {
                     executeFinalCheckout();
                     return;
                 }
 
-                currentUpsellList = unboughtAcc;
+                currentUpsellList = finalUpsell;
                 const container = document.getElementById('upsell-items-list');
                 container.innerHTML = '';
 
-                unboughtAcc.forEach(acc => {
+                finalUpsell.forEach(item => {
                     const row = document.createElement('div');
                     row.className = 'upsell-row';
                     row.innerHTML = `
-                        <img src="${getProductImage(acc)}" class="upsell-img" referrerpolicy="no-referrer" onerror="this.onerror=null; this.src='${FALLBACK_IMAGE}';">
+                        <img src="${getProductImage(item)}" class="upsell-img" referrerpolicy="no-referrer" onerror="this.onerror=null; this.src='${FALLBACK_IMAGE}';">
                         <div class="upsell-details">
-                            <h5 class="upsell-name">${acc.Name}</h5>
-                            <span class="upsell-price">${formatPrice(acc.Price)}</span>
+                            <span class="upsell-reason-tag"><i class="fa-solid fa-sparkles"></i> ${item.reason_tag}</span>
+                            <h5 class="upsell-name">${item.Name}</h5>
+                            <span class="upsell-price">${formatPrice(item.Price)}</span>
                         </div>
                         <label class="upsell-check-label">
-                            <input type="checkbox" class="upsell-checkbox" data-id="${acc.ID}" checked>
+                            <input type="checkbox" class="upsell-checkbox" data-id="${item.ID}" checked>
                             Add to Order
                         </label>
                     `;

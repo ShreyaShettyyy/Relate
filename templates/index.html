@@ -15,11 +15,17 @@
     <!-- Design System CSS -->
     <link rel="stylesheet" href="{{ url_for('static', filename='css/style.css') }}?v=16">
     <script>
-        // Immediate theme initialization to prevent flash
+        // Default to light theme when first opened
         (function() {
             try {
-                const savedTheme = localStorage.getItem('relate_theme') || 'dark';
-                if (savedTheme === 'light') {
+                const savedTheme = localStorage.getItem('relate_theme') || 'light';
+                if (savedTheme === 'dark') {
+                    document.documentElement.classList.add('luxury-dark-theme');
+                    document.addEventListener('DOMContentLoaded', function() {
+                        document.body.classList.remove('luxury-light-theme');
+                        document.body.classList.add('luxury-dark-theme');
+                    });
+                } else {
                     document.documentElement.classList.add('luxury-light-theme');
                     document.addEventListener('DOMContentLoaded', function() {
                         document.body.classList.remove('luxury-dark-theme');
@@ -30,7 +36,7 @@
         })();
     </script>
 </head>
-<body class="luxury-dark-theme">
+<body class="luxury-light-theme">
 
     <!-- GLOBAL NAVBAR -->
     <header class="navbar-wrapper">
@@ -40,7 +46,7 @@
                 <div class="brand-icon"><i class="fa-solid fa-cube"></i></div>
                 <div class="brand-text">
                     <span class="brand-name">Relate</span>
-                    <span class="brand-badge">LuxStore</span>
+                    <span class="brand-badge">Store</span>
                 </div>
             </div>
 
@@ -54,21 +60,21 @@
                         <!-- Populated by JS -->
                     </div>
                 </div>
-                <a href="#about" class="nav-link" data-target="about-section" id="nav-link-about">About Relate</a>
+                <a href="#about" class="nav-link" data-target="about-section" id="nav-link-about">About</a>
             </nav>
 
             <!-- Search Bar -->
             <div class="nav-search-bar">
                 <i class="fa-solid fa-magnifying-glass search-icon"></i>
-                <input type="text" id="global-search-input" placeholder="Search products, accessories, tech..." autocomplete="off">
+                <input type="text" id="global-search-input" placeholder="Search products..." autocomplete="off">
                 <button class="search-clear-btn hidden" id="search-clear-btn"><i class="fa-solid fa-xmark"></i></button>
             </div>
 
             <!-- Action Controls -->
             <div class="nav-actions">
                 <!-- Theme Toggle Button -->
-                <button class="nav-icon-btn" id="nav-theme-toggle-btn" title="Toggle Light / Dark Theme">
-                    <i class="fa-solid fa-sun" id="theme-icon"></i>
+                <button class="nav-icon-btn" id="nav-theme-toggle-btn" title="Toggle theme">
+                    <i class="fa-solid fa-moon" id="theme-icon"></i>
                 </button>
 
                 <!-- Wishlist -->
@@ -126,41 +132,20 @@
                 <div class="hero-glow-blob blob-2"></div>
                 
                 <div class="hero-content">
-                    <div class="hero-pill">
-                        <span class="pill-dot"></span> Powered by Apriori Market Basket Analysis & AI
-                    </div>
                     <h1 class="hero-title">
-                        Intelligent Shopping, <br>
-                        <span class="gradient-text">Engineered For Relevance.</span>
+                        Find What You Need, <br>
+                        <span class="gradient-text">Simply and Quickly.</span>
                     </h1>
                     <p class="hero-subtitle">
-                        Experience next-generation e-commerce where product relationships, complementary accessories, and customer purchasing patterns automatically tailor your discovery.
+                        Discover products and recommendations based on real customer purchases.
                     </p>
                     <div class="hero-cta-group">
                         <button class="btn-luxury-primary" id="hero-explore-btn">
-                            Explore Catalog <i class="fa-solid fa-arrow-right"></i>
+                            Shop Now <i class="fa-solid fa-arrow-right"></i>
                         </button>
                         <button class="btn-luxury-secondary" id="hero-about-btn">
-                            How Relate Works <i class="fa-solid fa-microchip"></i>
+                            How It Works
                         </button>
-                    </div>
-
-                    <!-- Highlight Metrics Strip -->
-                    <div class="hero-metrics-strip">
-                        <div class="metric-item">
-                            <span class="metric-val">100%</span>
-                            <span class="metric-lbl">Complementary Accessory Matching</span>
-                        </div>
-                        <div class="metric-divider"></div>
-                        <div class="metric-item">
-                            <span class="metric-val">Apriori</span>
-                            <span class="metric-lbl">Association Rule Mining (Lift &gt; 1)</span>
-                        </div>
-                        <div class="metric-divider"></div>
-                        <div class="metric-item">
-                            <span class="metric-val">Real-Time</span>
-                            <span class="metric-lbl">Dynamic Checkout Retraining</span>
-                        </div>
                     </div>
                 </div>
             </div>
@@ -176,9 +161,9 @@
             <div class="personalized-feed-wrapper hidden" id="personalized-feed-section">
                 <div class="section-header-row">
                     <div>
-                        <div class="section-tag"><i class="fa-solid fa-sparkles"></i> Tailored For You</div>
-                        <h2 class="section-title">Personalized Recommendations</h2>
-                        <p class="section-desc">Handpicked based on your past purchases and compatible companion accessories.</p>
+                        <div class="section-tag"><i class="fa-solid fa-sparkles"></i> For You</div>
+                        <h2 class="section-title">Recommended For You</h2>
+                        <p class="section-desc">Based on your past orders and preferences.</p>
                     </div>
                 </div>
                 <div class="product-grid" id="personalized-grid">
@@ -190,9 +175,9 @@
             <div class="recently-purchased-wrapper hidden" id="recently-purchased-section">
                 <div class="section-header-row">
                     <div>
-                        <div class="section-tag"><i class="fa-solid fa-clock-rotate-left"></i> Your History</div>
-                        <h2 class="section-title">Recently Purchased</h2>
-                        <p class="section-desc">Products you previously ordered. Recommendations are never conflated with this list.</p>
+                        <div class="section-tag"><i class="fa-solid fa-clock-rotate-left"></i> History</div>
+                        <h2 class="section-title">Your Past Orders</h2>
+                        <p class="section-desc">Products you bought recently.</p>
                     </div>
                 </div>
                 <div class="product-grid" id="recently-purchased-grid">
@@ -204,8 +189,8 @@
             <div class="catalog-content-wrapper" id="catalog-main-area">
                 <div class="section-header-row">
                     <div>
-                        <div class="section-tag" id="active-category-tag">Featured Catalog</div>
-                        <h2 class="section-title" id="catalog-heading">Explore All Collections</h2>
+                        <div class="section-tag" id="active-category-tag">Products</div>
+                        <h2 class="section-title" id="catalog-heading">All Products</h2>
                     </div>
                     <div class="catalog-filter-controls">
                         <select id="sort-select" class="luxury-select">
@@ -263,7 +248,7 @@
                 <div class="detail-info-column">
                     <div class="detail-badges-row">
                         <span class="badge-category" id="detail-category-badge">Category</span>
-                        <span class="badge-stock in-stock"><i class="fa-solid fa-circle-check"></i> In Stock & Ready to Ship</span>
+                        <span class="badge-stock in-stock"><i class="fa-solid fa-circle-check"></i> In Stock</span>
                     </div>
 
                     <h1 class="detail-product-title" id="detail-product-title">Product Title</h1>
@@ -271,7 +256,7 @@
                     <div class="detail-rating-row">
                         <div class="stars-box" id="detail-stars"></div>
                         <span class="rating-number" id="detail-rating-val">4.8</span>
-                        <span class="rating-count" id="detail-reviews-trigger">(128 Verified Reviews)</span>
+                        <span class="rating-count" id="detail-reviews-trigger">(128 reviews)</span>
                     </div>
 
                     <div class="detail-price-box">
@@ -283,7 +268,7 @@
                     <p class="detail-description" id="detail-desc">Full product description...</p>
 
                     <div class="detail-highlights-box">
-                        <h4>Key Specifications & Highlights</h4>
+                        <h4>Highlights</h4>
                         <ul id="detail-highlights-list">
                             <!-- Injected by JS -->
                         </ul>
@@ -306,26 +291,25 @@
 
                     <!-- Trust Perks -->
                     <div class="detail-trust-grid">
-                        <div class="trust-item"><i class="fa-solid fa-truck-fast"></i> <span>Free Express Delivery</span></div>
+                        <div class="trust-item"><i class="fa-solid fa-truck-fast"></i> <span>Free Delivery</span></div>
                         <div class="trust-item"><i class="fa-solid fa-shield-halved"></i> <span>1 Year Warranty</span></div>
-                        <div class="trust-item"><i class="fa-solid fa-rotate-left"></i> <span>7-Day Return Policy</span></div>
+                        <div class="trust-item"><i class="fa-solid fa-rotate-left"></i> <span>7-Day Returns</span></div>
                     </div>
                 </div>
             </div>
 
-            <!-- ML RECOMMENDATION RAILS -->
+            <!-- RECOMMENDATION RAILS -->
 
-            <!-- RAIL 0: PERSONAL CO-PURCHASE PATTERN (IF AND ONLY IF BUYER HAS BOUGHT WITH THIS PRODUCT BEFORE) -->
+            <!-- RAIL 0: PERSONAL CO-PURCHASE PATTERN -->
             <div class="recommendation-rail-wrapper hidden" id="rail-personal-wrapper">
                 <div class="rail-header">
                     <div class="rail-title-group">
-                        <span class="rail-badge personal-badge"><i class="fa-solid fa-user-check"></i> Your Personal Purchase History</span>
-                        <h3 class="rail-title">You Usually Buy This Product With...</h3>
-                        <p class="rail-subtitle">Complementary products you previously bought alongside this item in your past orders.</p>
+                        <h3 class="rail-title">You Usually Buy This With</h3>
+                        <p class="rail-subtitle">Items you previously bought with this product.</p>
                     </div>
                 </div>
                 <div class="product-grid rail-grid" id="personal-copurchase-grid">
-                    <!-- Injected by JS if and only if buyer has past co-purchases -->
+                    <!-- Injected by JS -->
                 </div>
             </div>
 
@@ -333,9 +317,8 @@
             <div class="recommendation-rail-wrapper" id="rail-fbt-wrapper">
                 <div class="rail-header">
                     <div class="rail-title-group">
-                        <span class="rail-badge apriori-badge"><i class="fa-solid fa-link"></i> Apriori Market Basket Analysis</span>
                         <h3 class="rail-title">Frequently Bought Together</h3>
-                        <p class="rail-subtitle">Complementary items customers frequently purchase together in a single basket (High Lift & Confidence).</p>
+                        <p class="rail-subtitle">Most people usually buy this product with these items.</p>
                     </div>
                     <button class="btn-luxury-secondary btn-sm" id="bundle-add-all-btn">
                         <i class="fa-solid fa-cart-plus"></i> Add All to Cart
@@ -350,9 +333,8 @@
             <div class="recommendation-rail-wrapper" id="rail-acc-wrapper">
                 <div class="rail-header">
                     <div class="rail-title-group">
-                        <span class="rail-badge accessories-badge"><i class="fa-solid fa-puzzle-piece"></i> Compatibility Engine</span>
                         <h3 class="rail-title">Recommended Accessories</h3>
-                        <p class="rail-subtitle">Essential add-ons, cables, protective gear, and companion peripherals built specifically for this device.</p>
+                        <p class="rail-subtitle">Useful add-ons and accessories for this item.</p>
                     </div>
                 </div>
                 <div class="product-grid rail-grid" id="acc-grid">
@@ -364,9 +346,8 @@
             <div class="recommendation-rail-wrapper" id="rail-sim-wrapper">
                 <div class="rail-header">
                     <div class="rail-title-group">
-                        <span class="rail-badge similarity-badge"><i class="fa-solid fa-clone"></i> TF-IDF Attribute Similarity</span>
                         <h3 class="rail-title">Similar Products</h3>
-                        <p class="rail-subtitle">Alternative options within the same category to consider.</p>
+                        <p class="rail-subtitle">Other options in this category.</p>
                     </div>
                 </div>
                 <div class="product-grid rail-grid" id="sim-grid">
@@ -378,9 +359,8 @@
             <div class="recommendation-rail-wrapper" id="rail-yml-wrapper">
                 <div class="rail-header">
                     <div class="rail-title-group">
-                        <span class="rail-badge discovery-badge"><i class="fa-solid fa-compass"></i> Collaborative Discovery</span>
                         <h3 class="rail-title">You May Also Like</h3>
-                        <p class="rail-subtitle">Curated cross-category lifestyle products that customer segments love.</p>
+                        <p class="rail-subtitle">Popular items other shoppers liked.</p>
                     </div>
                 </div>
                 <div class="product-grid rail-grid" id="yml-grid">
@@ -389,145 +369,114 @@
             </div>
         </section>
 
-        <!-- 3. ABOUT RELATE PROJECT PAGE -->
+        <!-- 3. ABOUT SECTION -->
         <section id="about-section" class="spa-section hidden">
             <div class="about-hero-box glass-panel">
-                <div class="about-hero-tag"><i class="fa-solid fa-brain"></i> Machine Learning Showcase</div>
-                <h1 class="about-title">About <span class="gradient-text">Relate (LuxStore)</span></h1>
+                <h1 class="about-title">About <span class="gradient-text">Relate</span></h1>
                 <p class="about-lead">
-                    Relate is an intelligent e-commerce platform that seamlessly merges online shopping with data-driven machine learning. It discovers real-world product relationships, mines transaction baskets, and delivers context-aware product and accessory recommendations in real time.
+                    Relate is an e-commerce platform that learns from customer purchase patterns to recommend useful products and accessories.
                 </p>
             </div>
 
-            <!-- Project Objectives -->
+            <!-- Objectives -->
             <div class="about-block">
-                <h2 class="about-section-heading"><i class="fa-solid fa-bullseye"></i> Project Objectives</h2>
+                <h2 class="about-section-heading"><i class="fa-solid fa-bullseye"></i> How It Works</h2>
                 <div class="about-objectives-grid">
                     <div class="obj-card glass-panel">
-                        <div class="obj-icon"><i class="fa-solid fa-user-gear"></i></div>
-                        <h4>Personalized Experiences</h4>
-                        <p>Deliver individualized product feeds based on customer transaction histories and category affinities rather than static trending lists.</p>
+                        <div class="obj-icon"><i class="fa-solid fa-user-check"></i></div>
+                        <h4>Personal History</h4>
+                        <p>If you usually buy two items together, the store remembers and suggests them when you view either item.</p>
                     </div>
                     <div class="obj-card glass-panel">
-                        <div class="obj-icon"><i class="fa-solid fa-diagram-project"></i></div>
-                        <h4>Discover Product Relationships</h4>
-                        <p>Identify which items naturally complement each other using mathematical Market Basket Analysis (Apriori algorithm).</p>
+                        <div class="obj-icon"><i class="fa-solid fa-users"></i></div>
+                        <h4>Community Purchases</h4>
+                        <p>When multiple customers purchase items together, other shoppers see them under Frequently Bought Together.</p>
                     </div>
                     <div class="obj-card glass-panel">
-                        <div class="obj-icon"><i class="fa-solid fa-magnifying-glass-chart"></i></div>
-                        <h4>Analyze Purchasing Patterns</h4>
-                        <p>Evaluate multi-item transaction logs to calculate Support, Confidence, and Lift metrics for bundle detection.</p>
+                        <div class="obj-icon"><i class="fa-solid fa-plug"></i></div>
+                        <h4>Useful Products</h4>
+                        <p>If no one has bought an item with another yet, the system suggests useful accessories like a phone case for a phone.</p>
                     </div>
                     <div class="obj-card glass-panel">
                         <div class="obj-icon"><i class="fa-solid fa-bolt"></i></div>
-                        <h4>Real-Time Model Updates</h4>
-                        <p>Dynamically append new customer checkouts to the transaction dataset and retrain association rules on-the-fly.</p>
+                        <h4>Live Learning</h4>
+                        <p>Every completed order is added to the system to continuously improve recommendations.</p>
                     </div>
                 </div>
             </div>
 
-            <!-- Machine Learning Algorithms Explained -->
+            <!-- Algorithms Explained Simply -->
             <div class="about-block">
-                <h2 class="about-section-heading"><i class="fa-solid fa-microchip"></i> Machine Learning Algorithms & Mathematical Foundations</h2>
+                <h2 class="about-section-heading"><i class="fa-solid fa-microchip"></i> Recommendation Methods</h2>
                 
                 <div class="ml-explainer-cards">
                     <!-- Apriori -->
                     <div class="ml-card glass-panel">
                         <div class="ml-card-header">
-                            <span class="ml-badge">Algorithm 1</span>
-                            <h3>Apriori Algorithm (Market Basket Analysis)</h3>
+                            <h3>Market Basket Analysis (Apriori)</h3>
                         </div>
                         <p class="ml-card-text">
-                            The Apriori algorithm mines frequent itemsets across transaction logs by enforcing the <strong>Apriori Principle</strong> (anti-monotonicity): all non-empty subsets of a frequent itemset must also be frequent.
-                        </p>
-                        <div class="formula-box">
-                            <div class="formula-title">Anti-Monotone Property:</div>
-                            <code>If itemset X is not frequent, no superset (X ∪ Y) can be frequent.</code>
-                        </div>
-                        <p class="ml-card-text">
-                            In Relate, transactions are converted into a binary one-hot matrix ($TransactionID \times Item$). Apriori generates candidate $k$-itemsets from ($k-1$)-itemsets and prunes any combination falling below the minimum support threshold ($\text{min\_support} = 0.001$).
+                            Analyzes customer shopping carts to find products that are frequently bought together in the same order.
                         </p>
                     </div>
 
                     <!-- Association Rules -->
                     <div class="ml-card glass-panel">
                         <div class="ml-card-header">
-                            <span class="ml-badge">Algorithm 2</span>
-                            <h3>Association Rule Mining (Support, Confidence, Lift)</h3>
+                            <h3>Purchase Connection Metrics</h3>
                         </div>
                         <p class="ml-card-text">
-                            From frequent itemsets, association rules in the form $A \rightarrow B$ are constructed, where $A$ is the antecedent (e.g. <em>iPhone 13 Pro</em>) and $B$ is the consequent (e.g. <em>Screen Protector</em>).
+                            Rules measure how strong a product combination is:
                         </p>
                         
                         <div class="formulas-grid">
                             <div class="formula-card">
                                 <h5>Support</h5>
-                                <div class="math-expr">$$\text{Support}(A \rightarrow B) = \frac{\text{Transactions containing } A \text{ and } B}{\text{Total Transactions } N}$$</div>
-                                <span class="formula-desc">Measures how frequently the combination occurs.</span>
+                                <span class="formula-desc">How often the product combination is purchased.</span>
                             </div>
                             <div class="formula-card">
                                 <h5>Confidence</h5>
-                                <div class="math-expr">$$\text{Confidence}(A \rightarrow B) = \frac{\text{Support}(A \cup B)}{\text{Support}(A)}$$</div>
-                                <span class="formula-desc">Probability that $B$ is bought given that $A$ was bought.</span>
+                                <span class="formula-desc">How likely a customer is to buy item B when buying item A.</span>
                             </div>
                             <div class="formula-card">
                                 <h5>Lift</h5>
-                                <div class="math-expr">$$\text{Lift}(A \rightarrow B) = \frac{\text{Confidence}(A \rightarrow B)}{\text{Support}(B)}$$</div>
-                                <span class="formula-desc"><strong>Lift &gt; 1:</strong> Positive dependency; items are complementary.</span>
+                                <span class="formula-desc">Measures if two products are genuinely bought together more than by random chance.</span>
                             </div>
                         </div>
                     </div>
 
-                    <!-- Personalized Hybrid Logic -->
+                    <!-- Useful Accessories -->
                     <div class="ml-card glass-panel">
                         <div class="ml-card-header">
-                            <span class="ml-badge">Algorithm 3</span>
-                            <h3>Personalized Hybrid Recommendation Architecture</h3>
+                            <h3>Useful Accessory Matching</h3>
                         </div>
                         <p class="ml-card-text">
-                            Relate combines collaborative transaction rules with content-based TF-IDF attribute similarity and category-level compatibility constraints:
+                            Guarantees that products are paired with useful, compatible items — for example, phones with cases and chargers, laptops with sleeves and mice, and cameras with memory cards and tripods.
                         </p>
-                        <ul class="ml-bullet-list">
-                            <li><strong>Accessory Compatibility Matrix:</strong> Guarantees that smartphones pair with chargers, cables, and cases; laptops pair with wireless mice, stands, and hubs; and cameras pair with memory cards, tripods, and lenses.</li>
-                            <li><strong>Content Similarity:</strong> Uses Scikit-learn TF-IDF Vectorizer and Cosine Similarity to find direct competing products within the same category.</li>
-                            <li><strong>Negative History Filtering:</strong> Excludes non-replenishable hardware already purchased by the customer while preserving complementary add-ons.</li>
-                        </ul>
                     </div>
                 </div>
             </div>
 
             <!-- Workflow Diagram -->
             <div class="about-block">
-                <h2 class="about-section-heading"><i class="fa-solid fa-arrows-split-up-and-left"></i> End-to-End System Workflow</h2>
+                <h2 class="about-section-heading"><i class="fa-solid fa-arrows-split-up-and-left"></i> Simple Workflow</h2>
                 <div class="workflow-diagram glass-panel">
                     <div class="workflow-step">
                         <div class="step-num">1</div>
-                        <h4>Customer Transactions</h4>
-                        <p>Purchase logs with Transaction ID, Customer ID, and Items.</p>
+                        <h4>Customer Orders</h4>
+                        <p>Orders containing 2 or more products.</p>
                     </div>
                     <div class="workflow-connector"><i class="fa-solid fa-arrow-right"></i></div>
                     <div class="workflow-step">
                         <div class="step-num">2</div>
-                        <h4>One-Hot Matrix</h4>
-                        <p>Pandas converts raw rows to binary basket vectors.</p>
+                        <h4>Pattern Analysis</h4>
+                        <p>Algorithms find frequent item combinations.</p>
                     </div>
                     <div class="workflow-connector"><i class="fa-solid fa-arrow-right"></i></div>
                     <div class="workflow-step">
                         <div class="step-num">3</div>
-                        <h4>Apriori & Rules</h4>
-                        <p>MLxtend extracts frequent itemsets and association rules.</p>
-                    </div>
-                    <div class="workflow-connector"><i class="fa-solid fa-arrow-right"></i></div>
-                    <div class="workflow-step">
-                        <div class="step-num">4</div>
-                        <h4>Multi-Rail Engine</h4>
-                        <p>Ranks FBT, Accessories, Similar, and Discovery items.</p>
-                    </div>
-                    <div class="workflow-connector"><i class="fa-solid fa-arrow-right"></i></div>
-                    <div class="workflow-step">
-                        <div class="step-num">5</div>
-                        <h4>Storefront Feed</h4>
-                        <p>Live recommendations rendered via GSAP animations.</p>
+                        <h4>Smart Recommendations</h4>
+                        <p>Personal and popular suggestions appear across the store.</p>
                     </div>
                 </div>
             </div>
@@ -695,12 +644,12 @@
                 </div>
                 <div class="cart-summary-divider"></div>
                 <div class="cart-summary-row total-row">
-                    <span>Estimated Total</span>
+                    <span>Total</span>
                     <span id="cart-total-val" class="gradient-text">₹0</span>
                 </div>
                 
                 <button class="btn-luxury-primary btn-block" id="proceed-checkout-btn">
-                    Proceed to Checkout <i class="fa-solid fa-arrow-right"></i>
+                    Checkout <i class="fa-solid fa-arrow-right"></i>
                 </button>
             </div>
         </div>
@@ -711,9 +660,8 @@
         <div class="upsell-modal glass-panel">
             <div class="modal-header">
                 <div>
-                    <span class="rail-badge apriori-badge"><i class="fa-solid fa-wand-magic-sparkles"></i> Companion Add-Ons</span>
-                    <h3>Complete Your Experience</h3>
-                    <p>Customers also frequently pair these compatible accessories with your items:</p>
+                    <h3>Frequently Bought Together</h3>
+                    <p>Items often bought with your order:</p>
                 </div>
                 <button class="modal-close-icon" id="close-upsell-modal"><i class="fa-solid fa-xmark"></i></button>
             </div>
@@ -723,9 +671,9 @@
             </div>
 
             <div class="modal-footer-actions">
-                <button class="btn-luxury-secondary" id="skip-upsell-btn">No thanks, proceed</button>
+                <button class="btn-luxury-secondary" id="skip-upsell-btn">Skip</button>
                 <button class="btn-luxury-primary" id="confirm-checkout-btn">
-                    <i class="fa-solid fa-lock"></i> Complete Order
+                    <i class="fa-solid fa-lock"></i> Continue to Checkout
                 </button>
             </div>
         </div>
@@ -859,7 +807,7 @@
     <!-- TOAST NOTIFICATION CONTAINER -->
     <div class="toast-container" id="toast-container"></div>
 
-    <!-- GLOBAL LUXURY FOOTER -->
+    <!-- GLOBAL FOOTER -->
     <footer class="app-footer">
         <div class="footer-container">
             <div class="footer-brand-col">
@@ -867,53 +815,37 @@
                     <div class="brand-icon"><i class="fa-solid fa-cube"></i></div>
                     <div class="brand-text">
                         <span class="brand-name">Relate</span>
-                        <span class="brand-badge">LuxStore</span>
+                        <span class="brand-badge">Store</span>
                     </div>
                 </div>
                 <p class="footer-tagline">
-                    An advanced machine learning-powered e-commerce ecosystem discovering product relationships and generating personalized recommendations from customer purchase patterns.
+                    An online store that discovers product relationships and recommends useful items based on real customer purchases.
                 </p>
-                <div class="footer-badge-strip">
-                    <span class="footer-tech-pill"><i class="fa-solid fa-microchip"></i> Apriori Algorithm</span>
-                    <span class="footer-tech-pill"><i class="fa-solid fa-brain"></i> TF-IDF Cosine Similarity</span>
-                    <span class="footer-tech-pill"><i class="fa-solid fa-bolt"></i> Real-Time Retraining</span>
-                </div>
             </div>
 
             <div class="footer-links-col">
                 <h4>Navigation</h4>
                 <ul>
                     <li><a href="#home" class="footer-nav-link" data-target="catalog-section">Home</a></li>
-                    <li><a href="#shop" class="footer-nav-link" data-target="catalog-section">Shop Collection</a></li>
-                    <li><a href="#about" class="footer-nav-link" data-target="about-section">About Relate</a></li>
-                    <li><a href="#profile" class="footer-nav-link" data-target="profile-section">User Profile</a></li>
+                    <li><a href="#shop" class="footer-nav-link" data-target="catalog-section">Shop</a></li>
+                    <li><a href="#about" class="footer-nav-link" data-target="about-section">About</a></li>
+                    <li><a href="#profile" class="footer-nav-link" data-target="profile-section">Profile</a></li>
                 </ul>
             </div>
 
             <div class="footer-links-col">
-                <h4>Recommendation Rails</h4>
+                <h4>Recommendations</h4>
                 <ul>
                     <li><span class="footer-sub-link">Frequently Bought Together</span></li>
                     <li><span class="footer-sub-link">Recommended Accessories</span></li>
-                    <li><span class="footer-sub-link">Similar Competing Products</span></li>
-                    <li><span class="footer-sub-link">Personalized Discovery Feed</span></li>
-                </ul>
-            </div>
-
-            <div class="footer-links-col">
-                <h4>Architecture</h4>
-                <ul>
-                    <li><span class="footer-sub-link">Python Flask REST API</span></li>
-                    <li><span class="footer-sub-link">MLxtend Association Mining</span></li>
-                    <li><span class="footer-sub-link">Node.js Nodemailer OTP</span></li>
-                    <li><span class="footer-sub-link">GSAP Micro-Interactions</span></li>
+                    <li><span class="footer-sub-link">Similar Products</span></li>
+                    <li><span class="footer-sub-link">Personalized Feed</span></li>
                 </ul>
             </div>
         </div>
 
         <div class="footer-bottom-bar">
-            <p>© 2026 Relate (LuxStore) Intelligent Recommendation System. Crafted with precision.</p>
-            <p class="footer-build-tag">Production Build v2.0 • High-Performance Machine Learning</p>
+            <p>© 2026 Relate. All rights reserved.</p>
         </div>
     </footer>
 

@@ -1,186 +1,268 @@
 {
-  "15shreyashetty@gmail.com": {
-    "name": "Shreya Shetty",
-    "password": "scrypt:32768:8:1$dGO2Dt3q39kDQfZE$af7e4bc6b4f34c015d9b957b093b4048fe059f2a29c977745041ae85fbe1be151726618289d03194e5e980839a478bd84958ace12279a4eac6ea52e02c937a5a",
-    "cart": [],
-    "wishlist": [],
-    "orders": [
-      {
-        "id": 852611,
-        "items": [
-          "Calvin Klein CK One",
-          "Red Nail Polish"
+    "15shreyashetty@gmail.com": {
+        "name": "Shreya Shetty",
+        "password": "scrypt:32768:8:1$dGO2Dt3q39kDQfZE$af7e4bc6b4f34c015d9b957b093b4048fe059f2a29c977745041ae85fbe1be151726618289d03194e5e980839a478bd84958ace12279a4eac6ea52e02c937a5a",
+        "cart": [],
+        "wishlist": [],
+        "orders": [
+            {
+                "id": 852611,
+                "items": [
+                    "Calvin Klein CK One",
+                    "Red Nail Polish"
+                ],
+                "total": 4718
+            },
+            {
+                "id": 334456,
+                "items": [
+                    "Calvin Klein CK One"
+                ],
+                "total": 1249
+            },
+            {
+                "id": 169334,
+                "items": [
+                    "Dior J'adore"
+                ],
+                "total": 2249
+            },
+            {
+                "id": 109397,
+                "items": [
+                    "Powder Canister"
+                ],
+                "total": 374
+            },
+            {
+                "id": 376730,
+                "items": [
+                    "Red Lipstick"
+                ],
+                "total": 324
+            },
+            {
+                "id": 559677,
+                "items": [
+                    "Plant Pot",
+                    "House Showpiece Plant"
+                ],
+                "total": 1373
+            },
+            {
+                "id": 783275,
+                "items": [
+                    "Red Nail Polish"
+                ],
+                "total": 764
+            },
+            {
+                "id": 1793785038,
+                "items": [
+                    "iPhone 13 Pro",
+                    "Ultra-Clear Tempered Glass Screen Protector",
+                    "Shockproof Crystal Clear Phone Case"
+                ],
+                "total": 138988,
+                "created_at": "2026-11-04 15:07:18"
+            }
         ],
-        "total": 4718
-      },
-      {
-        "id": 334456,
-        "items": [
-          "Calvin Klein CK One"
+        "customer_id": 1101
+    },
+    "k@gmain.com": {
+        "name": "karan",
+        "password": "0613",
+        "cart": [],
+        "wishlist": [
+            6,
+            4
         ],
-        "total": 1249
-      },
-      {
-        "id": 169334,
-        "items": [
-          "Dior J'adore"
+        "orders": [
+            {
+                "id": 961858,
+                "items": [
+                    "Calvin Klein CK One",
+                    "Dior J'adore"
+                ],
+                "total": 11198
+            },
+            {
+                "id": 723351,
+                "items": [
+                    "Essence Mascara Lash Princess"
+                ],
+                "total": 799
+            },
+            {
+                "id": 730701,
+                "items": [
+                    "Gigabyte Aorus Men Tshirt"
+                ],
+                "total": 624
+            },
+            {
+                "id": 305078,
+                "items": [
+                    "Sports Sneakers Off White & Red"
+                ],
+                "total": 2999
+            },
+            {
+                "id": 639874,
+                "items": [
+                    "Red Lipstick",
+                    "Eyeshadow Palette with Mirror"
+                ],
+                "total": 823
+            },
+            {
+                "id": 168540,
+                "items": [
+                    "Dior J'adore",
+                    "Calvin Klein CK One"
+                ],
+                "total": 3498
+            }
         ],
-        "total": 2249
-      },
-      {
-        "id": 109397,
-        "items": [
-          "Powder Canister"
+        "customer_id": 1102
+    },
+    "shreyasra7@gmail.com": {
+        "name": "Shreyas",
+        "password": "scrypt:32768:8:1$ABmzQx4aSVYQIQox$068cfe6dbb5c38f36c8276a91380042abdf773e6f16d836a6765985af0fbbe71f73aa470f9f57a7e4d78fd188d2002858cbab8c8a5b7edb23329fca118ff1b10",
+        "customer_id": 1103,
+        "cart": [],
+        "wishlist": [],
+        "orders": [
+            {
+                "id": 811960,
+                "items": [
+                    "iPad Mini 2021 Starlight"
+                ],
+                "total": 42499,
+                "status": "Delivered",
+                "created_at": "2026-11-04 15:14:38"
+            },
+            {
+                "id": 460387,
+                "items": [
+                    "Samsung 49-Inch CHG90 144Hz Curved Gaming Monitor (LC49HG90DMNXZA) \u2013 Super Ultrawide Screen QLED "
+                ],
+                "total": 84999,
+                "status": "Delivered",
+                "created_at": "2026-11-04 15:18:51"
+            },
+            {
+                "id": 451413,
+                "items": [
+                    "Acer SB220Q bi 21.5 inches Full HD (1920 x 1080) IPS Ultra-Thin",
+                    "Sleek Smartwatch with Vibrant Display"
+                ],
+                "total": 52275,
+                "status": "Delivered",
+                "created_at": "2026-11-04 15:19:32"
+            }
         ],
-        "total": 374
-      },
-      {
-        "id": 376730,
-        "items": [
-          "Red Lipstick"
+        "created_at": "2026-11-04 15:13:49"
+    },
+    "shreya@gmail.com": {
+        "name": "Shreya",
+        "password": "scrypt:32768:8:1$BnuY0aD06DPDRYGf$edd2bd1cbecfc4af836779299cb086b675edbd17c65bd79256ef5842281a87ea8b6edf0f8f44007b8b5426841b117d9302c259916394109e94137192d41a0d87",
+        "customer_id": 1104,
+        "cart": [],
+        "wishlist": [],
+        "orders": [
+            {
+                "id": 545979,
+                "items": [
+                    "Sleek Smartwatch with Vibrant Display"
+                ],
+                "total": 1360,
+                "status": "Delivered",
+                "created_at": "2026-11-04 15:20:50"
+            }
         ],
-        "total": 324
-      },
-      {
-        "id": 559677,
-        "items": [
-          "Plant Pot",
-          "House Showpiece Plant"
+        "created_at": "2026-11-04 15:20:18"
+    },
+    "shreyaaa@gmail.com": {
+        "name": "Shreya",
+        "password": "scrypt:32768:8:1$tRhNpWxJYtFILy82$45947fb92dbd3f01ddc2540b4075970057df3af6e060696d064f3b923f6fd58427c1df0576846ab0c146f053ebaa974dd4e3cf35b9a5988075c5599be5b28ecb",
+        "customer_id": 1105,
+        "cart": [],
+        "wishlist": [],
+        "orders": [
+            {
+                "id": 641218,
+                "items": [
+                    "Eyeshadow Palette with Mirror",
+                    "Red Lipstick"
+                ],
+                "total": 2803,
+                "status": "Delivered",
+                "created_at": "2026-11-05 20:31:14"
+            },
+            {
+                "id": 758150,
+                "items": [
+                    "Powder Canister"
+                ],
+                "total": 1274,
+                "status": "Delivered",
+                "created_at": "2026-11-05 21:22:18"
+            },
+            {
+                "id": 650901,
+                "items": [
+                    "Gucci Bloom Eau de",
+                    "Annibale Colombo Bed"
+                ],
+                "total": 168298,
+                "status": "Delivered",
+                "created_at": "2026-11-05 21:23:07"
+            }
         ],
-        "total": 1373
-      },
-      {
-        "id": 783275,
-        "items": [
-          "Red Nail Polish"
+        "created_at": "2026-11-05 20:30:54"
+    },
+    "karan@gmail.com": {
+        "name": "Karan",
+        "password": "scrypt:32768:8:1$phFY3lwaq3et0WrT$bbd6f1eabea25442d1aaead6679cebfed1bbae7efe22812083d2044168d2710ac07ca334c47781d02a41bcae8e547b43ac6ba16e42c758ea77f3364b9a21de3f",
+        "customer_id": 1106,
+        "cart": [
+            11
         ],
-        "total": 764
-      },
-      {
-        "id": 1793785038,
-        "items": [
-          "iPhone 13 Pro",
-          "Ultra-Clear Tempered Glass Screen Protector",
-          "Shockproof Crystal Clear Phone Case"
+        "wishlist": [
+            11
         ],
-        "total": 138988,
-        "created_at": "2026-11-04 15:07:18"
-      }
-    ],
-    "customer_id": 1101
-  },
-  "k@gmain.com": {
-    "name": "karan",
-    "password": "0613",
-    "cart": [],
-    "wishlist": [
-      6,
-      4
-    ],
-    "orders": [
-      {
-        "id": 961858,
-        "items": [
-          "Calvin Klein CK One",
-          "Dior J'adore"
+        "orders": [
+            {
+                "id": 488895,
+                "items": [
+                    "Eyeshadow Palette with Mirror"
+                ],
+                "total": 1699,
+                "status": "Delivered",
+                "created_at": "2026-11-05 20:32:01"
+            },
+            {
+                "id": 135079,
+                "items": [
+                    "Powder Canister",
+                    "Essence Mascara Lash Princess"
+                ],
+                "total": 2123,
+                "status": "Delivered",
+                "created_at": "2026-11-05 21:21:25"
+            },
+            {
+                "id": 671668,
+                "items": [
+                    "Annibale Colombo Bed",
+                    "Gucci Bloom Eau de"
+                ],
+                "total": 168298,
+                "status": "Delivered",
+                "created_at": "2026-11-05 21:23:45"
+            }
         ],
-        "total": 11198
-      },
-      {
-        "id": 723351,
-        "items": [
-          "Essence Mascara Lash Princess"
-        ],
-        "total": 799
-      },
-      {
-        "id": 730701,
-        "items": [
-          "Gigabyte Aorus Men Tshirt"
-        ],
-        "total": 624
-      },
-      {
-        "id": 305078,
-        "items": [
-          "Sports Sneakers Off White & Red"
-        ],
-        "total": 2999
-      },
-      {
-        "id": 639874,
-        "items": [
-          "Red Lipstick",
-          "Eyeshadow Palette with Mirror"
-        ],
-        "total": 823
-      },
-      {
-        "id": 168540,
-        "items": [
-          "Dior J'adore",
-          "Calvin Klein CK One"
-        ],
-        "total": 3498
-      }
-    ],
-    "customer_id": 1102
-  },
-  "shreyasra7@gmail.com": {
-    "name": "Shreyas",
-    "password": "scrypt:32768:8:1$ABmzQx4aSVYQIQox$068cfe6dbb5c38f36c8276a91380042abdf773e6f16d836a6765985af0fbbe71f73aa470f9f57a7e4d78fd188d2002858cbab8c8a5b7edb23329fca118ff1b10",
-    "customer_id": 1103,
-    "cart": [],
-    "wishlist": [],
-    "orders": [
-      {
-        "id": 811960,
-        "items": [
-          "iPad Mini 2021 Starlight"
-        ],
-        "total": 42499,
-        "status": "Delivered",
-        "created_at": "2026-11-04 15:14:38"
-      },
-      {
-        "id": 460387,
-        "items": [
-          "Samsung 49-Inch CHG90 144Hz Curved Gaming Monitor (LC49HG90DMNXZA) \u2013 Super Ultrawide Screen QLED "
-        ],
-        "total": 84999,
-        "status": "Delivered",
-        "created_at": "2026-11-04 15:18:51"
-      },
-      {
-        "id": 451413,
-        "items": [
-          "Acer SB220Q bi 21.5 inches Full HD (1920 x 1080) IPS Ultra-Thin",
-          "Sleek Smartwatch with Vibrant Display"
-        ],
-        "total": 52275,
-        "status": "Delivered",
-        "created_at": "2026-11-04 15:19:32"
-      }
-    ],
-    "created_at": "2026-11-04 15:13:49"
-  },
-  "shreya@gmail.com": {
-    "name": "Shreya",
-    "password": "scrypt:32768:8:1$BnuY0aD06DPDRYGf$edd2bd1cbecfc4af836779299cb086b675edbd17c65bd79256ef5842281a87ea8b6edf0f8f44007b8b5426841b117d9302c259916394109e94137192d41a0d87",
-    "customer_id": 1104,
-    "cart": [],
-    "wishlist": [],
-    "orders": [
-      {
-        "id": 545979,
-        "items": [
-          "Sleek Smartwatch with Vibrant Display"
-        ],
-        "total": 1360,
-        "status": "Delivered",
-        "created_at": "2026-11-04 15:20:50"
-      }
-    ],
-    "created_at": "2026-11-04 15:20:18"
-  }
+        "created_at": "2026-11-05 20:31:49"
+    }
 }

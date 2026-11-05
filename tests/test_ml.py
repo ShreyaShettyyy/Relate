@@ -14,6 +14,10 @@ from ml.model_loader import (
 
 
 class TestInstacartML(unittest.TestCase):
+    @unittest.skipUnless(
+        RAW_INSTACART_DIR.exists() and any(RAW_INSTACART_DIR.glob('*.csv')),
+        "Raw Instacart CSVs not present in data/raw/instacart/ (optional large dataset ignored in git)"
+    )
     def test_01_raw_instacart_files_exist(self):
         """Verify all 6 raw Instacart CSV files are present in data/raw/instacart/."""
         expected_files = [
