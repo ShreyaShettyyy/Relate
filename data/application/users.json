@@ -235,10 +235,7 @@
         "name": "Karan",
         "password": "scrypt:32768:8:1$phFY3lwaq3et0WrT$bbd6f1eabea25442d1aaead6679cebfed1bbae7efe22812083d2044168d2710ac07ca334c47781d02a41bcae8e547b43ac6ba16e42c758ea77f3364b9a21de3f",
         "customer_id": 1106,
-        "cart": [
-            47,
-            47
-        ],
+        "cart": [],
         "wishlist": [
             11
         ],
@@ -292,8 +289,41 @@
                 "total": 31022,
                 "status": "Delivered",
                 "created_at": "2026-11-05 22:17:50"
+            },
+            {
+                "id": 428920,
+                "items": [
+                    "Table Lamp",
+                    "Table Lamp",
+                    "Bedside Table African Cherry",
+                    "Bedside Table African Cherry",
+                    "House Showpiece Plant"
+                ],
+                "total": 62895,
+                "status": "Pending Delivery (Cash on Delivery)",
+                "payment_method": "COD",
+                "payment_id": null,
+                "shipping_address": {
+                    "full_name": "Karan",
+                    "phone": "09731350303",
+                    "street": "2-76D Mani, Kapikadu House, Mani, Bantwal, Mangaluru, Dakshina Kannada",
+                    "city": "Dakshina kannada",
+                    "state": "Karnataka",
+                    "pincode": "574253"
+                },
+                "phone": "09731350303",
+                "created_at": "2026-11-05 23:09:26"
             }
         ],
-        "created_at": "2026-11-05 20:31:49"
+        "created_at": "2026-11-05 20:31:49",
+        "phone": "09731350303",
+        "address": {
+            "full_name": "Karan",
+            "phone": "09731350303",
+            "street": "2-76D Mani, Kapikadu House, Mani, Bantwal, Mangaluru, Dakshina Kannada",
+            "city": "Dakshina kannada",
+            "state": "Karnataka",
+            "pincode": "574253"
+        }
     }
 }

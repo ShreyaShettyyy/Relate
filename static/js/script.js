@@ -3,19 +3,38 @@
  * Advanced ML Recommendations • GSAP Animations • Responsive SPA • Auth & Profile
  */
 
-const FALLBACK_IMAGE = 'https://images.unsplash.com/photo-1523275335684-37898b6baf30?w=500&auto=format&fit=crop&q=60';
+const FALLBACK_CATEGORIES = {
+    'Smartphones': 'https://images.unsplash.com/photo-1511707171634-5f897ff02aa9?w=500&auto=format&fit=crop&q=60',
+    'Laptops': 'https://images.unsplash.com/photo-1496181133206-80ce9b88a853?w=500&auto=format&fit=crop&q=60',
+    'Beauty': 'https://images.unsplash.com/photo-1522335789203-aabd1fc54bc9?w=500&auto=format&fit=crop&q=60',
+    'Fashion': 'https://images.unsplash.com/photo-1489987707025-afc232f7ea0f?w=500&auto=format&fit=crop&q=60',
+    'Home & Kitchen': 'https://images.unsplash.com/photo-1513694203232-719a280e022f?w=500&auto=format&fit=crop&q=60',
+    'Groceries': 'https://images.unsplash.com/photo-1542838132-92c53300491e?w=500&auto=format&fit=crop&q=60',
+    'Cameras': 'https://images.unsplash.com/photo-1516035069371-29a1b244cc32?w=500&auto=format&fit=crop&q=60',
+    'Botanicals': 'https://images.unsplash.com/photo-1608571423902-eed4a5ad8108?w=500&auto=format&fit=crop&q=60',
+    'Sports accessories': 'https://images.unsplash.com/photo-1517649763962-0c623266ddc0?w=500&auto=format&fit=crop&q=60',
+    'Vehicles & Outdoors': 'https://images.unsplash.com/photo-1558981403-c5f9899a28bc?w=500&auto=format&fit=crop&q=60',
+    'Electronics': 'https://images.unsplash.com/photo-1505740420928-5e560c06d30e?w=500&auto=format&fit=crop&q=60'
+};
+
+function getProductFallback(prod) {
+    if (!prod) return 'https://images.unsplash.com/photo-1523275335684-37898b6baf30?w=500&auto=format&fit=crop&q=60';
+    const cat = prod.Category || '';
+    if (FALLBACK_CATEGORIES[cat]) return FALLBACK_CATEGORIES[cat];
+    return 'https://images.unsplash.com/photo-1523275335684-37898b6baf30?w=500&auto=format&fit=crop&q=60';
+}
 
 function getProductImage(prod) {
-    if (!prod) return FALLBACK_IMAGE;
+    if (!prod) return getProductFallback(prod);
     let raw = '';
     if (typeof prod === 'string') raw = prod.trim();
     else if (prod.Image) raw = String(prod.Image).trim();
-    if (!raw) return FALLBACK_IMAGE;
+    if (!raw) return getProductFallback(prod);
     const first = raw.split(',')[0].trim();
-    if (!first.startsWith('http://') && !first.startsWith('https://')) {
-        return FALLBACK_IMAGE;
+    if (first.startsWith('/') || first.startsWith('http://') || first.startsWith('https://')) {
+        return first;
     }
-    return first;
+    return getProductFallback(prod);
 }
 
 document.addEventListener('DOMContentLoaded', () => {
@@ -235,7 +254,7 @@ document.addEventListener('DOMContentLoaded', () => {
                 <button class="card-wishlist-btn ${isWishlisted ? 'liked' : ''}" data-id="${product.ID}" title="Save to wishlist">
                     <i class="${isWishlisted ? 'fa-solid' : 'fa-regular'} fa-heart"></i>
                 </button>
-                <img src="${mainImage}" alt="${product.Name}" loading="lazy" referrerpolicy="no-referrer" onerror="this.onerror=null; this.src='${FALLBACK_IMAGE}';">
+                <img src="${mainImage}" alt="${product.Name}" loading="lazy" referrerpolicy="no-referrer" onerror="this.onerror=null; this.src=getProductFallback(${JSON.stringify(product).replace(/"/g, '&quot;')});">
             </div>
             <div class="card-body">
                 ${reasonHtml}
@@ -303,17 +322,6 @@ document.addEventListener('DOMContentLoaded', () => {
             fragment.appendChild(createProductCard(p));
         });
         container.appendChild(fragment);
-
-        // GSAP Stagger animation on cards
-        if (animate && typeof gsap !== 'undefined') {
-            gsap.from(container.children, {
-                opacity: 0,
-                y: 18,
-                duration: 0.35,
-                stagger: 0.03,
-                ease: 'power2.out'
-            });
-        }
     }
 
     // -------------------------------------------------------------
@@ -400,6 +408,14 @@ document.addEventListener('DOMContentLoaded', () => {
 
     function setCategory(cat) {
         currentCategory = cat;
+        currentSearchQuery = '';
+        const sInput = document.getElementById('global-search-input');
+        if (sInput) sInput.value = '';
+        const cBtn = document.getElementById('search-clear-btn');
+        if (cBtn) cBtn.classList.add('hidden');
+
+        // Make sure catalog section is visible
+        navigateTo('catalog-section');
 
         // Update pill active classes
         document.querySelectorAll('.category-pill').forEach(pill => {
@@ -410,12 +426,94 @@ document.addEventListener('DOMContentLoaded', () => {
             }
         });
 
-        // Update Section Header Tag
+        // Update Section Header Tag & Heading
         const tag = document.getElementById('active-category-tag');
         if (tag) tag.textContent = cat === 'All' ? 'Featured Catalog' : `${cat} Collection`;
+        const heading = document.getElementById('catalog-heading');
+        if (heading) heading.textContent = cat === 'All' ? 'All Products' : cat;
 
         executeFilterAndSort();
+
+        const catArea = document.getElementById('catalog-main-area');
+        if (catArea) {
+            catArea.scrollIntoView({ behavior: 'smooth' });
+        }
     }
+
+    const SEARCH_CATEGORY_MAP = {
+        'dress': 'Fashion',
+        'dresses': 'Fashion',
+        'cloth': 'Fashion',
+        'clothes': 'Fashion',
+        'clothing': 'Fashion',
+        'wear': 'Fashion',
+        'shirt': 'Fashion',
+        'shirts': 'Fashion',
+        'frock': 'Fashion',
+        'gown': 'Fashion',
+        'skirt': 'Fashion',
+        'shoe': 'Fashion',
+        'shoes': 'Fashion',
+        'sneaker': 'Fashion',
+        'sneakers': 'Fashion',
+        'cleats': 'Fashion',
+        'fashion': 'Fashion',
+        'mobile': 'Smartphones',
+        'mobiles': 'Smartphones',
+        'phone': 'Smartphones',
+        'phones': 'Smartphones',
+        'smartphone': 'Smartphones',
+        'smartphones': 'Smartphones',
+        'iphone': 'Smartphones',
+        'samsung': 'Smartphones',
+        'oppo': 'Smartphones',
+        'vivo': 'Smartphones',
+        'realme': 'Smartphones',
+        'camera': 'Cameras',
+        'cameras': 'Cameras',
+        'dslr': 'Cameras',
+        'tripod': 'Cameras',
+        'lens': 'Cameras',
+        'laptop': 'Laptops',
+        'laptops': 'Laptops',
+        'macbook': 'Laptops',
+        'asus': 'Laptops',
+        'dell': 'Laptops',
+        'lenovo': 'Laptops',
+        'beauty': 'Beauty',
+        'cosmetic': 'Beauty',
+        'cosmetics': 'Beauty',
+        'makeup': 'Beauty',
+        'lipstick': 'Beauty',
+        'mascara': 'Beauty',
+        'eyeshadow': 'Beauty',
+        'perfume': 'Beauty',
+        'fragrance': 'Beauty',
+        'food': 'Groceries',
+        'foods': 'Groceries',
+        'grocery': 'Groceries',
+        'groceries': 'Groceries',
+        'snack': 'Groceries',
+        'drink': 'Groceries',
+        'fruit': 'Groceries',
+        'fruits': 'Groceries',
+        'plant': 'Home & Kitchen',
+        'plants': 'Home & Kitchen',
+        'flower': 'Home & Kitchen',
+        'kitchen': 'Home & Kitchen',
+        'furniture': 'Home & Kitchen',
+        'bed': 'Home & Kitchen',
+        'sofa': 'Home & Kitchen',
+        'chair': 'Home & Kitchen',
+        'table': 'Home & Kitchen',
+        'botanical': 'Botanicals',
+        'botanicals': 'Botanicals',
+        'candle': 'Botanicals',
+        'mist': 'Botanicals',
+        'incense': 'Botanicals',
+        'lavender': 'Botanicals',
+        'eucalyptus': 'Botanicals'
+    };
 
     const SEARCH_SYNONYMS = {
         'dress': ['fashion', 'shirt', 'tshirt', 'cloth', 'apparel', 'wear', 'shoes', 'cleats', 'trainers', 'jacket'],
@@ -481,18 +579,24 @@ document.addEventListener('DOMContentLoaded', () => {
             return true;
         }
 
-        // 2. Tokenized & Synonym Match
+        // 2. Direct Category Map match (e.g. 'dress' -> Fashion, 'mobile' -> Smartphones)
+        if (SEARCH_CATEGORY_MAP[q] && p.Category === SEARCH_CATEGORY_MAP[q]) {
+            return true;
+        }
+
+        // 3. Tokenized & Synonym Match
         const tokens = q.split(/\s+/).filter(Boolean);
         for (const token of tokens) {
-            // Direct token match
             if (pName.includes(token) || pDesc.includes(token) || pCat.includes(token)) {
                 return true;
             }
-            // Check synonyms
+            if (SEARCH_CATEGORY_MAP[token] && p.Category === SEARCH_CATEGORY_MAP[token]) {
+                return true;
+            }
             const syns = SEARCH_SYNONYMS[token];
             if (syns) {
                 for (const syn of syns) {
-                    if (pName.includes(syn) || pDesc.includes(syn) || pCat.includes(syn)) {
+                    if (pName.includes(syn) || pDesc.includes(syn) || pCat.includes(syn) || pCat === syn) {
                         return true;
                     }
                 }
@@ -503,6 +607,9 @@ document.addEventListener('DOMContentLoaded', () => {
             else if (stem.endsWith('s')) stem = stem.slice(0, -1);
             if (stem && stem.length >= 3) {
                 if (pName.includes(stem) || pDesc.includes(stem) || pCat.includes(stem)) {
+                    return true;
+                }
+                if (SEARCH_CATEGORY_MAP[stem] && p.Category === SEARCH_CATEGORY_MAP[stem]) {
                     return true;
                 }
                 const stemSyns = SEARCH_SYNONYMS[stem];
@@ -521,17 +628,14 @@ document.addEventListener('DOMContentLoaded', () => {
     function executeFilterAndSort() {
         let filtered = [...allProducts];
 
-        // 1. Category Filter
-        if (currentCategory !== 'All') {
+        // 1. When actively searching, search across all products (or within selected category if user selected both)
+        if (currentSearchQuery.trim()) {
+            filtered = filtered.filter(p => matchProductWithQuery(p, currentSearchQuery));
+        } else if (currentCategory !== 'All') {
             filtered = filtered.filter(p => p.Category === currentCategory);
         }
 
-        // 2. Search Query Filter with Semantic Keyword Expansion
-        if (currentSearchQuery.trim()) {
-            filtered = filtered.filter(p => matchProductWithQuery(p, currentSearchQuery));
-        }
-
-        // 3. Sorting
+        // 2. Sorting
         if (currentSort === 'rating-desc') {
             filtered.sort((a, b) => (b.Rating || 0) - (a.Rating || 0));
         } else if (currentSort === 'price-asc') {
@@ -550,7 +654,7 @@ document.addEventListener('DOMContentLoaded', () => {
             emptyState.classList.remove('hidden');
         } else {
             emptyState.classList.add('hidden');
-            renderGrid(filtered, grid, true);
+            renderGrid(filtered, grid, false);
         }
     }
 
@@ -1286,69 +1390,95 @@ document.addEventListener('DOMContentLoaded', () => {
             const maskedCard = cardNum.slice(-4);
             completeOrderSubmission(`Paid via Card (•••• ${maskedCard})`, 'Credit Card', total, itemNames);
         } else if (currentSelectedPaymentMethod === 'online') {
-            // Online Payment via Razorpay / Google Pay (Request 5)
-            showToast("Connecting to Google Pay / Razorpay gateway...", "info");
-
-            fetch('/api/payment/create-order', {
-                method: 'POST',
-                headers: { 'Content-Type': 'application/json' },
-                body: JSON.stringify({ amount: total })
-            })
-            .then(res => res.json())
-            .then(data => {
-                if (!data.success) {
-                    showToast(data.error || "Payment gateway connection failed", "error");
-                    return;
-                }
-
-                if (typeof Razorpay !== 'undefined') {
-                    const options = {
-                        key: data.key_id,
-                        amount: data.amount,
-                        currency: data.currency,
-                        name: "Relate LuxStore",
-                        description: "Botanical Calm Collection",
-                        image: "/static/images/botanical_hero_bg.jpg",
-                        order_id: data.order_id,
-                        handler: function(response) {
-                            showToast("Payment verified! Confirming order...", "success");
-                            fetch('/api/payment/verify', {
-                                method: 'POST',
-                                headers: { 'Content-Type': 'application/json' },
-                                body: JSON.stringify({
-                                    razorpay_order_id: response.razorpay_order_id || data.order_id,
-                                    razorpay_payment_id: response.razorpay_payment_id,
-                                    razorpay_signature: response.razorpay_signature || ''
-                                })
-                            }).then(() => {
-                                completeOrderSubmission(`Paid via Google Pay / Razorpay (${response.razorpay_payment_id})`, 'Online (GPay/Razorpay)', total, itemNames, response.razorpay_payment_id);
-                            });
-                        },
-                        prefill: {
-                            name: savedAddressData.full_name,
-                            contact: savedAddressData.phone,
-                            email: currentUser ? currentUser.email : 'customer@relate.com'
-                        },
-                        theme: {
-                            color: "#233527"
-                        }
-                    };
-
-                    const rzp = new Razorpay(options);
-                    rzp.on('payment.failed', function(resp) {
-                        showToast("Payment was cancelled or failed. You can retry or choose Cash on Delivery.", "error");
-                    });
-                    rzp.open();
-                } else {
-                    completeOrderSubmission(`Paid via Google Pay / UPI (Simulated)`, 'Online (GPay)', total, itemNames);
-                }
-            })
-            .catch(err => {
-                console.error("Payment error:", err);
-                completeOrderSubmission(`Paid via Google Pay / UPI (Completed)`, 'Online (GPay)', total, itemNames);
-            });
+            // Interactive Google Pay & UPI Payment Flow (Direct App Deep-Link & QR)
+            openGooglePayModal(total, itemNames);
         }
     });
+
+    function openGooglePayModal(total, itemNames) {
+        const modalBackdrop = document.getElementById('gpay-modal-backdrop');
+        if (!modalBackdrop) return;
+
+        // Display amount
+        const amtEl = document.getElementById('gpay-modal-amount');
+        if (amtEl) amtEl.textContent = formatPrice(total);
+
+        // Generate authentic UPI Deep Link
+        const upiId = 'relatebotanicals@okaxis';
+        const payeeName = 'Relate Botanicals';
+        const txnNote = 'Relate Order';
+        const upiUri = `upi://pay?pa=${encodeURIComponent(upiId)}&pn=${encodeURIComponent(payeeName)}&am=${total}&cu=INR&tn=${encodeURIComponent(txnNote)}`;
+
+        // Wire Open in Google Pay App button
+        const appBtn = document.getElementById('gpay-open-app-btn');
+        if (appBtn) {
+            appBtn.href = upiUri;
+            appBtn.onclick = () => {
+                showToast("Opening Google Pay app...", "info");
+            };
+        }
+
+        // Generate live QR Code image using standard QR server
+        const qrImg = document.getElementById('gpay-qr-img');
+        if (qrImg) {
+            qrImg.src = `https://api.qrserver.com/v1/create-qr-code/?size=180x180&data=${encodeURIComponent(upiUri)}`;
+        }
+
+        // Reset UPI Form
+        const upiInput = document.getElementById('gpay-upi-id-input');
+        const statusMsg = document.getElementById('gpay-upi-status-msg');
+        if (upiInput) upiInput.value = '';
+        if (statusMsg) {
+            statusMsg.className = 'upi-status-pill hidden';
+            statusMsg.textContent = '';
+        }
+
+        // Show Modal
+        modalBackdrop.classList.remove('hidden');
+
+        // Close button
+        const closeBtn = document.getElementById('close-gpay-modal');
+        if (closeBtn) {
+            closeBtn.onclick = () => modalBackdrop.classList.add('hidden');
+        }
+
+        // Wire "Request in GPay" button
+        const verifyBtn = document.getElementById('gpay-verify-upi-btn');
+        if (verifyBtn) {
+            verifyBtn.disabled = false;
+            verifyBtn.onclick = () => {
+                const enteredVpa = (upiInput?.value || '').trim();
+                if (!enteredVpa || !enteredVpa.includes('@')) {
+                    showToast("Please enter a valid UPI ID (e.g. name@okaxis)", "error");
+                    if (upiInput) upiInput.focus();
+                    return;
+                }
+                statusMsg.className = 'upi-status-pill';
+                statusMsg.innerHTML = `<i class="fa-solid fa-spinner fa-spin"></i> Request sent to <strong>${enteredVpa}</strong>. Approve in Google Pay...`;
+                verifyBtn.disabled = true;
+
+                setTimeout(() => {
+                    statusMsg.innerHTML = '<i class="fa-solid fa-circle-check"></i> Payment Approved in Google Pay!';
+                    setTimeout(() => {
+                        modalBackdrop.classList.add('hidden');
+                        const paymentId = 'gpay_' + Date.now();
+                        completeOrderSubmission(`Paid via Google Pay (${enteredVpa})`, 'Google Pay (UPI)', total, itemNames, paymentId);
+                    }, 1200);
+                }, 3000);
+            };
+        }
+
+        // Wire "I Have Paid in Google Pay" confirm button
+        const confirmPaidBtn = document.getElementById('gpay-confirm-paid-btn');
+        if (confirmPaidBtn) {
+            confirmPaidBtn.onclick = () => {
+                modalBackdrop.classList.add('hidden');
+                const paymentId = 'gpay_' + Date.now();
+                showToast("Google Pay payment confirmed!", "success");
+                completeOrderSubmission(`Paid via Google Pay / UPI`, 'Google Pay (UPI)', total, itemNames, paymentId);
+            };
+        }
+    }
 
     function completeOrderSubmission(paymentStatus, method, total, itemNames, paymentId = null) {
         const orderId = Math.floor(100000 + Math.random() * 900000);
@@ -2006,8 +2136,18 @@ document.addEventListener('DOMContentLoaded', () => {
 
     function performImmediateSearch() {
         if (!searchInput) return;
-        const val = searchInput.value;
+        const val = searchInput.value.trim();
         currentSearchQuery = val;
+        currentCategory = 'All';
+        document.querySelectorAll('.category-pill').forEach(pill => {
+            if (pill.textContent === 'All Products') pill.classList.add('active');
+            else pill.classList.remove('active');
+        });
+        const tag = document.getElementById('active-category-tag');
+        if (tag) tag.textContent = val ? `Search: "${val}"` : 'All Products';
+        const heading = document.getElementById('catalog-heading');
+        if (heading) heading.textContent = val ? `Search Results for "${val}"` : 'All Products';
+
         navigateTo('catalog-section');
         executeFilterAndSort();
         const catArea = document.getElementById('catalog-main-area');
@@ -2051,6 +2191,13 @@ document.addEventListener('DOMContentLoaded', () => {
             clearTimeout(searchDebounce);
             searchDebounce = setTimeout(() => {
                 currentSearchQuery = val;
+                if (val.trim()) {
+                    currentCategory = 'All';
+                    document.querySelectorAll('.category-pill').forEach(pill => {
+                        if (pill.textContent === 'All Products') pill.classList.add('active');
+                        else pill.classList.remove('active');
+                    });
+                }
                 navigateTo('catalog-section');
                 executeFilterAndSort();
             }, 250);

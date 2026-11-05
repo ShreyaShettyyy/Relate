@@ -3940,21 +3940,31 @@ body.luxury-dark-theme .payment-icon-box {
     color: #c7decb;
 }
 
+.payment-text-group {
+    flex: 1;
+    min-width: 0;
+    padding-right: 140px;
+}
+
 .payment-text-group h4 {
     font-size: 0.95rem;
     font-weight: 600;
     color: var(--text-primary);
-    margin-bottom: 2px;
+    margin-bottom: 4px;
+    line-height: 1.35;
+    word-break: break-word;
 }
 
 .payment-text-group p {
     font-size: 0.8rem;
     color: var(--text-secondary);
+    line-height: 1.4;
+    margin: 0;
 }
 
 .payment-recommended-pill {
     position: absolute;
-    top: 14px;
+    top: 16px;
     right: 18px;
     font-size: 0.68rem;
     font-weight: 700;
@@ -3971,12 +3981,44 @@ body.luxury-dark-theme .payment-recommended-pill {
     color: #9ce0b5;
 }
 
+@media (max-width: 600px) {
+    .payment-text-group {
+        padding-right: 0;
+        margin-bottom: 12px;
+    }
+    .payment-recommended-pill {
+        position: static;
+        display: inline-block;
+        margin-top: 6px;
+    }
+}
+
 .card-details-box, .online-apps-banner {
     margin-top: 16px;
-    padding: 18px 20px;
+    padding: 20px 24px;
     border-radius: 18px;
     background: rgba(240, 246, 242, 0.7);
     border: 1px solid var(--border-subtle);
+}
+
+.card-details-box .form-group {
+    margin-bottom: 14px;
+}
+
+.card-details-box .form-group:last-child {
+    margin-bottom: 0;
+}
+
+.form-row-2 {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 16px;
+}
+
+@media (max-width: 500px) {
+    .form-row-2 {
+        grid-template-columns: 1fr;
+    }
 }
 
 body.luxury-dark-theme .card-details-box,
@@ -4312,15 +4354,21 @@ body.luxury-dark-theme .success-icon-bubble {
 
 .order-success-title {
     font-family: var(--font-heading);
-    font-size: 2.5rem;
+    font-size: 2.3rem;
+    line-height: 1.25;
     color: var(--text-primary);
-    margin-bottom: 8px;
+    margin: 8px 0;
+    word-break: break-word;
 }
 
 .order-success-subtitle {
     font-size: 0.95rem;
+    line-height: 1.5;
     color: var(--text-secondary);
     margin-bottom: 28px;
+    max-width: 520px;
+    margin-left: auto;
+    margin-right: auto;
 }
 
 .success-order-details-card {
@@ -4339,24 +4387,34 @@ body.luxury-dark-theme .success-order-details-card {
 .detail-row {
     display: flex;
     justify-content: space-between;
+    align-items: flex-start;
+    gap: 20px;
     font-size: 0.9rem;
-    padding: 8px 0;
+    padding: 10px 0;
     border-bottom: 1px solid var(--border-subtle);
+    line-height: 1.4;
 }
 
 .detail-row.total-row {
     border-bottom: none;
-    padding-top: 12px;
+    padding-top: 14px;
     font-size: 1.15rem;
     font-weight: 700;
 }
 
 .detail-lbl {
     color: var(--text-secondary);
+    flex-shrink: 0;
+    min-width: 140px;
+    font-weight: 500;
 }
 
 .detail-val {
     color: var(--text-primary);
+    text-align: right;
+    word-break: break-word;
+    max-width: 65%;
+    font-weight: 600;
 }
 
 .success-actions-row {
@@ -4365,4 +4423,247 @@ body.luxury-dark-theme .success-order-details-card {
     justify-content: center;
     gap: 16px;
     flex-wrap: wrap;
+}
+
+/* ==============================================================================
+   GOOGLE PAY & UPI INTERACTIVE CHECKOUT MODAL
+   ============================================================================== */
+.gpay-modal-card {
+    max-width: 460px;
+    width: 90%;
+    margin: 40px auto;
+    padding: 32px 28px;
+    border-radius: 26px;
+    background: rgba(255, 255, 255, 0.95);
+    backdrop-filter: blur(25px);
+    border: 1px solid rgba(195, 215, 201, 0.85);
+    box-shadow: 0 20px 60px rgba(35, 60, 45, 0.18);
+    position: relative;
+    text-align: center;
+}
+
+body.luxury-dark-theme .gpay-modal-card {
+    background: rgba(18, 32, 22, 0.95);
+    border-color: rgba(105, 155, 122, 0.4);
+    box-shadow: 0 25px 70px rgba(0, 0, 0, 0.6);
+}
+
+.gpay-modal-header {
+    margin-bottom: 20px;
+}
+
+.gpay-brand-pill {
+    display: inline-flex;
+    align-items: center;
+    gap: 8px;
+    background: #eef5f0;
+    color: #1e7040;
+    font-size: 0.82rem;
+    font-weight: 700;
+    padding: 6px 16px;
+    border-radius: 9999px;
+    margin-bottom: 12px;
+}
+
+body.luxury-dark-theme .gpay-brand-pill {
+    background: rgba(35, 65, 45, 0.6);
+    color: #9ce0b5;
+}
+
+.gpay-modal-header h3 {
+    font-family: var(--font-heading);
+    font-size: 1.65rem;
+    color: var(--text-primary);
+    margin-bottom: 4px;
+}
+
+.gpay-modal-header p {
+    font-size: 0.82rem;
+    color: var(--text-secondary);
+}
+
+.gpay-amount-box {
+    background: #f1f6f2;
+    border: 1px solid var(--border-subtle);
+    border-radius: 16px;
+    padding: 12px 20px;
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    margin-bottom: 18px;
+}
+
+body.luxury-dark-theme .gpay-amount-box {
+    background: rgba(26, 44, 32, 0.7);
+}
+
+.gpay-amount-lbl {
+    font-size: 0.85rem;
+    font-weight: 500;
+    color: var(--text-secondary);
+}
+
+.gpay-amount-val {
+    font-size: 1.35rem;
+    font-weight: 700;
+    color: var(--text-primary);
+}
+
+.gpay-app-intent-btn {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    gap: 10px;
+    width: 100%;
+    padding: 14px 20px;
+    border-radius: 9999px;
+    background: #1e7040;
+    color: #ffffff;
+    font-weight: 600;
+    font-size: 0.95rem;
+    text-decoration: none;
+    box-shadow: 0 4px 14px rgba(30, 112, 64, 0.25);
+    transition: all 0.2s ease;
+    cursor: pointer;
+}
+
+.gpay-app-intent-btn:hover {
+    background: #165631;
+    transform: translateY(-1px);
+    box-shadow: 0 6px 18px rgba(30, 112, 64, 0.35);
+}
+
+.gpay-divider {
+    display: flex;
+    align-items: center;
+    margin: 18px 0;
+    color: var(--text-muted);
+    font-size: 0.7rem;
+    font-weight: 600;
+    letter-spacing: 0.1em;
+}
+
+.gpay-divider::before, .gpay-divider::after {
+    content: '';
+    flex: 1;
+    border-bottom: 1px solid var(--border-subtle);
+}
+
+.gpay-divider span {
+    padding: 0 10px;
+}
+
+.gpay-qr-wrapper {
+    margin-bottom: 18px;
+}
+
+.gpay-qr-card {
+    width: 180px;
+    height: 180px;
+    margin: 0 auto 12px;
+    padding: 8px;
+    background: #ffffff;
+    border-radius: 16px;
+    box-shadow: 0 6px 20px rgba(0, 0, 0, 0.08);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+}
+
+.gpay-qr-card img {
+    width: 100%;
+    height: 100%;
+    object-fit: contain;
+}
+
+.gpay-apps-supported-icons {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    gap: 8px;
+    flex-wrap: wrap;
+}
+
+.mini-app-badge {
+    font-size: 0.72rem;
+    font-weight: 600;
+    background: rgba(220, 238, 226, 0.6);
+    color: #1e7040;
+    padding: 3px 9px;
+    border-radius: 9999px;
+}
+
+body.luxury-dark-theme .mini-app-badge {
+    background: rgba(35, 65, 45, 0.5);
+    color: #9ce0b5;
+}
+
+.gpay-upi-field-box {
+    margin: 16px 0;
+    text-align: left;
+}
+
+.gpay-upi-field-box label {
+    display: block;
+    font-size: 0.78rem;
+    font-weight: 600;
+    color: var(--text-secondary);
+    margin-bottom: 6px;
+}
+
+.upi-input-group {
+    display: flex;
+    gap: 8px;
+}
+
+.upi-input-group input {
+    flex: 1;
+    padding: 9px 14px;
+    border-radius: 12px;
+    border: 1px solid var(--border-subtle);
+    background: rgba(255, 255, 255, 0.8);
+    font-size: 0.85rem;
+    color: var(--text-primary);
+    outline: none;
+}
+
+body.luxury-dark-theme .upi-input-group input {
+    background: rgba(24, 40, 30, 0.8);
+    color: #e6f0e9;
+}
+
+.btn-verify-upi {
+    padding: 9px 16px;
+    border-radius: 12px;
+    background: #243829;
+    color: #ffffff;
+    border: none;
+    font-size: 0.8rem;
+    font-weight: 600;
+    cursor: pointer;
+    white-space: nowrap;
+    transition: background 0.2s ease;
+}
+
+.btn-verify-upi:hover {
+    background: #18281d;
+}
+
+.upi-status-pill {
+    margin-top: 8px;
+    padding: 8px 12px;
+    border-radius: 10px;
+    font-size: 0.78rem;
+    text-align: center;
+    background: #eaf5ed;
+    color: #1e7040;
+    font-weight: 600;
+}
+
+.gpay-confirm-btn {
+    width: 100%;
+    margin-top: 10px;
+    padding: 12px 20px;
+    font-size: 0.9rem;
+    font-weight: 600;
 }
