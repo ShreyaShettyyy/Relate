@@ -317,6 +317,7 @@ document.addEventListener('DOMContentLoaded', () => {
                 allCategories = data.categories || [];
 
                 populateCategoryControls(allCategories);
+                executeFilterAndSort();
                 fetchUserFeed();
                 updateBadgeCounters();
 
@@ -1616,13 +1617,22 @@ document.addEventListener('DOMContentLoaded', () => {
         navigateTo('about-section');
     });
 
-    document.getElementById('hero-explore-btn').addEventListener('click', () => {
-        document.getElementById('catalog-main-area').scrollIntoView({ behavior: 'smooth' });
-    });
+    const heroExploreBtn = document.getElementById('hero-explore-btn');
+    if (heroExploreBtn) {
+        heroExploreBtn.addEventListener('click', (e) => {
+            e.preventDefault();
+            const catArea = document.getElementById('catalog-main-area');
+            if (catArea) catArea.scrollIntoView({ behavior: 'smooth' });
+        });
+    }
 
-    document.getElementById('hero-about-btn').addEventListener('click', () => {
-        navigateTo('about-section');
-    });
+    const heroAboutBtn = document.getElementById('hero-about-btn');
+    if (heroAboutBtn) {
+        heroAboutBtn.addEventListener('click', (e) => {
+            e.preventDefault();
+            navigateTo('about-section');
+        });
+    }
 
     document.getElementById('crumb-home').addEventListener('click', () => {
         navigateTo('catalog-section');
