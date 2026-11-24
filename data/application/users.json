@@ -177,12 +177,7 @@
         "name": "Shreya",
         "password": "scrypt:32768:8:1$BnuY0aD06DPDRYGf$edd2bd1cbecfc4af836779299cb086b675edbd17c65bd79256ef5842281a87ea8b6edf0f8f44007b8b5426841b117d9302c259916394109e94137192d41a0d87",
         "customer_id": 1104,
-        "cart": [
-            255,
-            4,
-            83,
-            253
-        ],
+        "cart": [],
         "wishlist": [
             255
         ],

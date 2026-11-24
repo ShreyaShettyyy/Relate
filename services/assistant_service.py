@@ -181,7 +181,12 @@ class VoiceAssistantService:
         budget_match = re.search(r'(?:under|below|less than|within|around)\s*(?:rs\.?|inr|₹)?\s*(\d+)', q)
         max_price = int(budget_match.group(1)) if budget_match else None
 
-        # 6. Check for Category Inquiries (e.g. "show laptops", "smartphones", "luxury watches", "shoes")
+        # 5.5 Check for Focused Product Sub-categories (Shoes, Watches, Perfumes, Speakers, Headphones)
+        focused = self._check_focused_item_query(q, max_price=max_price)
+        if focused:
+            return focused
+
+        # 6. Check for Category Inquiries (e.g. "show laptops", "smartphones")
         cat_match = self._match_category(q)
         if cat_match:
             products = self._filter_by_category(cat_match, max_price=max_price)
@@ -219,10 +224,88 @@ class VoiceAssistantService:
     # --------------------------------------------------------------------------
     # INTENT HELPERS
     # --------------------------------------------------------------------------
+    def _check_focused_item_query(self, q, max_price=None):
+        """
+        Catches queries for specific product sub-types (e.g. 'shoes', 'watches', 'perfumes', 'cameras')
+        so they do not get swallowed by overly broad top-level category defaults.
+        """
+        if self.clean_df is None or self.clean_df.empty:
+            return None
+
+        # A. Footwear / Shoes
+        if any(re.search(r'\b' + re.escape(w) + r'\b', q) for w in ['shoes', 'shoe', 'sneakers', 'sneaker', 'trainers', 'footwear', 'cleats', 'loafers', 'sandals', 'heels']):
+            matches = self.clean_df[self.clean_df['Name_clean'].str.contains(r'shoe|sneaker|jordan|rider|cleat|heel|loafer|suede casual|sandals', regex=True)]
+            if max_price:
+                matches = matches[matches['Price'] <= max_price]
+            if not matches.empty:
+                results = [self._to_dict(r) for _, r in matches.sort_values(by='Rating', ascending=False).iterrows()]
+                return {
+                    "reply": "Here are our top footwear styles and designer sneakers. Which pair would you like to explore?",
+                    "products": results[:6],
+                    "action": {"type": "none"}
+                }
+
+        # B. Luxury Watches
+        if any(re.search(r'\b' + re.escape(w) + r'\b', q) for w in ['watches', 'watch', 'rolex', 'timepiece', 'timepieces']):
+            matches = self.clean_df[self.clean_df['Name_clean'].str.contains(r'rolex|watch|longines', regex=True)]
+            if max_price:
+                matches = matches[matches['Price'] <= max_price]
+            if not matches.empty:
+                results = [self._to_dict(r) for _, r in matches.sort_values(by=['Price', 'Rating'], ascending=[False, False]).iterrows()]
+                return {
+                    "reply": "Here are our luxury Swiss timepieces and master collection watches.",
+                    "products": results[:6],
+                    "action": {"type": "none"}
+                }
+
+        # C. Fragrances / Perfumes
+        if any(re.search(r'\b' + re.escape(w) + r'\b', q) for w in ['perfume', 'perfumes', 'fragrance', 'fragrances', 'cologne', 'scent']):
+            matches = self.clean_df[
+                ((self.clean_df['Category_clean'] == 'beauty') & (self.clean_df['Name_clean'].str.contains(r'dior|chanel|ck one|gucci bloom|dolce|perfume|eau de|fragrance', regex=True))) |
+                (self.clean_df['Name_clean'].str.contains(r'radiant citrus', regex=True))
+            ]
+            if max_price:
+                matches = matches[matches['Price'] <= max_price]
+            if not matches.empty:
+                results = [self._to_dict(r) for _, r in matches.sort_values(by='Rating', ascending=False).iterrows()]
+                return {
+                    "reply": "Here are our signature designer perfumes and luxury fragrances.",
+                    "products": results[:6],
+                    "action": {"type": "none"}
+                }
+
+        # D. Audio / Speakers
+        if any(re.search(r'\b' + re.escape(w) + r'\b', q) for w in ['speakers', 'speaker', 'smart speaker', 'sound system', 'echo']):
+            matches = self.clean_df[self.clean_df['Name_clean'].str.contains(r'echo|homepod|speaker', regex=True)]
+            if max_price:
+                matches = matches[matches['Price'] <= max_price]
+            if not matches.empty:
+                results = [self._to_dict(r) for _, r in matches.sort_values(by='Rating', ascending=False).iterrows()]
+                return {
+                    "reply": "Here are our premium smart speakers and home audio systems.",
+                    "products": results[:6],
+                    "action": {"type": "none"}
+                }
+
+        # E. Headphones / Earbuds
+        if any(re.search(r'\b' + re.escape(w) + r'\b', q) for w in ['headphones', 'headphone', 'earphones', 'earphone', 'earbuds', 'airpods', 'beats']):
+            matches = self.clean_df[self.clean_df['Name_clean'].str.contains(r'airpods|beats|headphone|earbud', regex=True)]
+            if max_price:
+                matches = matches[matches['Price'] <= max_price]
+            if not matches.empty:
+                results = [self._to_dict(r) for _, r in matches.sort_values(by='Rating', ascending=False).iterrows()]
+                return {
+                    "reply": "Here are our top wireless headphones, studio over-ears, and noise-cancelling earbuds.",
+                    "products": results[:6],
+                    "action": {"type": "none"}
+                }
+
+        return None
+
     def _parse_add_to_cart_query(self, q):
         """
         Parses variations of 'add [item] to cart' or 'add to cart'.
-        Returns extracted item name string or '' if generic 'add to cart'.
+        Returns extracted item name string or 'this' if generic 'add to cart'.
         Returns None if not an add-to-cart intent.
         """
         # Discard informational questions asking what/how to buy
@@ -232,31 +315,48 @@ class VoiceAssistantService:
         q_clean = q.strip('.,!? ')
 
         # Explicit generic commands
-        if q_clean in ['add to cart', 'add to bag', 'add this', 'add this to cart', 'add it', 'add it to cart', 'buy this', 'buy it', 'add product to cart', 'add a product to cart', 'add a product to the cart', 'add the product to cart', 'add the product to the cart', 'add product to the cart']:
+        generic_phrases = [
+            'add to cart', 'add to bag', 'add this', 'add this to cart', 'add this to bag',
+            'add it', 'add it to cart', 'add it to bag', 'buy this', 'buy it',
+            'add product to cart', 'add a product to cart', 'add a product to the cart',
+            'add the product to cart', 'add the product to the cart', 'add product to the cart',
+            'put this in cart', 'put it in cart', 'put product in cart'
+        ]
+        if q_clean in generic_phrases:
             return 'this'
+
+        # Form 0: "can you add [item] to cart", "please add [item] to cart", "i want to add [item] to cart"
+        m0 = re.search(r'^(?:can\s+you\s+|could\s+you\s+|please\s+|kindly\s+|i\s+want\s+to\s+|i\s+would\s+like\s+to\s+)?(?:add|put)\s+(.+?)\s+(?:to|in|into)\s+(?:the\s+|my\s+)?(?:cart|bag)\b', q_clean)
+        if m0:
+            item = m0.group(1).strip()
+            if item in ['it', 'this', 'product', 'the product', 'a product', 'item', 'this item']:
+                return 'this'
+            return item
 
         # Form 1: "add to cart [item]" or "add to bag [item]"
         m1 = re.search(r'\b(?:add|put)\s+(?:to|in)\s+(?:the\s+|my\s+)?(?:cart|bag)\s+(.+)$', q_clean)
         if m1:
-            return m1.group(1).strip()
+            item = m1.group(1).strip()
+            return 'this' if item in ['it', 'this', 'product', 'item'] else item
 
         # Form 2: "add [item] to/in cart/bag"
         m2 = re.search(r'\b(?:add|put)\s+(.+?)\s+(?:to|in)\s+(?:the\s+|my\s+)?(?:cart|bag)\b', q_clean)
         if m2:
-            return m2.group(1).strip()
+            item = m2.group(1).strip()
+            return 'this' if item in ['it', 'this', 'product', 'item'] else item
 
         # Form 3: Direct imperative command "buy [item]" or "purchase [item]"
         if q_clean.startswith(('buy ', 'purchase ')):
             sub = re.sub(r'^(?:buy|purchase)\s+', '', q_clean).strip()
             if sub and not sub.startswith(('for ', 'something ', 'a gift ', 'gift ', 'me ')):
-                return sub
+                return 'this' if sub in ['it', 'this', 'product', 'item'] else sub
 
         # Form 4: Direct imperative command "add [item]" (e.g. "add iphone 13 pro", "add macbook", "add airpods")
         m4 = re.search(r'^\s*add\s+(.+)$', q_clean)
         if m4:
             sub = m4.group(1).strip()
             if sub and not sub.startswith(('more', 'another', 'something', 'filter', 'to cart', 'to bag')):
-                return sub
+                return 'this' if sub in ['it', 'this', 'product', 'item', 'a product', 'the product'] else sub
 
         return None
 
@@ -287,23 +387,12 @@ class VoiceAssistantService:
                     }
                 }
             else:
-                # Fallback to top featured item
-                top_items = self._get_featured_products(1)
-                if top_items:
-                    top_prod = top_items[0]
-                    p_id = int(top_prod.get('ID', 0))
-                    p_name = str(top_prod.get('Name'))
-                    p_price = int(top_prod.get('Price', 0))
-                    return {
-                        "reply": f"I have added {p_name} to your cart for ₹{p_price:,}! You can also say any specific item name to add.",
-                        "products": [top_prod],
-                        "action": {
-                            "type": "add_to_cart",
-                            "product_id": p_id,
-                            "product_name": p_name,
-                            "price": p_price
-                        }
-                    }
+                featured = self._get_featured_products(4)
+                return {
+                    "reply": "Which product would you like to add to your cart? Please say the product name, or choose from our featured recommendations below.",
+                    "products": featured,
+                    "action": {"type": "none"}
+                }
 
         # Match specific product name or category concept
         matched = self._find_best_match(target_clean)
@@ -333,38 +422,111 @@ class VoiceAssistantService:
         if not term_clean or self.clean_df is None or self.clean_df.empty:
             return None
 
-        # Concept shortcuts (e.g. user says "add smartphone" -> return flagship phone, not speaker!)
+        # 1. iPhone matches (device vs accessory)
+        if 'iphone' in term_clean and not any(acc in term_clean for acc in ['charger', 'case', 'cable', 'cover', 'protector', 'battery', 'lamp', 'adapter']):
+            iphones = self.clean_df[
+                (self.clean_df['Name_clean'].str.contains('iphone', na=False)) &
+                (~self.clean_df['Name_clean'].str.contains(r'case|charger|cable|protector|battery|lamp|adapter', regex=True))
+            ]
+            if not iphones.empty:
+                for model in ['13 pro', '13', 'x', '6', '5s']:
+                    if model in term_clean:
+                        m = iphones[iphones['Name_clean'].str.contains(model, na=False)]
+                        if not m.empty:
+                            return self._to_dict(m.sort_values(by='Price', ascending=False).iloc[0])
+                # Default to flagship
+                return self._to_dict(iphones.sort_values(by=['Price', 'Rating'], ascending=[False, False]).iloc[0])
+
+        # 2. General Smartphone matches
         if term_clean in ['smartphone', 'smartphones', 'smart phone', 'smart phones', 'phone', 'phones', 'mobile', 'mobiles']:
             phones = self.clean_df[(self.clean_df['Category'] == 'Smartphones') & (~self.clean_df['Name_clean'].str.contains(r'case|charger|cable|protector|stand|holder|power bank|pedestal|monopod|stick|battery|airpods|beats|lamp', regex=True))]
             if not phones.empty:
                 return self._to_dict(phones.sort_values(by=['Price', 'Rating'], ascending=[False, False]).iloc[0])
 
-        if term_clean in ['laptop', 'laptops', 'macbook', 'computer', 'notebook']:
-            laptops = self.clean_df[(self.clean_df['Category'] == 'Laptops') & (~self.clean_df['Name_clean'].str.contains(r'backpack|bag|sleeve|case|stand|mouse', regex=True))]
-            if not laptops.empty:
-                return self._to_dict(laptops.sort_values(by=['Price', 'Rating'], ascending=[False, False]).iloc[0])
+        # 3. Laptop / MacBook matches
+        if 'macbook' in term_clean or 'laptop' in term_clean:
+            if not any(acc in term_clean for acc in ['sleeve', 'case', 'bag', 'stand', 'cooler', 'cooling', 'mouse', 'pad', 'hub', 'adapter']):
+                laptops = self.clean_df[
+                    (self.clean_df['Category'] == 'Laptops') &
+                    (~self.clean_df['Name_clean'].str.contains(r'sleeve|case|bag|stand|cooler|cooling|mouse|pad|hub|adapter|backpack', regex=True))
+                ]
+                if not laptops.empty:
+                    if 'macbook' in term_clean:
+                        macs = laptops[laptops['Name_clean'].str.contains('macbook', na=False)]
+                        if not macs.empty:
+                            return self._to_dict(macs.sort_values(by=['Price', 'Rating'], ascending=[False, False]).iloc[0])
+                    if 'dell' in term_clean or 'xps' in term_clean:
+                        dells = laptops[laptops['Name_clean'].str.contains('dell|xps', na=False)]
+                        if not dells.empty:
+                            return self._to_dict(dells.iloc[0])
+                    if 'zenbook' in term_clean or 'asus' in term_clean:
+                        asuss = laptops[laptops['Name_clean'].str.contains('zenbook|asus', na=False)]
+                        if not asuss.empty:
+                            return self._to_dict(asuss.iloc[0])
+                    return self._to_dict(laptops.sort_values(by=['Price', 'Rating'], ascending=[False, False]).iloc[0])
 
-        if term_clean in ['camera', 'cameras', 'dslr']:
-            cams = self.clean_df[(self.clean_df['Category'] == 'Cameras') & (~self.clean_df['Name_clean'].str.contains(r'card|tripod|bag|battery|pedestal', regex=True))]
-            if not cams.empty:
-                return self._to_dict(cams.sort_values(by=['Price', 'Rating'], ascending=[False, False]).iloc[0])
+        # 4. Shoes / Sneakers matches
+        if any(w in term_clean for w in ['shoe', 'shoes', 'sneaker', 'sneakers', 'trainer', 'trainers', 'cleat', 'cleats', 'footwear', 'heel', 'loafers']):
+            shoes = self.clean_df[self.clean_df['Name_clean'].str.contains(r'shoe|sneaker|jordan|rider|cleat|heel|loafer|suede casual', regex=True)]
+            if not shoes.empty:
+                if 'jordan' in term_clean or 'nike' in term_clean:
+                    m = shoes[shoes['Name_clean'].str.contains('jordan|nike', na=False)]
+                    if not m.empty:
+                        return self._to_dict(m.iloc[0])
+                if 'puma' in term_clean:
+                    m = shoes[shoes['Name_clean'].str.contains('puma', na=False)]
+                    if not m.empty:
+                        return self._to_dict(m.iloc[0])
+                return self._to_dict(shoes.sort_values(by='Rating', ascending=False).iloc[0])
 
-        if term_clean in ['watch', 'watches', 'rolex']:
+        # 5. Watches / Rolex matches
+        if any(w in term_clean for w in ['watch', 'watches', 'rolex', 'timepiece']):
             watches = self.clean_df[self.clean_df['Name_clean'].str.contains(r'rolex|watch', regex=True)]
             if not watches.empty:
+                if 'submariner' in term_clean:
+                    m = watches[watches['Name_clean'].str.contains('submariner', na=False)]
+                    if not m.empty:
+                        return self._to_dict(m.iloc[0])
+                if 'datejust' in term_clean:
+                    m = watches[watches['Name_clean'].str.contains('datejust', na=False)]
+                    if not m.empty:
+                        return self._to_dict(m.iloc[0])
+                if 'cellini' in term_clean:
+                    m = watches[watches['Name_clean'].str.contains('cellini', na=False)]
+                    if not m.empty:
+                        return self._to_dict(m.iloc[0])
                 return self._to_dict(watches.sort_values(by=['Price', 'Rating'], ascending=[False, False]).iloc[0])
 
-        # 1. Exact match on Name
+        # 6. Camera matches
+        if any(w in term_clean for w in ['camera', 'cameras', 'dslr']):
+            if not any(acc in term_clean for acc in ['tripod', 'bag', 'card', 'battery', 'lens']):
+                cams = self.clean_df[(self.clean_df['Category'] == 'Cameras') & (~self.clean_df['Name_clean'].str.contains(r'card|tripod|bag|battery|pedestal|lens', regex=True))]
+                if not cams.empty:
+                    if 'sony' in term_clean:
+                        m = cams[cams['Name_clean'].str.contains('sony', na=False)]
+                        if not m.empty:
+                            return self._to_dict(m.iloc[0])
+                    if 'canon' in term_clean:
+                        m = cams[cams['Name_clean'].str.contains('canon', na=False)]
+                        if not m.empty:
+                            return self._to_dict(m.iloc[0])
+                    if 'fujifilm' in term_clean:
+                        m = cams[cams['Name_clean'].str.contains('fujifilm', na=False)]
+                        if not m.empty:
+                            return self._to_dict(m.iloc[0])
+                    return self._to_dict(cams.sort_values(by=['Price', 'Rating'], ascending=[False, False]).iloc[0])
+
+        # 7. Exact match on Name
         exact = self.clean_df[self.clean_df['Name_clean'] == term_clean]
         if not exact.empty:
             return self._to_dict(exact.iloc[0])
 
-        # 2. Substring match on Name
+        # 8. Substring match on Name
         sub = self.clean_df[self.clean_df['Name_clean'].str.contains(re.escape(term_clean), regex=True, na=False)]
         if not sub.empty:
             return self._to_dict(sub.sort_values(by='Rating', ascending=False).iloc[0])
 
-        # 3. Token overlap match (excluding stop words)
+        # 9. Token overlap match (excluding stop words)
         tokens = [t for t in term_clean.split() if len(t) > 2 and t not in self.STOP_WORDS]
         if tokens:
             best_score = 0

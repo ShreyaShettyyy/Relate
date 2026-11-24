@@ -1010,6 +1010,19 @@ function initRelateApp() {
         cart.push(productId);
         updateBadgeCounters();
         syncUserData();
+
+        // Visual feedback
+        const product = allProducts.find(p => p.ID === productId);
+        const name = product ? product.Name : "Product";
+        showToast(`Added ${name} to your cart`, "success");
+
+        const cartBtn = document.getElementById('cart-btn');
+        if (cartBtn) {
+            cartBtn.classList.remove('cart-bounce');
+            void cartBtn.offsetWidth;
+            cartBtn.classList.add('cart-bounce');
+            setTimeout(() => cartBtn.classList.remove('cart-bounce'), 800);
+        }
     }
 
     function toggleWishlist(productId) {
@@ -2451,6 +2464,7 @@ function initRelateApp() {
     // -------------------------------------------------------------
     window.RelateApp = {
         addToCart: addToCart,
+        getCart: () => cart,
         openCartDrawer: openCartDrawer,
         closeCartDrawer: closeCartDrawer,
         navigateTo: navigateTo,

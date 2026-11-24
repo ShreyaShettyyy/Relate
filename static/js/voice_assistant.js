@@ -36,6 +36,8 @@
         speechSupported: false,
         synthesisSupported: false,
         silenceTimer: null,
+        speechFailsafeTimeout: null,
+        interimQueryTimeout: null,
         lastSpokenText: '',
         restartRecognitionTimeout: null
     };
@@ -184,6 +186,9 @@
         utterance.pitch = state.settings.pitch || 1.0;
         utterance.volume = 1.0;
 
+        // Keep global reference to prevent Chrome garbage-collection bug
+        window.__relateSpeechUtterance = utterance;
+
         utterance.onstart = () => {
             state.isSpeaking = true;
             state.activeUtterance = utterance;
@@ -193,29 +198,49 @@
         };
 
         const finalizeSpeech = () => {
+            clearTimeout(state.speechFailsafeTimeout);
             state.isSpeaking = false;
             state.activeUtterance = null;
+            window.__relateSpeechUtterance = null;
             updateSpeakingVisuals(false);
             resumeRecognitionAfterSpeech();
             if (onComplete) onComplete();
         };
 
+        // Failsafe watchdog: Chrome on Windows frequently drops `onend` on speech synthesis!
+        // This ensures recognition is ALWAYS safely unpaused after speech completes.
+        const estimatedDurationMs = Math.max(2200, (text.length * 85) + 1200);
+        clearTimeout(state.speechFailsafeTimeout);
+        state.speechFailsafeTimeout = setTimeout(() => {
+            if (state.isSpeaking) {
+                finalizeSpeech();
+            }
+        }, estimatedDurationMs);
+
         utterance.onend = finalizeSpeech;
         utterance.onerror = (e) => {
-            console.warn('Speech synthesis error/interrupted:', e);
+            console.warn('Speech synthesis notice:', e);
             finalizeSpeech();
         };
 
-        window.speechSynthesis.speak(utterance);
+        try {
+            window.speechSynthesis.speak(utterance);
+        } catch (err) {
+            console.warn('Speech synthesis speak error:', err);
+            finalizeSpeech();
+        }
     }
 
     function stopSpeaking() {
+        clearTimeout(state.speechFailsafeTimeout);
         if ('speechSynthesis' in window && window.speechSynthesis.speaking) {
             window.speechSynthesis.cancel();
         }
         state.isSpeaking = false;
         state.activeUtterance = null;
+        window.__relateSpeechUtterance = null;
         updateSpeakingVisuals(false);
+        resumeRecognitionAfterSpeech();
     }
 
     function updateSpeakingVisuals(isSpeaking) {
@@ -287,8 +312,9 @@
                 const wakeIndex = wakeMatch.index + wakeMatch[0].length;
                 const commandAfterWake = currentSpoken.slice(wakeIndex).trim().replace(/^[,.!\s]+/, '');
 
-                if (commandAfterWake.length > 2 && (event.results[event.results.length - 1].isFinal || commandAfterWake.split(' ').length >= 2)) {
+                if (commandAfterWake.length > 2) {
                     clearTimeout(state.silenceTimer);
+                    clearTimeout(state.interimQueryTimeout);
                     handleQuery(commandAfterWake);
                     return;
                 }
@@ -306,16 +332,28 @@
             }
 
             // If assistant is actively listening or panel is open
-            if (finalTranscript && (state.isListening || state.isOpen)) {
-                clearTimeout(state.silenceTimer);
-                // Strip leading wake word if present
-                let queryToHandle = finalTranscript.trim();
-                const prefixMatch = queryToHandle.match(/^\b(?:hey|hi|hello|ok|okay)?\s*(?:relate|re\s*late|reality|relay|relat|relet|elate)\b[,.!\s]*/i);
+            if (state.isListening || state.isOpen) {
+                let queryCandidate = (finalTranscript || interimTranscript).trim();
+                const prefixMatch = queryCandidate.match(/^\b(?:hey|hi|hello|ok|okay)?\s*(?:relate|re\s*late|reality|relay|relat|relet|elate)\b[,.!\s]*/i);
                 if (prefixMatch) {
-                    queryToHandle = queryToHandle.slice(prefixMatch[0].length).trim();
+                    queryCandidate = queryCandidate.slice(prefixMatch[0].length).trim();
                 }
-                if (queryToHandle) {
-                    handleQuery(queryToHandle);
+
+                if (queryCandidate.length > 1) {
+                    if (finalTranscript) {
+                        clearTimeout(state.silenceTimer);
+                        clearTimeout(state.interimQueryTimeout);
+                        handleQuery(queryCandidate);
+                    } else {
+                        // Interim text with natural speech pause detection (1000ms pause)
+                        clearTimeout(state.interimQueryTimeout);
+                        state.interimQueryTimeout = setTimeout(() => {
+                            if (!state.isSpeaking && queryCandidate.length > 1) {
+                                clearTimeout(state.silenceTimer);
+                                handleQuery(queryCandidate);
+                            }
+                        }, 1000);
+                    }
                 }
             }
         };
@@ -332,14 +370,14 @@
                 updateStatus('Microphone click required • Tap mic to activate');
                 return;
             }
-            console.warn('Speech recognition error:', event.error);
+            console.warn('Speech recognition notice:', event.error);
         };
 
         recog.onend = () => {
             state.isWakeWordActive = false;
             // Automatically restart if wake word is enabled and assistant is not speaking
             if (state.settings.wakeWordEnabled && !state.isSpeaking) {
-                scheduleRestartRecognition();
+                scheduleRestartRecognition(400);
             } else {
                 updateWakeWordStatus();
             }
@@ -522,7 +560,10 @@
         if (action && action.type === 'add_to_cart') {
             actionBadgeHtml = `
                 <div class="va-action-pill success">
-                    <i class="fa-solid fa-circle-check"></i> Added to Cart
+                    <span><i class="fa-solid fa-circle-check"></i> Added to Cart</span>
+                    <button class="va-inline-cart-btn" data-action="open-cart">
+                        <i class="fa-solid fa-bag-shopping"></i> View Cart
+                    </button>
                 </div>
             `;
         }
@@ -569,6 +610,16 @@
 
         container.appendChild(msgDiv);
         scrollChatToBottom();
+
+        // Bind clicks on inline view-cart button
+        msgDiv.querySelectorAll('.va-inline-cart-btn').forEach(btn => {
+            btn.addEventListener('click', (e) => {
+                e.stopPropagation();
+                if (window.RelateApp && typeof window.RelateApp.openCartDrawer === 'function') {
+                    window.RelateApp.openCartDrawer();
+                }
+            });
+        });
 
         // Bind clicks on mini product card buttons
         msgDiv.querySelectorAll('.va-btn-add-cart').forEach(btn => {
@@ -888,7 +939,19 @@
         updateStatus("Listening... speak your request");
         showLiveTranscription("Listening...");
 
-        startRecognition();
+        if (navigator.mediaDevices && navigator.mediaDevices.getUserMedia && !state.hasMicPermission) {
+            navigator.mediaDevices.getUserMedia({ audio: true })
+                .then(stream => {
+                    state.hasMicPermission = true;
+                    stream.getTracks().forEach(t => t.stop());
+                    startRecognition();
+                })
+                .catch(() => {
+                    startRecognition();
+                });
+        } else {
+            startRecognition();
+        }
         resetSilenceTimer();
     }
 
