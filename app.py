@@ -1,4 +1,4 @@
-from flask import Flask, render_template, request, jsonify
+from flask import Flask, render_template, request, jsonify, session
 import os
 import pandas as pd
 import time
@@ -67,13 +67,13 @@ try:
     sync_user_orders_to_transactions()
     recommender = RecommenderSystem(df_trans, df_prod)
     recommender.train_market_basket(min_support=0.001, min_threshold=0.1)
-    assistant_service = VoiceAssistantService(df_prod)
+    assistant_service = VoiceAssistantService(df_prod, recommender=recommender)
 except Exception as e:
     print("Error initializing recommender system:", e)
     df_trans = pd.DataFrame(columns=['TransactionID', 'CustomerID', 'Item'])
     df_prod = pd.DataFrame(columns=['ID', 'Name', 'Category', 'Price', 'Rating', 'Image', 'Description'])
     recommender = RecommenderSystem(df_trans, df_prod)
-    assistant_service = VoiceAssistantService(df_prod)
+    assistant_service = VoiceAssistantService(df_prod, recommender=recommender)
 
 
 @app.route('/')
@@ -475,12 +475,14 @@ def assistant_chat():
     current_product = data.get('current_product')
     current_cart_ids = data.get('cart', [])
     last_recommended_product = data.get('last_recommended_product')
+    customer_id = data.get('customer_id') or session.get('user_id')
     
     response = assistant_service.process_query(
         query_text=query,
         current_product=current_product,
         current_cart_ids=current_cart_ids,
-        last_recommended_product=last_recommended_product
+        last_recommended_product=last_recommended_product,
+        customer_id=customer_id
     )
     return jsonify(response)
 

@@ -468,6 +468,15 @@
         if (window.RelateApp && typeof window.RelateApp.getCurrentProduct === 'function') {
             currentProduct = window.RelateApp.getCurrentProduct();
         }
+        let customerId = null;
+        if (window.RelateApp && typeof window.RelateApp.getCurrentUser === 'function') {
+            const user = window.RelateApp.getCurrentUser();
+            if (user && user.customer_id) customerId = user.customer_id;
+        }
+        let currentCart = [];
+        if (window.RelateApp && typeof window.RelateApp.getCart === 'function') {
+            currentCart = window.RelateApp.getCart();
+        }
 
         try {
             const response = await fetch('/api/assistant/chat', {
@@ -476,7 +485,9 @@
                 body: JSON.stringify({
                     query: queryText.trim(),
                     current_product: currentProduct,
-                    last_recommended_product: state.lastRecommendedProduct
+                    last_recommended_product: state.lastRecommendedProduct,
+                    customer_id: customerId,
+                    cart: currentCart
                 })
             });
 
@@ -498,6 +509,7 @@
     function handleAssistantReply(data) {
         const replyText = data.reply || "I've checked the catalog for you.";
         const products = data.products || [];
+        const companionProducts = data.companion_products || [];
         const action = data.action || { type: 'none' };
 
         // Save last recommended product for context follow-ups (e.g. "add to cart")
@@ -505,7 +517,7 @@
             state.lastRecommendedProduct = products[0];
         }
 
-        // 1. Execute direct UI / Cart actions
+        // 1. Execute direct UI / Cart / Order actions
         if (action.type === 'add_to_cart' && action.product_id) {
             if (window.RelateApp && typeof window.RelateApp.addToCart === 'function') {
                 window.RelateApp.addToCart(action.product_id);
@@ -521,8 +533,23 @@
             if (window.RelateApp && typeof window.RelateApp.openCartDrawer === 'function') {
                 window.RelateApp.openCartDrawer();
             }
-        } else if (action.type === 'checkout') {
-            if (window.RelateApp && typeof window.RelateApp.navigateTo === 'function') {
+        } else if (action.type === 'checkout' || action.type === 'order') {
+            if (action.product_id && window.RelateApp && typeof window.RelateApp.addToCart === 'function') {
+                window.RelateApp.addToCart(action.product_id);
+                playChime('success');
+            }
+            if (action.show_cart && window.RelateApp && typeof window.RelateApp.openCartDrawer === 'function') {
+                window.RelateApp.openCartDrawer();
+                setTimeout(() => {
+                    if (window.RelateApp && typeof window.RelateApp.openCheckoutPage === 'function') {
+                        window.RelateApp.openCheckoutPage();
+                    } else if (window.RelateApp && typeof window.RelateApp.navigateTo === 'function') {
+                        window.RelateApp.navigateTo('checkout-section');
+                    }
+                }, 1200);
+            } else if (window.RelateApp && typeof window.RelateApp.openCheckoutPage === 'function') {
+                window.RelateApp.openCheckoutPage();
+            } else if (window.RelateApp && typeof window.RelateApp.navigateTo === 'function') {
                 window.RelateApp.navigateTo('checkout-section');
             }
         } else if (action.type === 'view_wishlist') {
@@ -539,7 +566,7 @@
         }
 
         // 2. Render Assistant Bubble & Interactive Product Cards
-        appendMessage('assistant', replyText, products, action);
+        appendMessage('assistant', replyText, products, action, companionProducts);
 
         // 3. Speak the reply
         speak(replyText);
@@ -549,7 +576,7 @@
     // -------------------------------------------------------------------------
     // UI RENDERING & DOM BUILDERS
     // -------------------------------------------------------------------------
-    function appendMessage(role, text, products = [], action = null) {
+    function appendMessage(role, text, products = [], action = null, companion_products = []) {
         const container = document.getElementById('va-messages');
         if (!container) return;
 
@@ -563,6 +590,15 @@
                     <span><i class="fa-solid fa-circle-check"></i> Added to Cart</span>
                     <button class="va-inline-cart-btn" data-action="open-cart">
                         <i class="fa-solid fa-bag-shopping"></i> View Cart
+                    </button>
+                </div>
+            `;
+        } else if (action && (action.type === 'checkout' || action.type === 'order')) {
+            actionBadgeHtml = `
+                <div class="va-action-pill success">
+                    <span><i class="fa-solid fa-bag-shopping"></i> Proceeding to Order / Checkout</span>
+                    <button class="va-inline-cart-btn" data-action="open-checkout">
+                        <i class="fa-solid fa-credit-card"></i> View Checkout
                     </button>
                 </div>
             `;
@@ -600,11 +636,55 @@
             productsHtml = `<div class="va-products-carousel">${cardsHtml}</div>`;
         }
 
+        let companionHtml = '';
+        if (companion_products && companion_products.length > 0) {
+            const compCards = companion_products.slice(0, 4).map(p => {
+                const img = getProductThumbnail(p);
+                const price = p.Price ? `₹${Number(p.Price).toLocaleString('en-IN')}` : '';
+                const reason = p.recommendation_reason || 'Frequently bought together';
+                return `
+                    <div class="va-product-card va-companion-card" data-id="${p.ID}">
+                        <div class="va-companion-reason" title="${escapeHtml(reason)}">
+                            <i class="fa-solid fa-sparkles"></i> ${escapeHtml(reason)}
+                        </div>
+                        <div class="va-prod-img-box">
+                            <img src="${img}" alt="${escapeHtml(p.Name)}" loading="lazy">
+                        </div>
+                        <div class="va-prod-info">
+                            <h5 class="va-prod-title">${escapeHtml(p.Name)}</h5>
+                            <div class="va-prod-meta">
+                                <span class="va-prod-price">${price}</span>
+                                <span class="va-prod-rating"><i class="fa-solid fa-star"></i> ${p.Rating || '4.5'}</span>
+                            </div>
+                            <div class="va-prod-actions">
+                                <button class="va-btn-add-cart" data-id="${p.ID}">
+                                    <i class="fa-solid fa-cart-plus"></i> Add
+                                </button>
+                                <button class="va-btn-view" data-id="${p.ID}">
+                                    View
+                                </button>
+                            </div>
+                        </div>
+                    </div>
+                `;
+            }).join('');
+
+            companionHtml = `
+                <div class="va-companion-container">
+                    <div class="va-companion-heading">
+                        <i class="fa-solid fa-layer-group"></i> Usually Purchased Together
+                    </div>
+                    <div class="va-products-carousel">${compCards}</div>
+                </div>
+            `;
+        }
+
         msgDiv.innerHTML = `
             <div class="va-msg-bubble">
                 ${actionBadgeHtml}
                 <p>${escapeHtml(text)}</p>
                 ${productsHtml}
+                ${companionHtml}
             </div>
         `;
 
@@ -612,11 +692,23 @@
         scrollChatToBottom();
 
         // Bind clicks on inline view-cart button
-        msgDiv.querySelectorAll('.va-inline-cart-btn').forEach(btn => {
+        msgDiv.querySelectorAll('[data-action="open-cart"]').forEach(btn => {
             btn.addEventListener('click', (e) => {
                 e.stopPropagation();
                 if (window.RelateApp && typeof window.RelateApp.openCartDrawer === 'function') {
                     window.RelateApp.openCartDrawer();
+                }
+            });
+        });
+
+        // Bind clicks on inline checkout button
+        msgDiv.querySelectorAll('[data-action="open-checkout"]').forEach(btn => {
+            btn.addEventListener('click', (e) => {
+                e.stopPropagation();
+                if (window.RelateApp && typeof window.RelateApp.openCheckoutPage === 'function') {
+                    window.RelateApp.openCheckoutPage();
+                } else if (window.RelateApp && typeof window.RelateApp.navigateTo === 'function') {
+                    window.RelateApp.navigateTo('checkout-section');
                 }
             });
         });

@@ -5612,6 +5612,58 @@ body.luxury-dark-theme .upi-input-group input {
     animation: cartBounce 0.65s cubic-bezier(0.175, 0.885, 0.32, 1.275);
 }
 
+/* Frequently Bought Together Companion Rails in Voice Chat */
+.va-companion-container {
+    margin-top: 14px;
+    padding-top: 12px;
+    border-top: 1px dashed rgba(85, 140, 105, 0.35);
+}
+
+.va-companion-heading {
+    font-size: 11.5px;
+    font-weight: 700;
+    color: #93c5fd;
+    text-transform: uppercase;
+    letter-spacing: 0.5px;
+    margin-bottom: 8px;
+    display: flex;
+    align-items: center;
+    gap: 6px;
+}
+
+body.luxury-light-theme .va-companion-heading {
+    color: #1e40af;
+}
+
+.va-companion-card {
+    border-color: rgba(99, 102, 241, 0.35) !important;
+    background: rgba(15, 23, 42, 0.65) !important;
+}
+
+body.luxury-light-theme .va-companion-card {
+    background: #f8fafc !important;
+    border-color: rgba(99, 102, 241, 0.25) !important;
+}
+
+.va-companion-reason {
+    font-size: 10px;
+    font-weight: 600;
+    color: #a5b4fc;
+    padding: 4px 8px;
+    background: rgba(99, 102, 241, 0.15);
+    border-bottom: 1px solid rgba(99, 102, 241, 0.2);
+    white-space: nowrap;
+    overflow: hidden;
+    text-overflow: ellipsis;
+    border-top-left-radius: 8px;
+    border-top-right-radius: 8px;
+}
+
+body.luxury-light-theme .va-companion-reason {
+    color: #4338ca;
+    background: rgba(99, 102, 241, 0.1);
+}
+
 /* Quick Suggestion Chips */
 .va-quick-chips {
     display: flex;

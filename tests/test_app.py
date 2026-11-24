@@ -115,6 +115,55 @@ class TestRelateApp(unittest.TestCase):
         data = res.get_json()
         self.assertEqual(data['action']['type'], 'view_cart')
 
+    def test_12_voice_assistant_dresses_collection(self):
+        """Test voice assistant returns luxury dress and ethnic collections without unrelated items."""
+        res = self.client.post('/api/assistant/chat', json={
+            'query': 'Show me luxury evening dresses'
+        })
+        self.assertEqual(res.status_code, 200)
+        data = res.get_json()
+        self.assertGreater(len(data.get('products', [])), 0)
+        # Verify returned products are relevant garments (dresses, gowns, lehengas, sarees)
+        for p in data['products']:
+            self.assertIn(p['Category'], ['Fashion', 'Womens Dresses'])
+            self.assertTrue(any(w in p['Name'].lower() for w in ['dress', 'gown', 'lehenga', 'saree', 'slip']))
+
+    def test_13_voice_assistant_view_cart_and_order(self):
+        """Test voice assistant executes 'view cart and order the product' by displaying cart and triggering checkout."""
+        res = self.client.post('/api/assistant/chat', json={
+            'query': 'View cart and order the product'
+        })
+        self.assertEqual(res.status_code, 200)
+        data = res.get_json()
+        self.assertEqual(data['action']['type'], 'checkout')
+        self.assertTrue(data['action'].get('show_cart'))
+
+    def test_14_voice_assistant_strict_non_random_matches(self):
+        """Test voice assistant strictly avoids random suggestions when a query has no matching product."""
+        res = self.client.post('/api/assistant/chat', json={
+            'query': 'Show me alien spaceship and laser blaster'
+        })
+        self.assertEqual(res.status_code, 200)
+        data = res.get_json()
+        # Must return empty products list, never random products
+        self.assertEqual(len(data.get('products', [])), 0)
+
+    def test_15_voice_assistant_companion_recommendations_on_cart_add(self):
+        """Test voice assistant returns co-purchased companion recommendations when adding an item to cart."""
+        res = self.client.post('/api/assistant/chat', json={
+            'query': 'Add Midnight Silk Evening Gown to cart',
+            'customer_id': 1104
+        })
+        self.assertEqual(res.status_code, 200)
+        data = res.get_json()
+        self.assertEqual(data['action']['type'], 'add_to_cart')
+        self.assertEqual(data['action']['product_id'], 277)
+        self.assertIn('companion_products', data)
+        self.assertGreater(len(data['companion_products']), 0)
+        comp_names = [c['Name'] for c in data['companion_products']]
+        # Should recommend pairing jewelry or accessories
+        self.assertTrue(any('Bracelet' in n or 'Diamond' in n or 'Necklace' in n or 'Bag' in n for n in comp_names))
+
 
 if __name__ == '__main__':
     unittest.main()

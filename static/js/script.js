@@ -2467,6 +2467,8 @@ function initRelateApp() {
         getCart: () => cart,
         openCartDrawer: openCartDrawer,
         closeCartDrawer: closeCartDrawer,
+        openCheckoutPage: openCheckoutPage,
+        getCurrentUser: () => currentUser,
         navigateTo: navigateTo,
         renderProductDetail: showProductDetail,
         showProductDetail: showProductDetail,

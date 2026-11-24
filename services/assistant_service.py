@@ -10,13 +10,17 @@ import numpy as np
 
 
 class VoiceAssistantService:
-    def __init__(self, products_df):
+    def __init__(self, products_df, recommender=None):
         self.products_df = products_df
+        self.recommender = recommender
         self._build_index()
 
     def set_products_df(self, products_df):
         self.products_df = products_df
         self._build_index()
+
+    def set_recommender(self, recommender):
+        self.recommender = recommender
 
     def _build_index(self):
         if self.products_df is None or self.products_df.empty:
@@ -96,17 +100,22 @@ class VoiceAssistantService:
         'show', 'me', 'some', 'products', 'product', 'item', 'items', 'for', 'example',
         'like', 'any', 'good', 'best', 'give', 'want', 'need', 'tell', 'about', 'can',
         'you', 'please', 'display', 'view', 'look', 'what', 'are', 'the', 'have', 'recommend',
-        'suggest', 'explore', 'find', 'which', 'with', 'a', 'an', 'in', 'of', 'on', 'to'
+        'suggest', 'explore', 'find', 'which', 'with', 'a', 'an', 'in', 'of', 'on', 'to',
+        'and', 'or', 'is', 'it', 'at', 'by', 'as', 'also', 'all', 'so', 'that', 'this',
+        'these', 'those', 'from', 'into', 'up', 'down', 'out', 'off', 'over', 'under',
+        'then', 'here', 'there', 'when', 'where', 'why', 'how', 'both', 'each', 'few',
+        'more', 'most', 'other', 'such', 'no', 'nor', 'not', 'only', 'own', 'same',
+        'than', 'too', 'very', 's', 't', 'will', 'just', 'should', 'now', 'hey', 'relate'
     }
 
-    def process_query(self, query_text, current_product=None, current_cart_ids=None, last_recommended_product=None):
+    def process_query(self, query_text, current_product=None, current_cart_ids=None, last_recommended_product=None, customer_id=None):
         """
         Main query handler. Analyzes voice or text input, determines user intent,
         extracts target products / constraints, and returns a rich assistant response.
         """
         if not query_text or not query_text.strip():
             return {
-                "reply": "I'm listening! You can ask for gift suggestions, search any category, or say 'Add this product to my cart'.",
+                "reply": "I'm listening! You can ask for dresses, shoes, laptops, smartphones, or say 'Add this to my cart'.",
                 "products": [],
                 "action": {"type": "none"}
             }
@@ -129,26 +138,29 @@ class VoiceAssistantService:
         # 2. Check for Greetings / Identity
         if any(q.startswith(g) or q == g for g in ['hi', 'hello', 'hey', 'good morning', 'good afternoon', 'good evening', 'who are you', 'what can you do', 'help']):
             return {
-                "reply": "Hello! I am Relate AI, your voice shopping concierge. Say 'Hey Relate' anytime or ask me to recommend gifts for an event, find electronics or fashion, or say 'Add to cart'!",
+                "reply": "Hello! I am Relate AI, your voice shopping concierge. Say 'Hey Relate' anytime or ask me to show dresses, smartphones, or say 'Order this product'!",
                 "products": self._get_featured_products(4),
                 "action": {"type": "none"}
             }
 
-        # 3. Check for Direct Cart / Navigation Actions
-        # A. View Cart / Show Bag
+        # 3. Check for Direct Cart, Order & Navigation Actions
+        # A. Order / Checkout / "view cart and order the product"
+        order_match = self._parse_order_query(q)
+        if order_match is not None:
+            return self._handle_order(
+                order_match,
+                current_product=current_product,
+                current_cart_ids=current_cart_ids,
+                last_recommended_product=last_recommended_product,
+                customer_id=customer_id
+            )
+
+        # B. View Cart / Show Bag
         if any(k in q for k in ['open cart', 'view cart', 'show cart', 'my cart', 'open bag', 'show bag', 'go to cart', 'what is in my cart']):
             return {
                 "reply": "Opening your shopping cart right now.",
                 "products": [],
                 "action": {"type": "view_cart"}
-            }
-
-        # B. Checkout / Payment
-        if any(k in q for k in ['checkout', 'proceed to checkout', 'pay now', 'make payment', 'place order']):
-            return {
-                "reply": "Taking you directly to checkout.",
-                "products": [],
-                "action": {"type": "checkout"}
             }
 
         # C. Wishlist / Saved items
@@ -162,7 +174,12 @@ class VoiceAssistantService:
         # D. Add to Cart Intent (Flexible regex parser)
         add_cart_match = self._parse_add_to_cart_query(q)
         if add_cart_match is not None:
-            return self._handle_add_to_cart(add_cart_match, current_product=current_product, last_recommended_product=last_recommended_product)
+            return self._handle_add_to_cart(
+                add_cart_match,
+                current_product=current_product,
+                last_recommended_product=last_recommended_product,
+                customer_id=customer_id
+            )
 
         # 4. Check for Occasion & Event Queries
         for occ_key, occ_info in self.OCCASION_MAP.items():
@@ -213,20 +230,78 @@ class VoiceAssistantService:
                 "action": {"type": "none"}
             }
 
-        # 8. Friendly Fallback (Never leave user hanging!)
-        featured = self._get_featured_products(4)
+        # 8. Friendly Fallback (Strict precision: never suggest random products!)
         return {
-            "reply": f"I heard '{query_text}', but couldn't find an exact match in our catalog. Here are some of our most popular recommendations across tech, fashion, and beauty!",
-            "products": featured,
+            "reply": f"I couldn't find any products matching '{query_text}' in our catalog. You can ask for dresses, sarees, suits, handbags, jewelry, smartphones, laptops, shoes, perfumes, or watches.",
+            "products": [],
             "action": {"type": "none"}
         }
 
     # --------------------------------------------------------------------------
     # INTENT HELPERS
     # --------------------------------------------------------------------------
+    def _get_companion_products(self, product_name, customer_id=None, top_n=3):
+        """
+        Retrieves products frequently bought together or co-purchased by other users
+        or the same user via Apriori association rules and co-purchase analytics.
+        """
+        if self.recommender is None or self.clean_df is None or self.clean_df.empty:
+            return []
+
+        used_names = {str(product_name).strip()}
+        companion_list = []
+
+        # 1. Personal co-purchases (same buyer past history)
+        if customer_id:
+            try:
+                personal = self.recommender.get_personal_copurchases(customer_id, product_name)
+                for name, reason in personal:
+                    if name not in used_names:
+                        used_names.add(name)
+                        companion_list.append((name, reason or f"You usually buy this with {product_name}"))
+                        if len(companion_list) >= top_n:
+                            break
+            except Exception:
+                pass
+
+        # 2. Frequently bought together (Apriori rules & community co-purchases from other users)
+        if len(companion_list) < top_n:
+            try:
+                fbt = self.recommender.get_frequently_bought_together(product_name, customer_id=customer_id, top_n=top_n, exclude_items=used_names)
+                for name, reason in fbt:
+                    if name not in used_names:
+                        used_names.add(name)
+                        companion_list.append((name, reason or f"Most people usually buy this with {product_name}"))
+                        if len(companion_list) >= top_n:
+                            break
+            except Exception:
+                pass
+
+        # 3. Recommended companion accessories
+        if len(companion_list) < top_n:
+            try:
+                acc = self.recommender.get_recommended_accessories(product_name, customer_id=customer_id, top_n=top_n, exclude_items=used_names)
+                for name, reason in acc:
+                    if name not in used_names:
+                        used_names.add(name)
+                        companion_list.append((name, reason or f"Recommended accessory for {product_name}"))
+                        if len(companion_list) >= top_n:
+                            break
+            except Exception:
+                pass
+
+        results = []
+        for name, reason in companion_list:
+            row = self.clean_df[self.clean_df['Name'] == name]
+            if not row.empty:
+                d = self._to_dict(row.iloc[0])
+                d['recommendation_reason'] = reason
+                results.append(d)
+        return results
+
     def _check_focused_item_query(self, q, max_price=None):
         """
-        Catches queries for specific product sub-types (e.g. 'shoes', 'watches', 'perfumes', 'cameras')
+        Catches queries for specific product sub-types (e.g. 'shoes', 'dresses', 'watches', 'perfumes', 'cameras')
         so they do not get swallowed by overly broad top-level category defaults.
         """
         if self.clean_df is None or self.clean_df.empty:
@@ -274,7 +349,59 @@ class VoiceAssistantService:
                     "action": {"type": "none"}
                 }
 
-        # D. Audio / Speakers
+        # D. Dresses, Evening Gowns & Indian Festive Wear (Sarees & Lehengas)
+        if any(re.search(r'\b' + re.escape(w) + r'\b', q) for w in ['dresses', 'dress', 'gown', 'gowns', 'saree', 'sarees', 'lehenga', 'lehengas', 'frock', 'frocks', 'maxi', 'slip dress', 'ballgown', 'evening dress']):
+            matches = self.clean_df[self.clean_df['Name_clean'].str.contains(r'dress|gown|saree|lehenga|frock|slip', regex=True)]
+            if max_price:
+                matches = matches[matches['Price'] <= max_price]
+            if not matches.empty:
+                results = [self._to_dict(r) for _, r in matches.sort_values(by=['Price', 'Rating'], ascending=[False, False]).iterrows()]
+                return {
+                    "reply": "Here are our designer dresses, silk evening gowns, and festive ethnic collections. Which one would you like to explore?",
+                    "products": results[:6],
+                    "action": {"type": "none"}
+                }
+
+        # E. Tailored Suits, Blazers & Tuxedos
+        if any(re.search(r'\b' + re.escape(w) + r'\b', q) for w in ['suit', 'suits', 'blazer', 'blazers', 'tuxedo', 'tuxedos', 'bandhgala', 'formal suit']):
+            matches = self.clean_df[self.clean_df['Name_clean'].str.contains(r'tuxedo|suit|blazer|bandhgala', regex=True)]
+            if max_price:
+                matches = matches[matches['Price'] <= max_price]
+            if not matches.empty:
+                results = [self._to_dict(r) for _, r in matches.sort_values(by=['Price', 'Rating'], ascending=[False, False]).iterrows()]
+                return {
+                    "reply": "Here are our tailored Italian wool suits, slim-fit blazers, and royal festive jackets.",
+                    "products": results[:6],
+                    "action": {"type": "none"}
+                }
+
+        # F. Luxury Handbags & Totes
+        if any(re.search(r'\b' + re.escape(w) + r'\b', q) for w in ['handbag', 'handbags', 'bag', 'bags', 'tote', 'totes', 'purse', 'purses', 'crossbody']):
+            matches = self.clean_df[self.clean_df['Name_clean'].str.contains(r'handbag|tote|crossbody|purse|carry-on|luggage', regex=True)]
+            if max_price:
+                matches = matches[matches['Price'] <= max_price]
+            if not matches.empty:
+                results = [self._to_dict(r) for _, r in matches.sort_values(by=['Price', 'Rating'], ascending=[False, False]).iterrows()]
+                return {
+                    "reply": "Here are our Italian leather handbags, crossbody bags, and luxury totes.",
+                    "products": results[:6],
+                    "action": {"type": "none"}
+                }
+
+        # G. Fine Diamond & Gold Jewelry
+        if any(re.search(r'\b' + re.escape(w) + r'\b', q) for w in ['jewelry', 'jewellery', 'necklace', 'necklaces', 'earring', 'earrings', 'bracelet', 'bracelets', 'diamond', 'diamonds', 'gold necklace']):
+            matches = self.clean_df[self.clean_df['Name_clean'].str.contains(r'necklace|earring|bracelet|pendant|diamond|gold', regex=True) & ~self.clean_df['Name_clean'].str.contains(r'watch', regex=True)]
+            if max_price:
+                matches = matches[matches['Price'] <= max_price]
+            if not matches.empty:
+                results = [self._to_dict(r) for _, r in matches.sort_values(by=['Price', 'Rating'], ascending=[False, False]).iterrows()]
+                return {
+                    "reply": "Here are our certified diamond necklaces, halo earrings, and 18K gold tennis bracelets.",
+                    "products": results[:6],
+                    "action": {"type": "none"}
+                }
+
+        # H. Audio / Speakers
         if any(re.search(r'\b' + re.escape(w) + r'\b', q) for w in ['speakers', 'speaker', 'smart speaker', 'sound system', 'echo']):
             matches = self.clean_df[self.clean_df['Name_clean'].str.contains(r'echo|homepod|speaker', regex=True)]
             if max_price:
@@ -287,7 +414,7 @@ class VoiceAssistantService:
                     "action": {"type": "none"}
                 }
 
-        # E. Headphones / Earbuds
+        # I. Headphones / Earbuds
         if any(re.search(r'\b' + re.escape(w) + r'\b', q) for w in ['headphones', 'headphone', 'earphones', 'earphone', 'earbuds', 'airpods', 'beats']):
             matches = self.clean_df[self.clean_df['Name_clean'].str.contains(r'airpods|beats|headphone|earbud', regex=True)]
             if max_price:
@@ -301,6 +428,131 @@ class VoiceAssistantService:
                 }
 
         return None
+
+    def _parse_order_query(self, q):
+        """
+        Parses variations of 'order the product', 'view cart and order the product', 'order [item]'.
+        Returns extracted item name string, 'view_cart_and_order', 'this', or None.
+        """
+        q_clean = q.strip('.,!? ')
+
+        # Explicit 'view cart and order'
+        if any(p in q_clean for p in ['view cart and order', 'view cart and checkout', 'view cart and place order', 'open cart and order', 'open cart and checkout', 'show cart and order', 'show cart and checkout']):
+            return 'view_cart_and_order'
+
+        # Generic order commands
+        generic_orders = [
+            'order the product', 'order a product', 'order product', 'order this product',
+            'order this', 'order it', 'place order', 'place the order', 'place my order',
+            'order now', 'buy now', 'buy this now', 'buy the product now', 'purchase now',
+            'proceed to checkout', 'checkout', 'go to checkout', 'complete order', 'finish order'
+        ]
+        if q_clean in generic_orders:
+            return 'this'
+
+        # "order [item]" e.g. "order iphone 13 pro", "order midnight silk evening gown"
+        m1 = re.search(r'^(?:please\s+|can\s+you\s+)?(?:order|place\s+order\s+for|buy\s+now)\s+(.+)$', q_clean)
+        if m1:
+            item = m1.group(1).strip()
+            if item in ['it', 'this', 'product', 'the product', 'a product', 'item']:
+                return 'this'
+            return item
+
+        # "order the [item]" or "order this [item]"
+        m2 = re.search(r'^(?:order|buy)\s+(?:the\s+|this\s+)?(.+?)\s+now$', q_clean)
+        if m2:
+            item = m2.group(1).strip()
+            return 'this' if item in ['it', 'this', 'product', 'item'] else item
+
+        return None
+
+    def _handle_order(self, target_term, current_product=None, current_cart_ids=None, last_recommended_product=None, customer_id=None):
+        target_clean = str(target_term).lower().strip()
+
+        # Case 1: "view cart and order"
+        if target_clean == 'view_cart_and_order':
+            return {
+                "reply": "Here is your cart! Taking you straight to checkout to complete your order.",
+                "products": [],
+                "action": {
+                    "type": "checkout",
+                    "show_cart": True
+                }
+            }
+
+        active_candidate = current_product or last_recommended_product
+
+        # Case 2: Generic "order the product" / "order this" / "place order"
+        if target_clean in ['', 'this', 'product', 'the product', 'it']:
+            if active_candidate:
+                p_id = int(active_candidate.get('ID', 0))
+                p_name = str(active_candidate.get('Name', 'this item'))
+                p_price = int(active_candidate.get('Price', 0))
+                companion = self._get_companion_products(p_name, customer_id=customer_id)
+                
+                if companion:
+                    top_names = " and ".join(c['Name'] for c in companion[:2])
+                    reply = f"I've added {p_name} to your cart for ₹{p_price:,} and brought you to checkout to place your order! Shoppers also frequently buy {top_names} with this."
+                else:
+                    reply = f"I've added {p_name} to your cart for ₹{p_price:,} and brought you directly to checkout to complete your order!"
+
+                return {
+                    "reply": reply,
+                    "products": [active_candidate],
+                    "companion_products": companion,
+                    "action": {
+                        "type": "checkout",
+                        "product_id": p_id,
+                        "product_name": p_name,
+                        "price": p_price
+                    }
+                }
+            elif current_cart_ids and len(current_cart_ids) > 0:
+                return {
+                    "reply": "Taking you directly to checkout to review and complete your order!",
+                    "products": [],
+                    "action": {
+                        "type": "checkout"
+                    }
+                }
+            else:
+                return {
+                    "reply": "Your shopping cart is currently empty. Please tell me which product you'd like to order, or select one from our collection!",
+                    "products": [],
+                    "action": {"type": "none"}
+                }
+
+        # Case 3: Specific product order e.g. "order midnight silk evening gown"
+        matched = self._find_best_match(target_clean)
+        if matched:
+            p_id = int(matched.get('ID', 0))
+            p_name = str(matched.get('Name'))
+            p_price = int(matched.get('Price', 0))
+            companion = self._get_companion_products(p_name, customer_id=customer_id)
+            
+            if companion:
+                top_names = " and ".join(c['Name'] for c in companion[:2])
+                reply = f"I've added the {p_name} to your cart for ₹{p_price:,} and brought you to checkout to place your order! Customers also frequently purchase {top_names} with this."
+            else:
+                reply = f"I've added the {p_name} to your cart for ₹{p_price:,} and brought you straight to checkout to complete your order!"
+
+            return {
+                "reply": reply,
+                "products": [matched],
+                "companion_products": companion,
+                "action": {
+                    "type": "checkout",
+                    "product_id": p_id,
+                    "product_name": p_name,
+                    "price": p_price
+                }
+            }
+
+        return {
+            "reply": f"I couldn't find a product matching '{target_term}' in our catalog. You can ask for dresses, sarees, suits, handbags, jewelry, smartphones, laptops, shoes, or perfumes.",
+            "products": [],
+            "action": {"type": "none"}
+        }
 
     def _parse_add_to_cart_query(self, q):
         """
@@ -360,7 +612,7 @@ class VoiceAssistantService:
 
         return None
 
-    def _handle_add_to_cart(self, target_term, current_product=None, last_recommended_product=None):
+    def _handle_add_to_cart(self, target_term, current_product=None, last_recommended_product=None, customer_id=None):
         target_clean = target_term.lower().strip()
         generic_terms = {
             '', 'this', 'this item', 'this product', 'it', 'one', 'a product', 'the product',
@@ -376,9 +628,18 @@ class VoiceAssistantService:
                 p_id = int(active_candidate.get('ID', 0))
                 p_name = str(active_candidate.get('Name', 'this item'))
                 p_price = int(active_candidate.get('Price', 0))
+                companion = self._get_companion_products(p_name, customer_id=customer_id)
+                
+                if companion:
+                    top_names = " and ".join(c['Name'] for c in companion[:2])
+                    reply = f"I have added {p_name} to your cart for ₹{p_price:,}! Shoppers also frequently buy {top_names} with this. Here are companion recommendations for you."
+                else:
+                    reply = f"I have added {p_name} to your cart for ₹{p_price:,}! Would you like to view your cart or checkout?"
+
                 return {
-                    "reply": f"I have added {p_name} to your cart for ₹{p_price:,}! Would you like to view your cart or checkout?",
+                    "reply": reply,
                     "products": [active_candidate],
+                    "companion_products": companion,
                     "action": {
                         "type": "add_to_cart",
                         "product_id": p_id,
@@ -387,10 +648,9 @@ class VoiceAssistantService:
                     }
                 }
             else:
-                featured = self._get_featured_products(4)
                 return {
-                    "reply": "Which product would you like to add to your cart? Please say the product name, or choose from our featured recommendations below.",
-                    "products": featured,
+                    "reply": "Which product would you like to add to your cart? Please say a product name, such as 'Midnight Silk Evening Gown' or 'iPhone 13 Pro'.",
+                    "products": [],
                     "action": {"type": "none"}
                 }
 
@@ -400,9 +660,18 @@ class VoiceAssistantService:
             p_id = int(matched.get('ID', 0))
             p_name = str(matched.get('Name'))
             p_price = int(matched.get('Price', 0))
+            companion = self._get_companion_products(p_name, customer_id=customer_id)
+            
+            if companion:
+                top_names = " and ".join(c['Name'] for c in companion[:2])
+                reply = f"I have added the {p_name} to your cart for ₹{p_price:,}! Customers also frequently purchase {top_names} with this. Take a look below!"
+            else:
+                reply = f"I have added the {p_name} to your cart for ₹{p_price:,}. Would you like to view your cart or keep shopping?"
+
             return {
-                "reply": f"I have added the {p_name} to your cart for ₹{p_price:,}. Would you like to view your cart or keep shopping?",
+                "reply": reply,
                 "products": [matched],
+                "companion_products": companion,
                 "action": {
                     "type": "add_to_cart",
                     "product_id": p_id,
@@ -412,15 +681,32 @@ class VoiceAssistantService:
             }
         
         return {
-            "reply": f"I couldn't find a product matching '{target_term}'. Here are some popular products you can add right now.",
-            "products": self._get_featured_products(4),
+            "reply": f"I couldn't find a product matching '{target_term}'. You can search for dresses, smartphones, laptops, shoes, perfumes, or watches.",
+            "products": [],
             "action": {"type": "none"}
         }
-
     def _find_best_match(self, term):
         term_clean = term.lower().strip()
+        if term_clean.startswith(('the ', 'a ', 'an ')):
+            term_clean = re.sub(r'^(?:the|a|an)\s+', '', term_clean).strip()
+
         if not term_clean or self.clean_df is None or self.clean_df.empty:
             return None
+
+        # 0. Direct match: Exact name match
+        exact = self.clean_df[self.clean_df['Name_clean'] == term_clean]
+        if not exact.empty:
+            return self._to_dict(exact.iloc[0])
+
+        # Multi-word specific product match (e.g. "midnight silk evening gown", "banarasi silk saree", "emerald satin slip dress")
+        if len(term_clean.split()) >= 2:
+            sub = self.clean_df[self.clean_df['Name_clean'].str.contains(re.escape(term_clean), regex=True, na=False)]
+            if not sub.empty:
+                return self._to_dict(sub.sort_values(by=['Rating', 'Price'], ascending=[False, False]).iloc[0])
+
+            contained = self.clean_df[self.clean_df['Name_clean'].apply(lambda n: len(n) >= 5 and n in term_clean)]
+            if not contained.empty:
+                return self._to_dict(contained.sort_values(by=['Price', 'Rating'], ascending=[False, False]).iloc[0])
 
         # 1. iPhone matches (device vs accessory)
         if 'iphone' in term_clean and not any(acc in term_clean for acc in ['charger', 'case', 'cable', 'cover', 'protector', 'battery', 'lamp', 'adapter']):
@@ -465,7 +751,59 @@ class VoiceAssistantService:
                             return self._to_dict(asuss.iloc[0])
                     return self._to_dict(laptops.sort_values(by=['Price', 'Rating'], ascending=[False, False]).iloc[0])
 
-        # 4. Shoes / Sneakers matches
+        # 4. Dresses / Evening Gowns / Ethnic Festive Wear
+        if any(w in term_clean for w in ['dress', 'dresses', 'gown', 'gowns', 'saree', 'sarees', 'lehenga', 'lehengas', 'frock']):
+            dresses = self.clean_df[self.clean_df['Name_clean'].str.contains(r'dress|gown|saree|lehenga|frock', regex=True)]
+            if not dresses.empty:
+                if 'silk' in term_clean or 'evening' in term_clean or 'gown' in term_clean:
+                    m = dresses[dresses['Name_clean'].str.contains('silk|evening|gown', na=False)]
+                    if not m.empty:
+                        return self._to_dict(m.sort_values(by=['Rating', 'Price'], ascending=[False, False]).iloc[0])
+                if 'saree' in term_clean:
+                    m = dresses[dresses['Name_clean'].str.contains('saree', na=False)]
+                    if not m.empty:
+                        return self._to_dict(m.sort_values(by=['Rating', 'Price'], ascending=[False, False]).iloc[0])
+                if 'lehenga' in term_clean:
+                    m = dresses[dresses['Name_clean'].str.contains('lehenga', na=False)]
+                    if not m.empty:
+                        return self._to_dict(m.sort_values(by=['Rating', 'Price'], ascending=[False, False]).iloc[0])
+                if 'satin' in term_clean or 'slip' in term_clean:
+                    m = dresses[dresses['Name_clean'].str.contains('satin|slip', na=False)]
+                    if not m.empty:
+                        return self._to_dict(m.sort_values(by=['Rating', 'Price'], ascending=[False, False]).iloc[0])
+                return self._to_dict(dresses.sort_values(by=['Price', 'Rating'], ascending=[False, False]).iloc[0])
+
+        # 5. Tailored Suits / Blazers / Tuxedos
+        if any(w in term_clean for w in ['suit', 'suits', 'blazer', 'blazers', 'tuxedo', 'tuxedos', 'bandhgala']):
+            suits = self.clean_df[self.clean_df['Name_clean'].str.contains(r'tuxedo|suit|blazer|bandhgala', regex=True)]
+            if not suits.empty:
+                if 'tuxedo' in term_clean:
+                    m = suits[suits['Name_clean'].str.contains('tuxedo', na=False)]
+                    if not m.empty:
+                        return self._to_dict(m.iloc[0])
+                if 'blazer' in term_clean:
+                    m = suits[suits['Name_clean'].str.contains('blazer', na=False)]
+                    if not m.empty:
+                        return self._to_dict(m.iloc[0])
+                if 'bandhgala' in term_clean:
+                    m = suits[suits['Name_clean'].str.contains('bandhgala', na=False)]
+                    if not m.empty:
+                        return self._to_dict(m.iloc[0])
+                return self._to_dict(suits.sort_values(by=['Price', 'Rating'], ascending=[False, False]).iloc[0])
+
+        # 6. Luxury Handbags / Totes
+        if any(w in term_clean for w in ['handbag', 'handbags', 'tote', 'totes', 'purse', 'crossbody']):
+            bags = self.clean_df[self.clean_df['Name_clean'].str.contains(r'handbag|tote|crossbody|purse', regex=True)]
+            if not bags.empty:
+                return self._to_dict(bags.sort_values(by=['Price', 'Rating'], ascending=[False, False]).iloc[0])
+
+        # 7. Fine Jewelry / Diamond / Gold
+        if any(w in term_clean for w in ['jewelry', 'jewellery', 'necklace', 'earring', 'earrings', 'bracelet', 'diamond']):
+            jewels = self.clean_df[self.clean_df['Name_clean'].str.contains(r'necklace|earring|bracelet|diamond', regex=True) & ~self.clean_df['Name_clean'].str.contains(r'watch', regex=True)]
+            if not jewels.empty:
+                return self._to_dict(jewels.sort_values(by=['Price', 'Rating'], ascending=[False, False]).iloc[0])
+
+        # 8. Shoes / Sneakers matches
         if any(w in term_clean for w in ['shoe', 'shoes', 'sneaker', 'sneakers', 'trainer', 'trainers', 'cleat', 'cleats', 'footwear', 'heel', 'loafers']):
             shoes = self.clean_df[self.clean_df['Name_clean'].str.contains(r'shoe|sneaker|jordan|rider|cleat|heel|loafer|suede casual', regex=True)]
             if not shoes.empty:
@@ -479,7 +817,7 @@ class VoiceAssistantService:
                         return self._to_dict(m.iloc[0])
                 return self._to_dict(shoes.sort_values(by='Rating', ascending=False).iloc[0])
 
-        # 5. Watches / Rolex matches
+        # 9. Watches / Rolex matches
         if any(w in term_clean for w in ['watch', 'watches', 'rolex', 'timepiece']):
             watches = self.clean_df[self.clean_df['Name_clean'].str.contains(r'rolex|watch', regex=True)]
             if not watches.empty:
@@ -497,7 +835,7 @@ class VoiceAssistantService:
                         return self._to_dict(m.iloc[0])
                 return self._to_dict(watches.sort_values(by=['Price', 'Rating'], ascending=[False, False]).iloc[0])
 
-        # 6. Camera matches
+        # 10. Camera matches
         if any(w in term_clean for w in ['camera', 'cameras', 'dslr']):
             if not any(acc in term_clean for acc in ['tripod', 'bag', 'card', 'battery', 'lens']):
                 cams = self.clean_df[(self.clean_df['Category'] == 'Cameras') & (~self.clean_df['Name_clean'].str.contains(r'card|tripod|bag|battery|pedestal|lens', regex=True))]
@@ -516,17 +854,17 @@ class VoiceAssistantService:
                             return self._to_dict(m.iloc[0])
                     return self._to_dict(cams.sort_values(by=['Price', 'Rating'], ascending=[False, False]).iloc[0])
 
-        # 7. Exact match on Name
+        # 11. Exact match on Name
         exact = self.clean_df[self.clean_df['Name_clean'] == term_clean]
         if not exact.empty:
             return self._to_dict(exact.iloc[0])
 
-        # 8. Substring match on Name
+        # 12. Substring match on Name
         sub = self.clean_df[self.clean_df['Name_clean'].str.contains(re.escape(term_clean), regex=True, na=False)]
         if not sub.empty:
             return self._to_dict(sub.sort_values(by='Rating', ascending=False).iloc[0])
 
-        # 9. Token overlap match (excluding stop words)
+        # 13. Token overlap match (excluding stop words)
         tokens = [t for t in term_clean.split() if len(t) > 2 and t not in self.STOP_WORDS]
         if tokens:
             best_score = 0
@@ -549,7 +887,7 @@ class VoiceAssistantService:
             tokens = [t for t in q_clean.split() if len(t) > 1 and t not in self.STOP_WORDS]
 
         if not tokens:
-            return self._get_featured_products(6)
+            return []
 
         results = []
         if self.clean_df is not None and not self.clean_df.empty:
@@ -565,19 +903,25 @@ class VoiceAssistantService:
                 desc_clean = row['Desc_clean']
                 
                 for t in tokens:
-                    if t in name_clean:
-                        score += 5
-                    if t in cat_clean:
+                    # Exact word boundary matching for high accuracy
+                    if re.search(rf'\b{re.escape(t)}\b', name_clean):
+                        score += 6
+                    elif len(t) >= 4 and t in name_clean:
                         score += 3
-                    if t in desc_clean:
+
+                    if re.search(rf'\b{re.escape(t)}\b', cat_clean):
+                        score += 4
+                    elif len(t) >= 4 and t in cat_clean:
+                        score += 2
+
+                    if re.search(rf'\b{re.escape(t)}\b', desc_clean):
                         score += 1
                 scores.append(score)
 
             df = df.copy()
             df['Score'] = scores
-            # Require at least name or category match if tokens > 1, or minimum score of 3
-            min_score = 3 if len(tokens) > 1 else 1
-            matched = df[df['Score'] >= min_score].sort_values(by=['Score', 'Rating'], ascending=[False, False])
+            # Require at least a strong match (score >= 3) so random tokens don't falsely match
+            matched = df[df['Score'] >= 3].sort_values(by=['Score', 'Rating'], ascending=[False, False])
             results = [self._to_dict(r) for _, r in matched.iterrows()]
 
         return results
