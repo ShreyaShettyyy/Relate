@@ -92,7 +92,14 @@ class VoiceAssistantService:
         }
     }
 
-    def process_query(self, query_text, current_product=None, current_cart_ids=None):
+    STOP_WORDS = {
+        'show', 'me', 'some', 'products', 'product', 'item', 'items', 'for', 'example',
+        'like', 'any', 'good', 'best', 'give', 'want', 'need', 'tell', 'about', 'can',
+        'you', 'please', 'display', 'view', 'look', 'what', 'are', 'the', 'have', 'recommend',
+        'suggest', 'explore', 'find', 'which', 'with', 'a', 'an', 'in', 'of', 'on', 'to'
+    }
+
+    def process_query(self, query_text, current_product=None, current_cart_ids=None, last_recommended_product=None):
         """
         Main query handler. Analyzes voice or text input, determines user intent,
         extracts target products / constraints, and returns a rich assistant response.
@@ -106,8 +113,8 @@ class VoiceAssistantService:
 
         q = query_text.strip().lower()
         
-        # 1. Strip wake-word prefix if present
-        for prefix in ['hey relate', 'hi relate', 'hello relate', 'ok relate', 'okay relate', 'relate']:
+        # 1. Strip wake-word prefix if present (including common speech-to-text misrecognitions)
+        for prefix in ['hey relate', 'hi relate', 'hello relate', 'ok relate', 'okay relate', 'relate', 'hey reality', 'hey relay', 'hey re late']:
             if q.startswith(prefix):
                 q = q[len(prefix):].strip(',.! ')
                 break
@@ -137,7 +144,7 @@ class VoiceAssistantService:
             }
 
         # B. Checkout / Payment
-        if any(k in q for k in ['checkout', 'proceed to checkout', 'pay now', 'make payment', 'buy now', 'place order']):
+        if any(k in q for k in ['checkout', 'proceed to checkout', 'pay now', 'make payment', 'place order']):
             return {
                 "reply": "Taking you directly to checkout.",
                 "products": [],
@@ -155,7 +162,7 @@ class VoiceAssistantService:
         # D. Add to Cart Intent (Flexible regex parser)
         add_cart_match = self._parse_add_to_cart_query(q)
         if add_cart_match is not None:
-            return self._handle_add_to_cart(add_cart_match, current_product)
+            return self._handle_add_to_cart(add_cart_match, current_product=current_product, last_recommended_product=last_recommended_product)
 
         # 4. Check for Occasion & Event Queries
         for occ_key, occ_info in self.OCCASION_MAP.items():
@@ -222,36 +229,56 @@ class VoiceAssistantService:
         if any(w in q for w in ['what should i buy', 'what to buy', 'should i buy', 'can i buy', 'where to buy', 'how to buy', 'what can i buy']):
             return None
 
+        q_clean = q.strip('.,!? ')
+
+        # Explicit generic commands
+        if q_clean in ['add to cart', 'add to bag', 'add this', 'add this to cart', 'add it', 'add it to cart', 'buy this', 'buy it', 'add product to cart', 'add a product to cart', 'add a product to the cart', 'add the product to cart', 'add the product to the cart', 'add product to the cart']:
+            return 'this'
+
         # Form 1: "add to cart [item]" or "add to bag [item]"
-        m1 = re.search(r'\b(?:add|put)\s+(?:to|in)\s+(?:the\s+|my\s+)?(?:cart|bag)\s*(.*)', q)
+        m1 = re.search(r'\b(?:add|put)\s+(?:to|in)\s+(?:the\s+|my\s+)?(?:cart|bag)\s+(.+)$', q_clean)
         if m1:
             return m1.group(1).strip()
 
         # Form 2: "add [item] to/in cart/bag"
-        m2 = re.search(r'\b(?:add|put)\s+(.+?)\s+(?:to|in)\s+(?:the\s+|my\s+)?(?:cart|bag)\b', q)
+        m2 = re.search(r'\b(?:add|put)\s+(.+?)\s+(?:to|in)\s+(?:the\s+|my\s+)?(?:cart|bag)\b', q_clean)
         if m2:
             return m2.group(1).strip()
 
         # Form 3: Direct imperative command "buy [item]" or "purchase [item]"
-        if q.startswith(('buy ', 'purchase ')):
-            sub = re.sub(r'^(?:buy|purchase)\s+', '', q).strip()
+        if q_clean.startswith(('buy ', 'purchase ')):
+            sub = re.sub(r'^(?:buy|purchase)\s+', '', q_clean).strip()
             if sub and not sub.startswith(('for ', 'something ', 'a gift ', 'gift ', 'me ')):
+                return sub
+
+        # Form 4: Direct imperative command "add [item]" (e.g. "add iphone 13 pro", "add macbook", "add airpods")
+        m4 = re.search(r'^\s*add\s+(.+)$', q_clean)
+        if m4:
+            sub = m4.group(1).strip()
+            if sub and not sub.startswith(('more', 'another', 'something', 'filter', 'to cart', 'to bag')):
                 return sub
 
         return None
 
-    def _handle_add_to_cart(self, target_term, current_product=None):
+    def _handle_add_to_cart(self, target_term, current_product=None, last_recommended_product=None):
         target_clean = target_term.lower().strip()
+        generic_terms = {
+            '', 'this', 'this item', 'this product', 'it', 'one', 'a product', 'the product',
+            'product', 'products', 'item', 'items', 'that', 'that product', 'that item'
+        }
 
-        # If user said "add this" or generic "add to cart" without specifying name
-        if target_clean in ['', 'this', 'this item', 'this product', 'it', 'one']:
-            if current_product:
-                p_id = int(current_product.get('ID', 0))
-                p_name = str(current_product.get('Name', 'this item'))
-                p_price = int(current_product.get('Price', 0))
+        target_is_generic = target_clean in generic_terms
+        active_candidate = current_product or last_recommended_product
+
+        # If user gave a generic "add to cart" command and we have an active candidate
+        if target_is_generic:
+            if active_candidate:
+                p_id = int(active_candidate.get('ID', 0))
+                p_name = str(active_candidate.get('Name', 'this item'))
+                p_price = int(active_candidate.get('Price', 0))
                 return {
-                    "reply": f"I've added {p_name} to your cart for ₹{p_price:,}! Would you like to view your cart or checkout?",
-                    "products": [current_product],
+                    "reply": f"I have added {p_name} to your cart for ₹{p_price:,}! Would you like to view your cart or checkout?",
+                    "products": [active_candidate],
                     "action": {
                         "type": "add_to_cart",
                         "product_id": p_id,
@@ -260,20 +287,32 @@ class VoiceAssistantService:
                     }
                 }
             else:
-                return {
-                    "reply": "Which product would you like me to add to your cart? You can say 'Add iPhone' or 'Add MacBook Pro'.",
-                    "products": self._get_featured_products(4),
-                    "action": {"type": "none"}
-                }
+                # Fallback to top featured item
+                top_items = self._get_featured_products(1)
+                if top_items:
+                    top_prod = top_items[0]
+                    p_id = int(top_prod.get('ID', 0))
+                    p_name = str(top_prod.get('Name'))
+                    p_price = int(top_prod.get('Price', 0))
+                    return {
+                        "reply": f"I have added {p_name} to your cart for ₹{p_price:,}! You can also say any specific item name to add.",
+                        "products": [top_prod],
+                        "action": {
+                            "type": "add_to_cart",
+                            "product_id": p_id,
+                            "product_name": p_name,
+                            "price": p_price
+                        }
+                    }
 
-        # Match specific product name
+        # Match specific product name or category concept
         matched = self._find_best_match(target_clean)
         if matched:
             p_id = int(matched.get('ID', 0))
             p_name = str(matched.get('Name'))
             p_price = int(matched.get('Price', 0))
             return {
-                "reply": f"I've added the {p_name} to your cart for ₹{p_price:,}. Would you like to view your cart or keep browsing?",
+                "reply": f"I have added the {p_name} to your cart for ₹{p_price:,}. Would you like to view your cart or keep shopping?",
                 "products": [matched],
                 "action": {
                     "type": "add_to_cart",
@@ -294,6 +333,27 @@ class VoiceAssistantService:
         if not term_clean or self.clean_df is None or self.clean_df.empty:
             return None
 
+        # Concept shortcuts (e.g. user says "add smartphone" -> return flagship phone, not speaker!)
+        if term_clean in ['smartphone', 'smartphones', 'smart phone', 'smart phones', 'phone', 'phones', 'mobile', 'mobiles']:
+            phones = self.clean_df[(self.clean_df['Category'] == 'Smartphones') & (~self.clean_df['Name_clean'].str.contains(r'case|charger|cable|protector|stand|holder|power bank|pedestal|monopod|stick|battery|airpods|beats|lamp', regex=True))]
+            if not phones.empty:
+                return self._to_dict(phones.sort_values(by=['Price', 'Rating'], ascending=[False, False]).iloc[0])
+
+        if term_clean in ['laptop', 'laptops', 'macbook', 'computer', 'notebook']:
+            laptops = self.clean_df[(self.clean_df['Category'] == 'Laptops') & (~self.clean_df['Name_clean'].str.contains(r'backpack|bag|sleeve|case|stand|mouse', regex=True))]
+            if not laptops.empty:
+                return self._to_dict(laptops.sort_values(by=['Price', 'Rating'], ascending=[False, False]).iloc[0])
+
+        if term_clean in ['camera', 'cameras', 'dslr']:
+            cams = self.clean_df[(self.clean_df['Category'] == 'Cameras') & (~self.clean_df['Name_clean'].str.contains(r'card|tripod|bag|battery|pedestal', regex=True))]
+            if not cams.empty:
+                return self._to_dict(cams.sort_values(by=['Price', 'Rating'], ascending=[False, False]).iloc[0])
+
+        if term_clean in ['watch', 'watches', 'rolex']:
+            watches = self.clean_df[self.clean_df['Name_clean'].str.contains(r'rolex|watch', regex=True)]
+            if not watches.empty:
+                return self._to_dict(watches.sort_values(by=['Price', 'Rating'], ascending=[False, False]).iloc[0])
+
         # 1. Exact match on Name
         exact = self.clean_df[self.clean_df['Name_clean'] == term_clean]
         if not exact.empty:
@@ -304,14 +364,14 @@ class VoiceAssistantService:
         if not sub.empty:
             return self._to_dict(sub.sort_values(by='Rating', ascending=False).iloc[0])
 
-        # 3. Token overlap match
-        tokens = [t for t in term_clean.split() if len(t) > 2]
+        # 3. Token overlap match (excluding stop words)
+        tokens = [t for t in term_clean.split() if len(t) > 2 and t not in self.STOP_WORDS]
         if tokens:
             best_score = 0
             best_row = None
             for _, row in self.clean_df.iterrows():
                 name_words = row['Name_clean'].split()
-                score = sum(2 for t in tokens if t in name_words) + sum(1 for t in tokens if any(t in w for w in name_words))
+                score = sum(3 for t in tokens if t in name_words) + sum(1 for t in tokens if any(t in w for w in name_words))
                 if score > best_score:
                     best_score = score
                     best_row = row
@@ -322,9 +382,12 @@ class VoiceAssistantService:
 
     def _search_products(self, query, max_price=None):
         q_clean = query.lower().strip()
-        tokens = [t for t in q_clean.split() if len(t) > 2 and t not in ['show', 'find', 'best', 'give', 'want', 'need', 'product', 'items', 'under', 'price', 'tell', 'about']]
+        tokens = [t for t in q_clean.split() if len(t) > 2 and t not in self.STOP_WORDS]
         if not tokens and self.clean_df is not None:
-            tokens = [t for t in q_clean.split() if len(t) > 1]
+            tokens = [t for t in q_clean.split() if len(t) > 1 and t not in self.STOP_WORDS]
+
+        if not tokens:
+            return self._get_featured_products(6)
 
         results = []
         if self.clean_df is not None and not self.clean_df.empty:
@@ -335,18 +398,24 @@ class VoiceAssistantService:
             scores = []
             for _, row in df.iterrows():
                 score = 0
+                name_clean = row['Name_clean']
+                cat_clean = row['Category_clean']
+                desc_clean = row['Desc_clean']
+                
                 for t in tokens:
-                    if t in row['Name_clean']:
+                    if t in name_clean:
+                        score += 5
+                    if t in cat_clean:
                         score += 3
-                    if t in row['Category_clean']:
-                        score += 2
-                    if t in row['Desc_clean']:
+                    if t in desc_clean:
                         score += 1
                 scores.append(score)
 
             df = df.copy()
             df['Score'] = scores
-            matched = df[df['Score'] > 0].sort_values(by=['Score', 'Rating'], ascending=[False, False])
+            # Require at least name or category match if tokens > 1, or minimum score of 3
+            min_score = 3 if len(tokens) > 1 else 1
+            matched = df[df['Score'] >= min_score].sort_values(by=['Score', 'Rating'], ascending=[False, False])
             results = [self._to_dict(r) for _, r in matched.iterrows()]
 
         return results
@@ -376,16 +445,17 @@ class VoiceAssistantService:
 
     def _match_category(self, q):
         cat_map = {
-            'smartphones': ['smartphone', 'smartphones', 'phones', 'mobile', 'mobiles'],
-            'laptops': ['laptop', 'laptops', 'notebook', 'notebooks', 'computers'],
-            'fashion': ['fashion', 'clothes', 'clothing', 'shoes', 'sneakers', 'sweatpants', 'wear'],
-            'beauty': ['beauty', 'cosmetics', 'makeup', 'lipsticks', 'perfumes', 'fragrances'],
-            'home & kitchen': ['home', 'kitchen', 'furniture', 'cookware', 'sofas', 'lamps'],
-            'groceries': ['grocery', 'groceries', 'fresh food', 'juices', 'coffee'],
-            'electronics': ['electronics', 'gadgets', 'power banks'],
-            'cameras': ['camera', 'cameras', 'dslr', 'dslrs', 'lenses'],
-            'botanicals': ['botanical', 'botanicals', 'candles', 'incense', 'diffusers'],
-            'sports accessories': ['sports', 'fitness gear', 'cleats']
+            'smartphones': ['smart phone', 'smart phones', 'smartphone', 'smartphones', 'phone', 'phones', 'mobile', 'mobiles', 'cellphone', 'cellphones', 'android', 'iphone', 'handset', 'handsets'],
+            'laptops': ['laptop', 'laptops', 'notebook', 'notebooks', 'computers', 'computer', 'macbook'],
+            'fashion': ['fashion', 'clothes', 'clothing', 'shoes', 'sneakers', 'sweatpants', 'wear', 'dress', 'dresses', 'shirt', 'shirts', 'jeans', 'jacket', 'jackets', 'watch', 'watches', 'sunglasses'],
+            'beauty': ['beauty', 'cosmetics', 'makeup', 'lipsticks', 'lipstick', 'perfumes', 'perfume', 'fragrances', 'fragrance', 'cologne'],
+            'home & kitchen': ['home', 'kitchen', 'furniture', 'cookware', 'sofas', 'sofa', 'beds', 'bed', 'lamps', 'lamp', 'living', 'chair', 'chairs'],
+            'groceries': ['grocery', 'groceries', 'fresh food', 'juices', 'juice', 'coffee', 'fruits', 'food', 'apothecary'],
+            'electronics': ['electronics', 'gadget', 'gadgets', 'power banks', 'power bank', 'speaker', 'speakers', 'tablet', 'tablets', 'ipad'],
+            'cameras': ['camera', 'cameras', 'dslr', 'dslrs', 'lenses', 'lens', 'tripod', 'tripods'],
+            'botanicals': ['botanical', 'botanicals', 'candle', 'candles', 'incense', 'diffusers', 'diffuser', 'mist', 'essence'],
+            'sports accessories': ['sports', 'sport', 'fitness gear', 'fitness', 'cleats', 'gym', 'workout'],
+            'vehicles & outdoors': ['vehicle', 'vehicles', 'bike', 'bikes', 'bicycle', 'bicycles', 'motorcycle', 'motorcycles', 'scooter', 'scooters']
         }
         for cat_name, triggers in cat_map.items():
             if any(re.search(r'\b' + re.escape(t) + r'\b', q) for t in triggers):
@@ -403,13 +473,26 @@ class VoiceAssistantService:
         if max_price:
             matches = matches[matches['Price'] <= max_price]
         
-        # Prefer devices over accessories if category is Laptops or Smartphones
-        if category.lower() in ['laptops', 'smartphones', 'cameras']:
-            devices = matches[~matches['Name_clean'].str.contains(r'case|sleeve|stand|hub|mouse|keyboard|pad|cable|charger|bag|sieve|pot', regex=True)]
-            if not devices.empty:
-                accessories = matches[matches['Name_clean'].str.contains(r'case|sleeve|stand|hub|mouse|keyboard|pad|cable|charger|bag|sieve|pot', regex=True)]
-                sorted_matches = pd.concat([devices.sort_values(by='Rating', ascending=False), accessories.sort_values(by='Rating', ascending=False)])
-                return [self._to_dict(r) for _, r in sorted_matches.iterrows()]
+        # When user asks for Smartphones, prioritize actual phone handsets (exclude cases/cables/chargers from top results)
+        if category.lower() == 'smartphones':
+            handsets = matches[~matches['Name_clean'].str.contains(r'case|charger|cable|protector|stand|holder|power bank|pedestal|monopod|stick|battery|airpods|beats|lamp', regex=True)]
+            accessories = matches[matches['Name_clean'].str.contains(r'case|charger|cable|protector|stand|holder|power bank|pedestal|monopod|stick|battery|airpods|beats|lamp', regex=True)]
+            sorted_matches = pd.concat([handsets.sort_values(by=['Price', 'Rating'], ascending=[False, False]), accessories.sort_values(by='Rating', ascending=False)])
+            return [self._to_dict(r) for _, r in sorted_matches.iterrows()]
+
+        # When user asks for Laptops, prioritize actual laptops (exclude backpacks/sleeves from top results)
+        if category.lower() == 'laptops':
+            devices = matches[~matches['Name_clean'].str.contains(r'backpack|bag|sleeve|case|stand|mouse', regex=True)]
+            accessories = matches[matches['Name_clean'].str.contains(r'backpack|bag|sleeve|case|stand|mouse', regex=True)]
+            sorted_matches = pd.concat([devices.sort_values(by=['Price', 'Rating'], ascending=[False, False]), accessories.sort_values(by='Rating', ascending=False)])
+            return [self._to_dict(r) for _, r in sorted_matches.iterrows()]
+
+        # When user asks for Cameras, prioritize actual cameras (exclude SD cards/bags/tripods from top results)
+        if category.lower() == 'cameras':
+            devices = matches[~matches['Name_clean'].str.contains(r'card|tripod|bag|battery|pedestal', regex=True)]
+            accessories = matches[matches['Name_clean'].str.contains(r'card|tripod|bag|battery|pedestal', regex=True)]
+            sorted_matches = pd.concat([devices.sort_values(by=['Price', 'Rating'], ascending=[False, False]), accessories.sort_values(by='Rating', ascending=False)])
+            return [self._to_dict(r) for _, r in sorted_matches.iterrows()]
 
         matches = matches.sort_values(by='Rating', ascending=False)
         return [self._to_dict(r) for _, r in matches.iterrows()]

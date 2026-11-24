@@ -22,6 +22,7 @@
         isWakeWordActive: false,
         isSpeaking: false,
         activeUtterance: null,
+        lastRecommendedProduct: null,
         voices: [],
         settings: {
             voiceURI: '',
@@ -271,8 +272,8 @@
             // Show real-time streaming text in the UI
             showLiveTranscription(currentSpoken);
 
-            // Check for Wake-Word: "Hey Relate" / "Hi Relate" / "Relate"
-            const wakeMatch = currentSpoken.match(/\b(?:hey|hi|hello|ok|okay)?\s*relate\b/i);
+            // Check for Wake-Word: "Hey Relate" / "Hi Relate" / "Relate" (plus common STT variants like reality, relay, re late)
+            const wakeMatch = currentSpoken.match(/\b(?:hey|hi|hello|ok|okay)?\s*(?:relate|re\s*late|reality|relay|relat|relet|elate)\b/i);
             
             if (wakeMatch) {
                 // Wake word detected!
@@ -281,12 +282,13 @@
                     openAssistantPanel();
                 }
 
-                // Check if user continued their command in the same sentence
+                // Check if user continued their command in the same utterance
                 // e.g., "Hey Relate, add iPhone 13 Pro to cart"
                 const wakeIndex = wakeMatch.index + wakeMatch[0].length;
                 const commandAfterWake = currentSpoken.slice(wakeIndex).trim().replace(/^[,.!\s]+/, '');
 
-                if (commandAfterWake.length > 2 && event.results[event.results.length - 1].isFinal) {
+                if (commandAfterWake.length > 2 && (event.results[event.results.length - 1].isFinal || commandAfterWake.split(' ').length >= 2)) {
+                    clearTimeout(state.silenceTimer);
                     handleQuery(commandAfterWake);
                     return;
                 }
@@ -296,18 +298,25 @@
                     state.isListening = true;
                     updateListeningVisuals(true);
                     updateStatus("Listening... speak your request");
-                    speak("I'm listening! What can I help you find?", () => {
-                        // After speaking, reset silence timer
+                    speak("Hello! I'm listening. What would you like to explore or add to your cart?", () => {
                         resetSilenceTimer();
                     });
                     return;
                 }
             }
 
-            // If assistant is actively open and listening for command
+            // If assistant is actively listening or panel is open
             if (finalTranscript && (state.isListening || state.isOpen)) {
                 clearTimeout(state.silenceTimer);
-                handleQuery(finalTranscript.trim());
+                // Strip leading wake word if present
+                let queryToHandle = finalTranscript.trim();
+                const prefixMatch = queryToHandle.match(/^\b(?:hey|hi|hello|ok|okay)?\s*(?:relate|re\s*late|reality|relay|relat|relet|elate)\b[,.!\s]*/i);
+                if (prefixMatch) {
+                    queryToHandle = queryToHandle.slice(prefixMatch[0].length).trim();
+                }
+                if (queryToHandle) {
+                    handleQuery(queryToHandle);
+                }
             }
         };
 
@@ -317,10 +326,10 @@
                 return;
             }
             if (event.error === 'not-allowed') {
-                console.warn('Microphone permission blocked or denied.');
-                state.settings.wakeWordEnabled = false;
+                console.warn('Microphone permission requires user click or permission in browser settings.');
+                state.isWakeWordActive = false;
                 updateWakeWordStatus();
-                updateStatus('Microphone blocked • Enable mic in browser settings');
+                updateStatus('Microphone click required • Tap mic to activate');
                 return;
             }
             console.warn('Speech recognition error:', event.error);
@@ -428,7 +437,8 @@
                 headers: { 'Content-Type': 'application/json' },
                 body: JSON.stringify({
                     query: queryText.trim(),
-                    current_product: currentProduct
+                    current_product: currentProduct,
+                    last_recommended_product: state.lastRecommendedProduct
                 })
             });
 
@@ -452,11 +462,22 @@
         const products = data.products || [];
         const action = data.action || { type: 'none' };
 
+        // Save last recommended product for context follow-ups (e.g. "add to cart")
+        if (products && products.length > 0) {
+            state.lastRecommendedProduct = products[0];
+        }
+
         // 1. Execute direct UI / Cart actions
         if (action.type === 'add_to_cart' && action.product_id) {
             if (window.RelateApp && typeof window.RelateApp.addToCart === 'function') {
                 window.RelateApp.addToCart(action.product_id);
                 playChime('success');
+                if (typeof window.RelateApp.showToast === 'function') {
+                    window.RelateApp.showToast(`Added ${action.product_name || 'product'} to cart!`, 'success');
+                }
+            }
+            if (products && products.length > 0) {
+                state.lastRecommendedProduct = products[0];
             }
         } else if (action.type === 'view_cart') {
             if (window.RelateApp && typeof window.RelateApp.openCartDrawer === 'function') {
@@ -885,6 +906,19 @@
         setupEventListeners();
         initSpeechRecognition();
         updateWakeWordStatus();
+
+        // Enable microphone listening seamlessly upon first user gesture (Chrome autoplay policy compliance)
+        const onFirstInteraction = () => {
+            if (state.settings.wakeWordEnabled && !state.isWakeWordActive && state.speechSupported) {
+                startRecognition();
+            }
+            document.removeEventListener('click', onFirstInteraction);
+            document.removeEventListener('keydown', onFirstInteraction);
+            document.removeEventListener('touchstart', onFirstInteraction);
+        };
+        document.addEventListener('click', onFirstInteraction);
+        document.addEventListener('keydown', onFirstInteraction);
+        document.addEventListener('touchstart', onFirstInteraction);
     }
 
     if (document.readyState === 'loading') {

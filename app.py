@@ -474,11 +474,13 @@ def assistant_chat():
     query = data.get('query', '')
     current_product = data.get('current_product')
     current_cart_ids = data.get('cart', [])
+    last_recommended_product = data.get('last_recommended_product')
     
     response = assistant_service.process_query(
         query_text=query,
         current_product=current_product,
-        current_cart_ids=current_cart_ids
+        current_cart_ids=current_cart_ids,
+        last_recommended_product=last_recommended_product
     )
     return jsonify(response)
 
