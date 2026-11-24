@@ -39,7 +39,7 @@ function getProductImage(prod) {
     return getProductFallback(prod);
 }
 
-document.addEventListener('DOMContentLoaded', () => {
+function initRelateApp() {
     // -------------------------------------------------------------
     // STATE MANAGEMENT
     // -------------------------------------------------------------
@@ -109,10 +109,27 @@ document.addEventListener('DOMContentLoaded', () => {
         }
     });
 
-    // Handle hash on initial load
+    // Handle hash on initial load safely (avoid blank product detail on reload)
     const initialHash = window.location.hash.replace('#', '');
     if (initialHash && document.getElementById(initialHash)) {
-        navigateTo(initialHash, false);
+        if (initialHash === 'product-detail-section') {
+            let restored = false;
+            try {
+                const saved = sessionStorage.getItem('relate_active_product');
+                if (saved) {
+                    const prod = JSON.parse(saved);
+                    if (prod && prod.Name) {
+                        showProductDetail(prod);
+                        restored = true;
+                    }
+                }
+            } catch (e) {}
+            if (!restored) {
+                navigateTo('catalog-section', false);
+            }
+        } else {
+            navigateTo(initialHash, false);
+        }
     } else {
         history.replaceState({ section: 'catalog-section' }, '', '#catalog-section');
     }
@@ -727,6 +744,9 @@ document.addEventListener('DOMContentLoaded', () => {
     function showProductDetail(product) {
         if (!product) return;
         currentProductObj = product;
+        try {
+            sessionStorage.setItem('relate_active_product', JSON.stringify(product));
+        } catch (e) {}
         navigateTo('product-detail-section');
 
         const mainImg = getProductImage(product);
@@ -2453,4 +2473,11 @@ document.addEventListener('DOMContentLoaded', () => {
     if (currentUser) {
         loadUserProfileData();
     }
-});
+}
+
+// Safely initialize whether DOM is already loaded or still loading
+if (document.readyState === 'loading') {
+    document.addEventListener('DOMContentLoaded', initRelateApp);
+} else {
+    initRelateApp();
+}

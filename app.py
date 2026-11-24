@@ -484,5 +484,7 @@ def assistant_chat():
 
 
 if __name__ == '__main__':
-    print(f"Starting Relate (LuxStore) Server on port {Config.PORT}...")
-    app.run(debug=Config.DEBUG, port=Config.PORT)
+    host = Config.HOST
+    port = Config.PORT
+    print(f"Starting Relate (LuxStore) Server on http://127.0.0.1:{port} and http://localhost:{port} (host={host})...")
+    app.run(debug=Config.DEBUG, host=host, port=port, threaded=True)

@@ -880,11 +880,17 @@
     // -------------------------------------------------------------------------
     // INITIALIZATION ON DOM READY
     // -------------------------------------------------------------------------
-    document.addEventListener('DOMContentLoaded', () => {
+    function initVoiceAssistant() {
         initSpeechSynthesis();
         setupEventListeners();
         initSpeechRecognition();
         updateWakeWordStatus();
-    });
+    }
+
+    if (document.readyState === 'loading') {
+        document.addEventListener('DOMContentLoaded', initVoiceAssistant);
+    } else {
+        initVoiceAssistant();
+    }
 
 })();
