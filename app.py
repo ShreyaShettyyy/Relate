@@ -30,6 +30,7 @@ from services.recommendation_service import (
     get_product_dict_list,
     get_product_dict_list_with_reasons,
 )
+from services.assistant_service import VoiceAssistantService
 
 app = Flask(__name__)
 app.config['SEND_FILE_MAX_AGE_DEFAULT'] = 0
@@ -66,11 +67,13 @@ try:
     sync_user_orders_to_transactions()
     recommender = RecommenderSystem(df_trans, df_prod)
     recommender.train_market_basket(min_support=0.001, min_threshold=0.1)
+    assistant_service = VoiceAssistantService(df_prod)
 except Exception as e:
     print("Error initializing recommender system:", e)
     df_trans = pd.DataFrame(columns=['TransactionID', 'CustomerID', 'Item'])
     df_prod = pd.DataFrame(columns=['ID', 'Name', 'Category', 'Price', 'Rating', 'Image', 'Description'])
     recommender = RecommenderSystem(df_trans, df_prod)
+    assistant_service = VoiceAssistantService(df_prod)
 
 
 @app.route('/')
@@ -463,6 +466,21 @@ def verify_payment():
     except Exception as e:
         # In test mode / simulation or if signature check is simulated
         return jsonify({"success": True, "verified": True, "note": str(e)})
+
+
+@app.route('/api/assistant/chat', methods=['POST'])
+def assistant_chat():
+    data = request.get_json(silent=True) or {}
+    query = data.get('query', '')
+    current_product = data.get('current_product')
+    current_cart_ids = data.get('cart', [])
+    
+    response = assistant_service.process_query(
+        query_text=query,
+        current_product=current_product,
+        current_cart_ids=current_cart_ids
+    )
+    return jsonify(response)
 
 
 if __name__ == '__main__':

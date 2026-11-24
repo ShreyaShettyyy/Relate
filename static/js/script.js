@@ -2427,6 +2427,25 @@ document.addEventListener('DOMContentLoaded', () => {
     });
 
     // -------------------------------------------------------------
+    // EXPOSE GLOBAL APP API FOR VOICE ASSISTANT
+    // -------------------------------------------------------------
+    window.RelateApp = {
+        addToCart: addToCart,
+        openCartDrawer: openCartDrawer,
+        closeCartDrawer: closeCartDrawer,
+        navigateTo: navigateTo,
+        renderProductDetail: renderProductDetail,
+        getCurrentProduct: () => currentProductObj,
+        getAllProducts: () => allProducts,
+        showToast: showToast,
+        setCategory: setCategory,
+        openWishlist: () => {
+            const wishlistBtn = document.getElementById('nav-wishlist-btn');
+            if (wishlistBtn) wishlistBtn.click();
+        }
+    };
+
+    // -------------------------------------------------------------
     // INITIALIZATION
     // -------------------------------------------------------------
     updateAuthUI();

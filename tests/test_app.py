@@ -82,6 +82,39 @@ class TestRelateApp(unittest.TestCase):
         acc_names = [x['Name'] for x in data['recommended_accessories']]
         self.assertTrue(any('Case' in n or 'Charger' in n or 'Screen' in n or 'Stand' in n for n in acc_names))
 
+    def test_09_voice_assistant_add_to_cart(self):
+        """Test voice assistant parses add-to-cart query and returns structured action."""
+        res = self.client.post('/api/assistant/chat', json={
+            'query': 'Hey Relate, add iPhone 13 Pro to cart'
+        })
+        self.assertEqual(res.status_code, 200)
+        data = res.get_json()
+        self.assertIn('reply', data)
+        self.assertEqual(data['action']['type'], 'add_to_cart')
+        self.assertEqual(data['action']['product_id'], 123)
+
+    def test_10_voice_assistant_event_suggestion(self):
+        """Test voice assistant provides occasion-specific product recommendations."""
+        res = self.client.post('/api/assistant/chat', json={
+            'query': 'Suggest a gift for a wedding'
+        })
+        self.assertEqual(res.status_code, 200)
+        data = res.get_json()
+        self.assertIn('reply', data)
+        self.assertGreater(len(data['products']), 0)
+        # Should include luxury items like Rolex or jewelry
+        names = [p['Name'] for p in data['products']]
+        self.assertTrue(any('Rolex' in n or 'Gold' in n or 'Diamond' in n or 'Perfume' in n for n in names))
+
+    def test_11_voice_assistant_navigation_action(self):
+        """Test voice assistant handles cart and checkout navigation queries."""
+        res = self.client.post('/api/assistant/chat', json={
+            'query': 'Show my cart'
+        })
+        self.assertEqual(res.status_code, 200)
+        data = res.get_json()
+        self.assertEqual(data['action']['type'], 'view_cart')
+
 
 if __name__ == '__main__':
     unittest.main()

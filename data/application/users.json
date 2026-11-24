@@ -177,8 +177,15 @@
         "name": "Shreya",
         "password": "scrypt:32768:8:1$BnuY0aD06DPDRYGf$edd2bd1cbecfc4af836779299cb086b675edbd17c65bd79256ef5842281a87ea8b6edf0f8f44007b8b5426841b117d9302c259916394109e94137192d41a0d87",
         "customer_id": 1104,
-        "cart": [],
-        "wishlist": [],
+        "cart": [
+            255,
+            4,
+            83,
+            253
+        ],
+        "wishlist": [
+            255
+        ],
         "orders": [
             {
                 "id": 545979,
@@ -188,9 +195,80 @@
                 "total": 1360,
                 "status": "Delivered",
                 "created_at": "2026-11-04 15:20:50"
+            },
+            {
+                "id": 972478,
+                "items": [
+                    "Heshe Women's Leather Bag"
+                ],
+                "total": 499,
+                "status": "Paid via Google Pay / UPI",
+                "payment_method": "Google Pay (UPI)",
+                "payment_id": "gpay_1793958411501",
+                "shipping_address": {
+                    "full_name": "Shreyas R A",
+                    "phone": "07483711250",
+                    "street": "Krishna Nagara, Bondel",
+                    "city": "Manglore",
+                    "state": "Karnataka",
+                    "pincode": "575015"
+                },
+                "phone": "07483711250",
+                "created_at": "2026-11-06 15:16:51"
+            },
+            {
+                "id": 345469,
+                "items": [
+                    "Sleek Futuristic Electric Bicycle",
+                    "Trendy Pink-Tinted Sunglasses"
+                ],
+                "total": 1798,
+                "status": "Paid via Google Pay / UPI",
+                "payment_method": "Google Pay (UPI)",
+                "payment_id": "gpay_1793958536761",
+                "shipping_address": {
+                    "full_name": "Shreyas R A",
+                    "phone": "07483711250",
+                    "street": "Krishna Nagara, Bondel",
+                    "city": "Manglore",
+                    "state": "Karnataka",
+                    "pincode": "575015"
+                },
+                "phone": "07483711250",
+                "created_at": "2026-11-06 15:18:56"
+            },
+            {
+                "id": 975707,
+                "items": [
+                    "Trendy Pink-Tinted Sunglasses",
+                    "Sleek Futuristic Electric Bicycle"
+                ],
+                "total": 1798,
+                "status": "Paid via Google Pay / UPI",
+                "payment_method": "Google Pay (UPI)",
+                "payment_id": "gpay_1793959168042",
+                "shipping_address": {
+                    "full_name": "Shreyas R A",
+                    "phone": "07483711250",
+                    "street": "Krishna Nagara, Bondel",
+                    "city": "Manglore",
+                    "state": "Karnataka",
+                    "pincode": "575015"
+                },
+                "phone": "07483711250",
+                "created_at": "2026-11-06 15:29:28"
             }
         ],
-        "created_at": "2026-11-04 15:20:18"
+        "created_at": "2026-11-04 15:20:18",
+        "phone": "07483711250",
+        "address": {
+            "full_name": "Shreyas R A",
+            "phone": "07483711250",
+            "street": "Krishna Nagara, Bondel",
+            "city": "Manglore",
+            "state": "Karnataka",
+            "pincode": "575015"
+        }
     },
     "shreyaaa@gmail.com": {
         "name": "Shreya",
