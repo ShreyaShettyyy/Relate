@@ -6234,3 +6234,207 @@ body.luxury-light-theme .va-input-field:focus {
         display: none;
     }
 }
+
+/* ==============================================================================
+   GLOBAL FULL-SITE RESPONSIVENESS (ALL PAGES & BREAKPOINTS)
+   ============================================================================== */
+html, body {
+    max-width: 100%;
+    overflow-x: hidden;
+}
+
+.main-wrapper,
+.spa-section,
+.catalog-wrapper,
+.detail-wrapper,
+.checkout-page-container,
+.profile-layout-container,
+.about-hero-box,
+.order-success-container {
+    max-width: 100%;
+    box-sizing: border-box;
+}
+
+@media (max-width: 1024px) {
+    .main-wrapper {
+        padding-left: 18px;
+        padding-right: 18px;
+    }
+
+    .product-detail-card {
+        grid-template-columns: 1fr;
+        gap: 24px;
+        padding: 22px;
+    }
+
+    .checkout-page-container {
+        grid-template-columns: 1fr;
+        gap: 22px;
+    }
+
+    .profile-layout-container {
+        grid-template-columns: 1fr;
+        gap: 20px;
+    }
+
+    .profile-sidebar {
+        position: static;
+    }
+
+    .profile-nav {
+        display: flex;
+        flex-direction: row;
+        overflow-x: auto;
+        gap: 8px;
+        padding-bottom: 6px;
+        -webkit-overflow-scrolling: touch;
+    }
+
+    .profile-nav-btn {
+        white-space: nowrap;
+        flex-shrink: 0;
+    }
+}
+
+@media (max-width: 768px) {
+    .main-wrapper {
+        padding: 16px 14px 80px;
+    }
+
+    .navbar-container {
+        height: auto;
+        min-height: 62px;
+        padding: 10px 14px;
+        flex-wrap: wrap;
+        gap: 10px;
+    }
+
+    .nav-search-container,
+    .search-bar-container {
+        order: 3;
+        width: 100%;
+        max-width: 100%;
+        flex: 1 1 100%;
+    }
+
+    .nav-actions {
+        gap: 8px;
+    }
+
+    .hero-section.botanical-hero {
+        height: auto;
+        min-height: 240px;
+        padding: 28px 18px;
+        border-radius: 18px;
+    }
+
+    .hero-title.botanical-title,
+    .hero-title {
+        font-size: clamp(1.75rem, 6vw, 2.5rem);
+        line-height: 1.15;
+    }
+
+    .hero-actions {
+        flex-wrap: wrap;
+        gap: 10px;
+    }
+
+    .section-header,
+    .catalog-controls {
+        flex-wrap: wrap;
+        gap: 12px;
+    }
+
+    .detail-actions-row {
+        flex-wrap: wrap;
+        gap: 10px;
+    }
+
+    .checkout-card {
+        padding: 18px 16px;
+        border-radius: 18px;
+    }
+
+    .payment-option-card {
+        flex-direction: column;
+        align-items: flex-start;
+        gap: 10px;
+    }
+
+    .order-success-container {
+        padding: 26px 18px;
+        margin: 12px auto;
+    }
+
+    .about-hero-box {
+        padding: 28px 18px;
+    }
+
+    .about-grid,
+    .about-features-grid {
+        grid-template-columns: 1fr;
+    }
+
+    .order-header-row,
+    .order-footer-row {
+        flex-wrap: wrap;
+        gap: 10px;
+    }
+}
+
+@media (max-width: 480px) {
+    .main-wrapper {
+        padding: 12px 10px 76px;
+    }
+
+    .product-grid,
+    body.luxury-light-theme .product-grid {
+        grid-template-columns: repeat(2, minmax(0, 1fr));
+        gap: 10px;
+    }
+
+    .product-card,
+    body.luxury-light-theme .product-card {
+        padding: 10px;
+        border-radius: 16px;
+    }
+
+    .cart-drawer {
+        width: 100vw;
+        max-width: 100vw;
+    }
+
+    .auth-modal-card,
+    .upsell-modal,
+    .gpay-modal-card {
+        width: calc(100vw - 20px);
+        max-width: calc(100vw - 20px);
+        padding: 20px 16px;
+        max-height: 90vh;
+        overflow-y: auto;
+    }
+
+    .detail-actions-row > button,
+    .success-actions-row {
+        flex-direction: column;
+        width: 100%;
+    }
+
+    .success-actions-row > button {
+        width: 100%;
+        justify-content: center;
+    }
+
+    .detail-row {
+        flex-direction: column;
+        align-items: flex-start;
+        gap: 4px;
+    }
+
+    .toast-container {
+        left: 10px;
+        right: 10px;
+        bottom: 14px;
+        max-width: calc(100vw - 20px);
+    }
+}
