@@ -1828,6 +1828,9 @@ function initRelateApp() {
             created_at: new Date().toISOString()
         };
         lastCompletedOrder = newOrder;
+        try {
+            localStorage.setItem('relate_last_order', JSON.stringify(newOrder));
+        } catch (e) {}
 
         const email = currentUser ? currentUser.email : 'guest@relate.com';
 
@@ -1869,9 +1872,44 @@ function initRelateApp() {
         });
     }
 
+    function getActiveOrderForInvoice() {
+        if (lastCompletedOrder) return lastCompletedOrder;
+        try {
+            const stored = localStorage.getItem('relate_last_order');
+            if (stored) return JSON.parse(stored);
+        } catch (e) {}
+
+        // Fallback: reconstruct from the visible Order Success DOM fields
+        const idText = (document.getElementById('success-order-id')?.textContent || '').replace('#', '').trim();
+        const statusText = (document.getElementById('success-payment-status')?.textContent || 'Paid').trim();
+        const addrText = (document.getElementById('success-delivery-address')?.textContent || '').trim();
+        const phoneText = (document.getElementById('success-delivery-phone')?.textContent || '').trim();
+        const totalDigits = (document.getElementById('success-total-paid')?.textContent || '0').replace(/[^0-9.]/g, '');
+        const totalNum = parseFloat(totalDigits) || 0;
+
+        if (!idText && totalNum === 0) return null;
+
+        return {
+            id: idText || Math.floor(100000 + Math.random() * 900000),
+            items: ['Relate Purchase Order'],
+            total: totalNum,
+            status: statusText,
+            payment_method: statusText,
+            shipping_address: {
+                full_name: currentUser ? currentUser.name : 'Valued Customer',
+                street: addrText,
+                phone: phoneText
+            },
+            phone: phoneText,
+            customer_name: currentUser ? currentUser.name : 'Valued Customer',
+            customer_email: currentUser ? currentUser.email : 'guest@relate.com',
+            created_at: new Date().toISOString()
+        };
+    }
+
     // Success actions
     document.getElementById('success-download-invoice-btn')?.addEventListener('click', () => {
-        downloadOrderInvoicePDF(lastCompletedOrder);
+        downloadOrderInvoicePDF(getActiveOrderForInvoice());
     });
 
     document.getElementById('success-continue-shopping-btn')?.addEventListener('click', () => {
