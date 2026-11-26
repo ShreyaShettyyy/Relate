@@ -1615,6 +1615,203 @@ function initRelateApp() {
         }
     }
 
+    let lastCompletedOrder = null;
+
+    function formatInvoiceCurrency(amount) {
+        return `Rs. ${Number(amount || 0).toLocaleString('en-IN')}`;
+    }
+
+    function downloadOrderInvoicePDF(order) {
+        if (!order) {
+            showToast("No order details available to generate invoice.", "error");
+            return;
+        }
+
+        // Aggregate item quantities & prices from catalog
+        const itemCounts = {};
+        (order.items || []).forEach(name => {
+            itemCounts[name] = (itemCounts[name] || 0) + 1;
+        });
+
+        const lineItems = Object.entries(itemCounts).map(([name, qty]) => {
+            const prod = allProducts.find(p => p.Name === name);
+            const unitPrice = prod ? Number(prod.Price || 0) : 0;
+            return {
+                name,
+                qty,
+                unitPrice,
+                lineTotal: unitPrice * qty
+            };
+        });
+
+        const orderDateStr = order.created_at
+            ? new Date(order.created_at).toLocaleString('en-IN', { dateStyle: 'medium', timeStyle: 'short' })
+            : new Date().toLocaleString('en-IN', { dateStyle: 'medium', timeStyle: 'short' });
+
+        const addr = order.shipping_address || savedAddressData || {};
+        const customerName = addr.full_name || order.customer_name || (currentUser ? currentUser.name : 'Valued Customer');
+        const customerEmail = order.customer_email || (currentUser ? currentUser.email : 'guest@relate.com');
+        const customerPhone = order.phone || addr.phone || '-';
+        const addressLine = [addr.street, addr.city, addr.pincode].filter(Boolean).join(', ') || 'Standard Delivery';
+
+        if (!window.jspdf || !window.jspdf.jsPDF) {
+            // Fallback printable receipt window if jsPDF CDN is unavailable
+            const win = window.open('', '_blank', 'width=800,height=700');
+            if (win) {
+                const rowsHtml = lineItems.map((it, idx) => `
+                    <tr>
+                        <td>${idx + 1}</td>
+                        <td>${it.name}</td>
+                        <td style="text-align:center;">${it.qty}</td>
+                        <td style="text-align:right;">${formatInvoiceCurrency(it.unitPrice)}</td>
+                        <td style="text-align:right;">${formatInvoiceCurrency(it.lineTotal)}</td>
+                    </tr>
+                `).join('');
+                win.document.write(`<!DOCTYPE html><html><head><title>Invoice #${order.id}</title>
+                    <style>body{font-family:Arial,sans-serif;padding:32px;color:#111}table{width:100%;border-collapse:collapse;margin-top:20px}th,td{border-bottom:1px solid #ddd;padding:10px;text-align:left}th{background:#f4f7f5}</style>
+                    </head><body>
+                    <h2>RELATE (LUXSTORE) — PURCHASE INVOICE</h2>
+                    <p><strong>Order #:</strong> ${order.id} &nbsp;|&nbsp; <strong>Date:</strong> ${orderDateStr}</p>
+                    <p><strong>Payment:</strong> ${order.status || 'Paid'} (${order.payment_method || 'Online'})</p>
+                    <p><strong>Billed To:</strong> ${customerName} (${customerEmail})<br><strong>Address:</strong> ${addressLine} | <strong>Phone:</strong> ${customerPhone}</p>
+                    <table><thead><tr><th>#</th><th>Product</th><th style="text-align:center;">Qty</th><th style="text-align:right;">Unit Price</th><th style="text-align:right;">Total</th></tr></thead><tbody>${rowsHtml}</tbody></table>
+                    <h3 style="text-align:right;margin-top:20px;">Total Paid: ${formatInvoiceCurrency(order.total)}</h3>
+                    <script>window.print();</script></body></html>`);
+                win.document.close();
+            } else {
+                showToast("Invoice library unavailable. Please allow popups to print.", "error");
+            }
+            return;
+        }
+
+        const { jsPDF } = window.jspdf;
+        const doc = new jsPDF({ unit: 'pt', format: 'a4' });
+        const pageWidth = doc.internal.pageSize.getWidth();
+        const margin = 40;
+        let y = 45;
+
+        // Top Brand Header Banner
+        doc.setFillColor(20, 44, 30);
+        doc.rect(0, 0, pageWidth, 88, 'F');
+        doc.setTextColor(255, 255, 255);
+        doc.setFont('helvetica', 'bold');
+        doc.setFontSize(20);
+        doc.text('RELATE (LUXSTORE)', margin, 42);
+        doc.setFont('helvetica', 'normal');
+        doc.setFontSize(10);
+        doc.setTextColor(190, 225, 200);
+        doc.text('Intelligent Machine Learning E-Commerce  |  Tax Invoice', margin, 60);
+
+        doc.setTextColor(255, 255, 255);
+        doc.setFont('helvetica', 'bold');
+        doc.setFontSize(13);
+        doc.text(`INVOICE #${order.id}`, pageWidth - margin, 42, { align: 'right' });
+        doc.setFont('helvetica', 'normal');
+        doc.setFontSize(9.5);
+        doc.text(`Date: ${orderDateStr}`, pageWidth - margin, 60, { align: 'right' });
+
+        y = 115;
+
+        // Customer & Order Meta Columns
+        doc.setTextColor(30, 41, 59);
+        doc.setFont('helvetica', 'bold');
+        doc.setFontSize(10.5);
+        doc.text('BILLED & SHIPPED TO', margin, y);
+        doc.text('PAYMENT DETAILS', pageWidth / 2 + 20, y);
+
+        y += 16;
+        doc.setFont('helvetica', 'normal');
+        doc.setFontSize(9.5);
+        doc.setTextColor(71, 85, 105);
+
+        const wrappedAddr = doc.splitTextToSize(addressLine, pageWidth / 2 - margin - 10);
+        doc.text(customerName, margin, y);
+        doc.text(`Email: ${customerEmail}`, margin, y + 14);
+        doc.text(`Phone: ${customerPhone}`, margin, y + 28);
+        doc.text(wrappedAddr, margin, y + 42);
+
+        const rightX = pageWidth / 2 + 20;
+        doc.text(`Method: ${order.payment_method || 'Online Payment'}`, rightX, y);
+        doc.text(`Status: ${order.status || 'Paid'}`, rightX, y + 14);
+        if (order.payment_id) {
+            doc.text(`Transaction ID: ${order.payment_id}`, rightX, y + 28);
+        }
+
+        y += Math.max(70, 42 + wrappedAddr.length * 12) + 18;
+
+        // Table Header
+        doc.setFillColor(240, 246, 242);
+        doc.rect(margin, y, pageWidth - margin * 2, 24, 'F');
+        doc.setTextColor(20, 44, 30);
+        doc.setFont('helvetica', 'bold');
+        doc.setFontSize(9.5);
+        doc.text('#', margin + 8, y + 16);
+        doc.text('Product Description', margin + 32, y + 16);
+        doc.text('Qty', pageWidth - 185, y + 16, { align: 'right' });
+        doc.text('Unit Price', pageWidth - 115, y + 16, { align: 'right' });
+        doc.text('Amount', pageWidth - margin - 8, y + 16, { align: 'right' });
+
+        y += 32;
+        doc.setFont('helvetica', 'normal');
+        doc.setTextColor(30, 41, 59);
+
+        lineItems.forEach((item, idx) => {
+            if (y > 740) {
+                doc.addPage();
+                y = 50;
+            }
+            const nameLines = doc.splitTextToSize(item.name, pageWidth - margin * 2 - 230);
+            doc.text(String(idx + 1), margin + 8, y);
+            doc.text(nameLines, margin + 32, y);
+            doc.text(String(item.qty), pageWidth - 185, y, { align: 'right' });
+            doc.text(formatInvoiceCurrency(item.unitPrice), pageWidth - 115, y, { align: 'right' });
+            doc.text(formatInvoiceCurrency(item.lineTotal), pageWidth - margin - 8, y, { align: 'right' });
+
+            const rowHeight = Math.max(20, nameLines.length * 13 + 6);
+            doc.setDrawColor(226, 232, 240);
+            doc.line(margin, y + rowHeight - 8, pageWidth - margin, y + rowHeight - 8);
+            y += rowHeight;
+        });
+
+        y += 14;
+        if (y > 720) {
+            doc.addPage();
+            y = 50;
+        }
+
+        // Totals Summary Box
+        const sumX = pageWidth - margin - 210;
+        doc.setFont('helvetica', 'normal');
+        doc.setFontSize(10);
+        doc.setTextColor(71, 85, 105);
+        doc.text('Shipping:', sumX, y);
+        doc.text('FREE', pageWidth - margin - 8, y, { align: 'right' });
+
+        y += 18;
+        doc.setFillColor(20, 44, 30);
+        doc.rect(sumX - 10, y - 13, 220, 26, 'F');
+        doc.setTextColor(255, 255, 255);
+        doc.setFont('helvetica', 'bold');
+        doc.setFontSize(11);
+        doc.text('TOTAL PAID:', sumX, y + 4);
+        doc.text(formatInvoiceCurrency(order.total), pageWidth - margin - 8, y + 4, { align: 'right' });
+
+        // Footer
+        const pageHeight = doc.internal.pageSize.getHeight();
+        doc.setFont('helvetica', 'italic');
+        doc.setFontSize(8.5);
+        doc.setTextColor(120, 130, 140);
+        doc.text(
+            'Thank you for shopping with Relate (LuxStore). This is a computer-generated invoice and does not require a signature.',
+            pageWidth / 2,
+            pageHeight - 32,
+            { align: 'center' }
+        );
+
+        doc.save(`Relate_Invoice_${order.id}.pdf`);
+        showToast(`Invoice #${order.id} PDF downloaded!`, "success");
+    }
+
     function completeOrderSubmission(paymentStatus, method, total, itemNames, paymentId = null) {
         const orderId = Math.floor(100000 + Math.random() * 900000);
         const newOrder = {
@@ -1626,8 +1823,11 @@ function initRelateApp() {
             payment_id: paymentId,
             shipping_address: savedAddressData,
             phone: savedAddressData ? savedAddressData.phone : '',
+            customer_name: currentUser ? currentUser.name : (savedAddressData ? savedAddressData.full_name : 'Guest'),
+            customer_email: currentUser ? currentUser.email : 'guest@relate.com',
             created_at: new Date().toISOString()
         };
+        lastCompletedOrder = newOrder;
 
         const email = currentUser ? currentUser.email : 'guest@relate.com';
 
@@ -1670,6 +1870,10 @@ function initRelateApp() {
     }
 
     // Success actions
+    document.getElementById('success-download-invoice-btn')?.addEventListener('click', () => {
+        downloadOrderInvoicePDF(lastCompletedOrder);
+    });
+
     document.getElementById('success-continue-shopping-btn')?.addEventListener('click', () => {
         navigateTo('catalog-section');
     });
@@ -1786,9 +1990,17 @@ function initRelateApp() {
                 </div>
                 <div class="order-footer-row">
                     <span class="order-total-lbl">Total Paid:</span>
-                    <span class="order-total-amt">${formatPrice(order.total || 0)}</span>
+                    <div style="display:flex;align-items:center;gap:12px;">
+                        <span class="order-total-amt">${formatPrice(order.total || 0)}</span>
+                        <button type="button" class="btn-luxury-secondary order-invoice-btn" style="padding:5px 12px;font-size:12px;">
+                            <i class="fa-solid fa-file-pdf"></i> Invoice PDF
+                        </button>
+                    </div>
                 </div>
             `;
+            card.querySelector('.order-invoice-btn')?.addEventListener('click', () => {
+                downloadOrderInvoicePDF(order);
+            });
             container.appendChild(card);
         });
     }

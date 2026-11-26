@@ -590,7 +590,10 @@
                 </div>
 
                 <div class="success-actions-row">
-                    <button class="btn-luxury-primary" id="success-continue-shopping-btn">
+                    <button class="btn-luxury-primary" id="success-download-invoice-btn">
+                        <i class="fa-solid fa-file-pdf"></i> Download Invoice PDF
+                    </button>
+                    <button class="btn-luxury-secondary" id="success-continue-shopping-btn">
                         <i class="fa-solid fa-bag-shopping"></i> Continue Shopping
                     </button>
                     <button class="btn-luxury-secondary" id="success-view-orders-btn">
@@ -1277,8 +1280,11 @@
     <!-- Razorpay Standard Checkout SDK -->
     <script src="https://checkout.razorpay.com/v1/checkout.js"></script>
 
+    <!-- jsPDF for Client-Side Invoice PDF Generation -->
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf/2.5.1/jspdf.umd.min.js"></script>
+
     <!-- Application Script -->
-    <script src="{{ url_for('static', filename='js/script.js') }}?v=31"></script>
+    <script src="{{ url_for('static', filename='js/script.js') }}?v=32"></script>
     <script src="{{ url_for('static', filename='js/voice_assistant.js') }}?v=6"></script>
 </body>
 </html>
