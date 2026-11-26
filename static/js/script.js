@@ -317,7 +317,6 @@ function initRelateApp() {
             addBtn.addEventListener('click', (e) => {
                 e.stopPropagation();
                 addToCart(product.ID);
-                showToast(`Added ${product.Name} to cart`, 'success');
                 if (typeof gsap !== 'undefined') {
                     gsap.fromTo(addBtn, { scale: 0.8 }, { scale: 1, duration: 0.25, ease: 'back.out(2)' });
                 }
@@ -987,7 +986,7 @@ function initRelateApp() {
         if (!currentProductObj) return;
         const qty = parseInt(document.getElementById('detail-qty-input').value || 1);
         for (let i = 0; i < qty; i++) {
-            addToCart(currentProductObj.ID);
+            addToCart(currentProductObj.ID, true);
         }
         showToast(`Added ${qty} × ${currentProductObj.Name} to cart`, 'success');
         openCartDrawer();
@@ -1006,15 +1005,17 @@ function initRelateApp() {
     // -------------------------------------------------------------
     // CART & WISHLIST MANAGEMENT
     // -------------------------------------------------------------
-    function addToCart(productId) {
+    function addToCart(productId, silent = false) {
         cart.push(productId);
         updateBadgeCounters();
         syncUserData();
 
         // Visual feedback
-        const product = allProducts.find(p => p.ID === productId);
-        const name = product ? product.Name : "Product";
-        showToast(`Added ${name} to your cart`, "success");
+        if (!silent) {
+            const product = allProducts.find(p => p.ID === productId);
+            const name = product ? product.Name : "Product";
+            showToast(`Added ${name} to your cart`, "success");
+        }
 
         const cartBtn = document.getElementById('cart-btn');
         if (cartBtn) {

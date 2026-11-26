@@ -5499,6 +5499,7 @@ body.luxury-dark-theme .upi-input-group input {
 .va-body {
     flex: 1;
     overflow-y: auto;
+    overflow-x: hidden;
     padding: 16px 18px;
     display: flex;
     flex-direction: column;
@@ -5510,13 +5511,16 @@ body.luxury-dark-theme .upi-input-group input {
     display: flex;
     flex-direction: column;
     gap: 12px;
+    width: 100%;
+    min-width: 0;
 }
 
 /* Chat Message Bubbles */
 .va-msg {
     display: flex;
     flex-direction: column;
-    max-width: 90%;
+    max-width: 92%;
+    min-width: 0;
     animation: msgFadeIn 0.25s ease-out;
 }
 
@@ -5552,6 +5556,9 @@ body.luxury-dark-theme .upi-input-group input {
     font-size: 13.5px;
     line-height: 1.5;
     box-shadow: 0 4px 16px rgba(0, 0, 0, 0.2);
+    max-width: 100%;
+    box-sizing: border-box;
+    overflow-wrap: break-word;
 }
 
 .va-msg-sub {
@@ -5636,8 +5643,21 @@ body.luxury-light-theme .va-companion-heading {
 }
 
 .va-companion-card {
+    flex-direction: column !important;
+    align-items: stretch !important;
+    gap: 0 !important;
+    padding: 0 !important;
+    overflow: hidden;
     border-color: rgba(99, 102, 241, 0.35) !important;
     background: rgba(15, 23, 42, 0.65) !important;
+}
+
+.va-companion-main {
+    display: flex;
+    align-items: center;
+    gap: 10px;
+    padding: 8px 10px;
+    min-width: 0;
 }
 
 body.luxury-light-theme .va-companion-card {
@@ -5709,6 +5729,9 @@ body.luxury-light-theme .va-companion-reason {
     border-radius: 12px;
     padding: 8px 10px;
     transition: border-color 0.2s ease;
+    max-width: 100%;
+    box-sizing: border-box;
+    min-width: 0;
 }
 
 .va-product-card:hover {
@@ -5766,6 +5789,7 @@ body.luxury-light-theme .va-companion-reason {
 .va-prod-actions {
     display: flex;
     align-items: center;
+    flex-wrap: wrap;
     gap: 6px;
 }
 
@@ -6126,17 +6150,44 @@ body.luxury-light-theme .va-input-field:focus {
     border-color: #5d916d;
 }
 
-/* Mobile Responsiveness */
+/* Tablet & Mobile Responsiveness */
+@media (max-width: 768px) {
+    .voice-assistant-panel {
+        width: calc(100vw - 24px);
+        right: 12px;
+        bottom: 88px;
+        height: min(560px, calc(100vh - 110px));
+    }
+    .va-header {
+        padding: 12px 14px;
+        gap: 8px;
+    }
+    .va-pill-btn span {
+        display: none;
+    }
+    .va-msg {
+        max-width: 96%;
+    }
+}
+
 @media (max-width: 480px) {
     .voice-assistant-panel {
-        bottom: 84px;
-        right: 12px;
-        left: 12px;
+        bottom: 78px;
+        right: 8px;
+        left: 8px;
         width: auto;
-        height: 520px;
+        max-width: none;
+        height: min(520px, calc(100vh - 96px));
+        border-radius: 18px;
+    }
+    .va-body {
+        padding: 12px;
     }
     .voice-assistant-fab-container {
-        bottom: 20px;
-        right: 20px;
+        bottom: 16px;
+        right: 16px;
+    }
+    .fab-tooltip {
+        display: none;
     }
 }

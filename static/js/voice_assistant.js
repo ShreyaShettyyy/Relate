@@ -294,12 +294,15 @@
             const currentSpoken = (finalTranscript || interimTranscript).trim();
             if (!currentSpoken) return;
 
-            // Show real-time streaming text in the UI
-            showLiveTranscription(currentSpoken);
+            // Check for Wake-Word: require greeting prefix ("Hey Relate", "Hi Relate", "Ok Relate", "Hello Relate")
+            // so casual words like "reality" or "relate" in conversation with a friend do not falsely trigger
+            const wakeMatch = currentSpoken.match(/\b(?:hey|hi|hello|ok|okay)[,\s]+(?:relate|re\s*late|reality|relay|relat|relet|elate)\b/i);
 
-            // Check for Wake-Word: "Hey Relate" / "Hi Relate" / "Relate" (plus common STT variants like reality, relay, re late)
-            const wakeMatch = currentSpoken.match(/\b(?:hey|hi|hello|ok|okay)?\s*(?:relate|re\s*late|reality|relay|relat|relet|elate)\b/i);
-            
+            // Only show live transcription when actively listening or wake word was spoken
+            if (state.isListening || wakeMatch) {
+                showLiveTranscription(currentSpoken);
+            }
+
             if (wakeMatch) {
                 // Wake word detected!
                 playChime('wake');
@@ -319,7 +322,7 @@
                     return;
                 }
 
-                // If user just said "Hey Relate", acknowledge with voice and keep listening!
+                // If user just said "Hey Relate", acknowledge with voice and listen for one command
                 if (!commandAfterWake && (!state.isListening || !state.lastSpokenText)) {
                     state.isListening = true;
                     updateListeningVisuals(true);
@@ -331,10 +334,10 @@
                 }
             }
 
-            // If assistant is actively listening or panel is open
-            if (state.isListening || state.isOpen) {
+            // Only process speech without wake word when actively listening (mic tapped or post-"Hey Relate" window)
+            if (state.isListening) {
                 let queryCandidate = (finalTranscript || interimTranscript).trim();
-                const prefixMatch = queryCandidate.match(/^\b(?:hey|hi|hello|ok|okay)?\s*(?:relate|re\s*late|reality|relay|relat|relet|elate)\b[,.!\s]*/i);
+                const prefixMatch = queryCandidate.match(/^\b(?:hey|hi|hello|ok|okay)[,\s]+(?:relate|re\s*late|reality|relay|relat|relet|elate)\b[,.!\s]*/i);
                 if (prefixMatch) {
                     queryCandidate = queryCandidate.slice(prefixMatch[0].length).trim();
                 }
@@ -522,9 +525,6 @@
             if (window.RelateApp && typeof window.RelateApp.addToCart === 'function') {
                 window.RelateApp.addToCart(action.product_id);
                 playChime('success');
-                if (typeof window.RelateApp.showToast === 'function') {
-                    window.RelateApp.showToast(`Added ${action.product_name || 'product'} to cart!`, 'success');
-                }
             }
             if (products && products.length > 0) {
                 state.lastRecommendedProduct = products[0];
@@ -647,22 +647,24 @@
                         <div class="va-companion-reason" title="${escapeHtml(reason)}">
                             <i class="fa-solid fa-sparkles"></i> ${escapeHtml(reason)}
                         </div>
-                        <div class="va-prod-img-box">
-                            <img src="${img}" alt="${escapeHtml(p.Name)}" loading="lazy">
-                        </div>
-                        <div class="va-prod-info">
-                            <h5 class="va-prod-title">${escapeHtml(p.Name)}</h5>
-                            <div class="va-prod-meta">
-                                <span class="va-prod-price">${price}</span>
-                                <span class="va-prod-rating"><i class="fa-solid fa-star"></i> ${p.Rating || '4.5'}</span>
+                        <div class="va-companion-main">
+                            <div class="va-prod-img-box">
+                                <img src="${img}" alt="${escapeHtml(p.Name)}" loading="lazy">
                             </div>
-                            <div class="va-prod-actions">
-                                <button class="va-btn-add-cart" data-id="${p.ID}">
-                                    <i class="fa-solid fa-cart-plus"></i> Add
-                                </button>
-                                <button class="va-btn-view" data-id="${p.ID}">
-                                    View
-                                </button>
+                            <div class="va-prod-info">
+                                <h5 class="va-prod-title">${escapeHtml(p.Name)}</h5>
+                                <div class="va-prod-meta">
+                                    <span class="va-prod-price">${price}</span>
+                                    <span class="va-prod-rating"><i class="fa-solid fa-star"></i> ${p.Rating || '4.5'}</span>
+                                </div>
+                                <div class="va-prod-actions">
+                                    <button class="va-btn-add-cart" data-id="${p.ID}">
+                                        <i class="fa-solid fa-cart-plus"></i> Add
+                                    </button>
+                                    <button class="va-btn-view" data-id="${p.ID}">
+                                        View
+                                    </button>
+                                </div>
                             </div>
                         </div>
                     </div>
