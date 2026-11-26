@@ -6301,24 +6301,32 @@ html, body {
         padding: 16px 14px 80px;
     }
 
-    .navbar-container {
+    .navbar-container,
+    body.luxury-light-theme .navbar-container {
         height: auto;
-        min-height: 62px;
+        min-height: 56px;
         padding: 10px 14px;
+        border-radius: 20px;
         flex-wrap: wrap;
-        gap: 10px;
-    }
-
-    .nav-search-container,
-    .search-bar-container {
-        order: 3;
-        width: 100%;
-        max-width: 100%;
-        flex: 1 1 100%;
-    }
-
-    .nav-actions {
+        justify-content: space-between;
         gap: 8px;
+    }
+
+    .nav-menu,
+    body.luxury-light-theme .nav-menu {
+        display: none;
+    }
+
+    .nav-actions,
+    body.luxury-light-theme .nav-actions {
+        gap: 6px;
+        flex-wrap: wrap;
+        justify-content: flex-end;
+    }
+
+    .nav-search-bar.expanded,
+    body.luxury-light-theme .nav-search-bar.expanded {
+        width: 150px;
     }
 
     .hero-section.botanical-hero {
@@ -6385,6 +6393,30 @@ html, body {
 @media (max-width: 480px) {
     .main-wrapper {
         padding: 12px 10px 76px;
+    }
+
+    .navbar-container,
+    body.luxury-light-theme .navbar-container {
+        padding: 8px 12px;
+        border-radius: 18px;
+        gap: 6px;
+    }
+
+    .user-display-name,
+    body.luxury-light-theme .user-display-name {
+        display: none;
+    }
+
+    .user-avatar-btn,
+    body.luxury-light-theme .user-avatar-btn {
+        padding: 3px 6px 3px 3px;
+        gap: 4px;
+    }
+
+    .nav-icon-btn,
+    body.luxury-light-theme .nav-icon-btn {
+        width: 34px;
+        height: 34px;
     }
 
     .product-grid,
