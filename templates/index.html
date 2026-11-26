@@ -9,11 +9,11 @@
     <!-- Typography & Icons -->
     <link rel="preconnect" href="https://fonts.googleapis.com">
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-    <link href="https://fonts.googleapis.com/css2?family=Cormorant+Garamond:ital,wght@0,400;0,500;0,600;0,700;1,400&family=Playfair+Display:ital,wght@0,400;0,500;0,600;0,700;1,400&family=Plus+Jakarta+Sans:wght@300;400;500;600;700&family=Outfit:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&family=Plus+Jakarta+Sans:wght@400;500;600;700&display=swap" rel="stylesheet">
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
     
     <!-- Design System CSS -->
-    <link rel="stylesheet" href="{{ url_for('static', filename='css/style.css') }}?v=24">
+    <link rel="stylesheet" href="{{ url_for('static', filename='css/style.css') }}?v=31">
     <script>
         // Default to light theme when first opened
         (function() {
@@ -590,7 +590,10 @@
                 </div>
 
                 <div class="success-actions-row">
-                    <button class="btn-luxury-primary" id="success-continue-shopping-btn">
+                    <button class="btn-luxury-primary" id="success-download-invoice-btn">
+                        <i class="fa-solid fa-file-pdf"></i> Download Invoice PDF
+                    </button>
+                    <button class="btn-luxury-secondary" id="success-continue-shopping-btn">
                         <i class="fa-solid fa-bag-shopping"></i> Continue Shopping
                     </button>
                     <button class="btn-luxury-secondary" id="success-view-orders-btn">
@@ -992,7 +995,12 @@
                             <label>Password</label>
                             <span class="link-action" id="trigger-forgot-password">Forgot password?</span>
                         </div>
-                        <input type="password" id="login-password" class="luxury-input" placeholder="••••••••" required>
+                        <div class="password-input-wrap">
+                            <input type="password" id="login-password" class="luxury-input" placeholder="••••••••" required>
+                            <button type="button" class="password-toggle-btn" data-target="login-password" aria-label="Show password" title="Show / Hide password">
+                                <i class="fa-regular fa-eye"></i>
+                            </button>
+                        </div>
                     </div>
                     <button type="submit" class="btn-luxury-primary btn-block" id="login-submit-btn">
                         Sign In <i class="fa-solid fa-arrow-right"></i>
@@ -1138,6 +1146,138 @@
         </div>
     </footer>
 
+    <!-- =========================================================================
+         AI VOICE ASSISTANT (FLOATING BOTTOM RIGHT)
+         ========================================================================= -->
+    <!-- Floating Trigger Orb in Bottom Right -->
+    <div class="voice-assistant-fab-container" id="voice-assistant-fab-container">
+        <button class="voice-assistant-fab" id="voice-assistant-fab" title="Relate AI Voice Concierge (Say 'Hey Relate')">
+            <div class="fab-wave-ring"></div>
+            <div class="fab-wave-ring ring-2"></div>
+            <div class="fab-icon-box">
+                <i class="fa-solid fa-microphone fab-mic-icon" id="fab-mic-icon"></i>
+                <div class="fab-status-dot online" id="fab-status-dot" title="Listening for 'Hey Relate'"></div>
+            </div>
+            <span class="fab-tooltip">Hey Relate</span>
+        </button>
+    </div>
+
+    <!-- Interactive Voice Assistant Panel -->
+    <div class="voice-assistant-panel hidden" id="voice-assistant-panel">
+        <!-- Panel Header -->
+        <div class="va-header">
+            <div class="va-header-title-box">
+                <div class="va-avatar">
+                    <i class="fa-solid fa-wand-magic-sparkles"></i>
+                    <span class="va-live-pulse" id="va-header-pulse"></span>
+                </div>
+                <div>
+                    <h3 class="va-title">Relate AI</h3>
+                    <p class="va-status-text" id="va-status-text">Ready • Say "Hey Relate"</p>
+                </div>
+            </div>
+            <div class="va-header-actions">
+                <!-- Wake word toggle -->
+                <button class="va-pill-btn active" id="va-wake-toggle-btn" title="Toggle 'Hey Relate' Wake Word Listening">
+                    <i class="fa-solid fa-ear-listen"></i> <span>Wake Word ON</span>
+                </button>
+                <!-- Voice settings toggle -->
+                <button class="va-icon-btn" id="va-settings-btn" title="Voice & Speech Customization">
+                    <i class="fa-solid fa-sliders"></i>
+                </button>
+                <!-- Close / Minimize panel -->
+                <button class="va-icon-btn" id="va-close-btn" title="Close Voice Assistant">
+                    <i class="fa-solid fa-xmark"></i>
+                </button>
+            </div>
+        </div>
+
+        <!-- Voice Settings Popover (Voice Customizer) -->
+        <div class="va-settings-popover hidden" id="va-settings-popover">
+            <div class="va-settings-header">
+                <h4><i class="fa-solid fa-microphone-lines"></i> Voice Customization</h4>
+                <button class="va-icon-btn-sm" id="va-close-settings-btn"><i class="fa-solid fa-xmark"></i></button>
+            </div>
+            <div class="va-settings-body">
+                <div class="va-form-group">
+                    <label for="va-voice-select">AI Voice Accent & Persona</label>
+                    <select id="va-voice-select" class="va-select">
+                        <option value="">Default System Voice</option>
+                    </select>
+                </div>
+                <div class="va-form-group">
+                    <div class="va-slider-label">
+                        <span>Speech Speed (Rate)</span>
+                        <span id="va-rate-val">1.0x</span>
+                    </div>
+                    <input type="range" id="va-rate-slider" min="0.75" max="1.35" step="0.05" value="1.0" class="va-slider">
+                </div>
+                <div class="va-form-group">
+                    <div class="va-slider-label">
+                        <span>Voice Pitch</span>
+                        <span id="va-pitch-val">1.0x</span>
+                    </div>
+                    <input type="range" id="va-pitch-slider" min="0.75" max="1.3" step="0.05" value="1.0" class="va-slider">
+                </div>
+                <div class="va-settings-footer">
+                    <button class="btn-va-test" id="va-test-voice-btn" type="button">
+                        <i class="fa-solid fa-volume-high"></i> Test Voice
+                    </button>
+                    <button class="btn-va-save" id="va-save-settings-btn" type="button">Save</button>
+                </div>
+            </div>
+        </div>
+
+        <!-- Conversation Scrollable Body -->
+        <div class="va-body" id="va-chat-body">
+            <!-- Messages container -->
+            <div class="va-messages" id="va-messages">
+                <!-- Welcome Message -->
+                <div class="va-msg va-msg-assistant">
+                    <div class="va-msg-bubble">
+                        <p>Hello! I'm <strong>Relate AI</strong>, your personal shopping voice assistant. 🎙️</p>
+                        <p class="va-msg-sub">Say <em>"Hey Relate"</em> or tap the mic below. Ask for event suggestions, gifts, or say <em>"Add iPhone to cart"</em>!</p>
+                    </div>
+                </div>
+
+                <!-- Quick Suggestion Chips -->
+                <div class="va-quick-chips" id="va-quick-chips">
+                    <button class="va-chip" data-query="Show me luxury evening dresses">👗 Luxury dresses</button>
+                    <button class="va-chip" data-query="Add Midnight Silk Evening Gown to cart">✨ Add Silk Gown</button>
+                    <button class="va-chip" data-query="Suggest a gift for a wedding">💍 Wedding gifts</button>
+                    <button class="va-chip" data-query="Add iPhone 13 Pro to cart">🛒 Add iPhone</button>
+                    <button class="va-chip" data-query="View cart and order the product">🛍️ View cart & order</button>
+                    <button class="va-chip" data-query="Recommend best laptops for work">💻 Work laptops</button>
+                </div>
+            </div>
+
+            <!-- Live Speech Visualizer / Stream -->
+            <div class="va-live-stream hidden" id="va-live-stream">
+                <div class="va-waveform">
+                    <span class="bar"></span><span class="bar"></span><span class="bar"></span><span class="bar"></span><span class="bar"></span>
+                </div>
+                <span class="va-live-transcript" id="va-live-transcript">Listening...</span>
+            </div>
+        </div>
+
+        <!-- Bottom Input & Voice Controls -->
+        <div class="va-footer">
+            <button class="va-stop-speech-btn hidden" id="va-stop-speech-btn" title="Stop speaking">
+                <i class="fa-solid fa-volume-xmark"></i> Stop Speaking
+            </button>
+            <div class="va-input-row">
+                <button class="va-mic-btn" id="va-mic-btn" title="Click or Hold to Speak">
+                    <i class="fa-solid fa-microphone"></i>
+                    <span class="mic-pulse-ring"></span>
+                </button>
+                <input type="text" class="va-input-field" id="va-text-input" placeholder="Say 'Hey Relate...' or type a request..." autocomplete="off">
+                <button class="va-send-btn" id="va-send-btn" title="Send request">
+                    <i class="fa-solid fa-arrow-up"></i>
+                </button>
+            </div>
+        </div>
+    </div>
+
     <!-- GSAP Animation Library & Plugins (CDN) -->
     <script src="https://cdnjs.cloudflare.com/ajax/libs/gsap/3.12.5/gsap.min.js"></script>
     <script src="https://cdnjs.cloudflare.com/ajax/libs/gsap/3.12.5/ScrollTrigger.min.js"></script>
@@ -1145,7 +1285,11 @@
     <!-- Razorpay Standard Checkout SDK -->
     <script src="https://checkout.razorpay.com/v1/checkout.js"></script>
 
+    <!-- jsPDF for Client-Side Invoice PDF Generation -->
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf/2.5.1/jspdf.umd.min.js"></script>
+
     <!-- Application Script -->
-    <script src="{{ url_for('static', filename='js/script.js') }}?v=24"></script>
+    <script src="{{ url_for('static', filename='js/script.js') }}?v=34"></script>
+    <script src="{{ url_for('static', filename='js/voice_assistant.js') }}?v=6"></script>
 </body>
 </html>

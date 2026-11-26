@@ -36,7 +36,7 @@ class Config:
     SECRET_KEY = os.getenv("SECRET_KEY", "luxstore-ml-secure-key-2026")
     DEBUG = os.getenv("DEBUG", "True").lower() in ("true", "1")
     PORT = int(os.getenv("PORT", 5000))
-    HOST = os.getenv("HOST", "127.0.0.1")
+    HOST = os.getenv("HOST", "0.0.0.0")
     
     # Paths
     BASE_DIR = BASE_DIR

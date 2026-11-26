@@ -1,4 +1,4 @@
-from flask import Flask, render_template, request, jsonify
+from flask import Flask, render_template, request, jsonify, session
 import os
 import pandas as pd
 import time
@@ -30,6 +30,7 @@ from services.recommendation_service import (
     get_product_dict_list,
     get_product_dict_list_with_reasons,
 )
+from services.assistant_service import VoiceAssistantService
 
 app = Flask(__name__)
 app.config['SEND_FILE_MAX_AGE_DEFAULT'] = 0
@@ -66,11 +67,13 @@ try:
     sync_user_orders_to_transactions()
     recommender = RecommenderSystem(df_trans, df_prod)
     recommender.train_market_basket(min_support=0.001, min_threshold=0.1)
+    assistant_service = VoiceAssistantService(df_prod, recommender=recommender)
 except Exception as e:
     print("Error initializing recommender system:", e)
     df_trans = pd.DataFrame(columns=['TransactionID', 'CustomerID', 'Item'])
     df_prod = pd.DataFrame(columns=['ID', 'Name', 'Category', 'Price', 'Rating', 'Image', 'Description'])
     recommender = RecommenderSystem(df_trans, df_prod)
+    assistant_service = VoiceAssistantService(df_prod, recommender=recommender)
 
 
 @app.route('/')
@@ -186,6 +189,7 @@ def login():
 
 # ----------------- FORGOT PASSWORD VIA EMAIL OTP -----------------
 @app.route('/api/auth/forgot-password/send-otp', methods=['POST'])
+@app.route('/api/auth/forgot-password/request-otp', methods=['POST'])
 def send_password_reset_otp():
     data = request.json or {}
     email = data.get('email', '').strip().lower()
@@ -465,6 +469,27 @@ def verify_payment():
         return jsonify({"success": True, "verified": True, "note": str(e)})
 
 
+@app.route('/api/assistant/chat', methods=['POST'])
+def assistant_chat():
+    data = request.get_json(silent=True) or {}
+    query = data.get('query', '')
+    current_product = data.get('current_product')
+    current_cart_ids = data.get('cart', [])
+    last_recommended_product = data.get('last_recommended_product')
+    customer_id = data.get('customer_id') or session.get('user_id')
+    
+    response = assistant_service.process_query(
+        query_text=query,
+        current_product=current_product,
+        current_cart_ids=current_cart_ids,
+        last_recommended_product=last_recommended_product,
+        customer_id=customer_id
+    )
+    return jsonify(response)
+
+
 if __name__ == '__main__':
-    print(f"Starting Relate (LuxStore) Server on port {Config.PORT}...")
-    app.run(debug=Config.DEBUG, port=Config.PORT)
+    host = Config.HOST
+    port = Config.PORT
+    print(f"Starting Relate (LuxStore) Server on http://127.0.0.1:{port} and http://localhost:{port} (host={host})...")
+    app.run(debug=Config.DEBUG, host=host, port=port, threaded=True)
