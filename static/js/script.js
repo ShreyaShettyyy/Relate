@@ -2199,6 +2199,22 @@ function initRelateApp() {
     document.getElementById('trigger-forgot-password').addEventListener('click', () => openAuthModal('forgot'));
     document.getElementById('trigger-back-login').addEventListener('click', () => openAuthModal('login'));
 
+    // Show / Hide Password Toggle Buttons
+    document.querySelectorAll('.password-toggle-btn').forEach(btn => {
+        btn.addEventListener('click', () => {
+            const targetId = btn.getAttribute('data-target');
+            const input = document.getElementById(targetId);
+            if (!input) return;
+            const isHidden = input.type === 'password';
+            input.type = isHidden ? 'text' : 'password';
+            const icon = btn.querySelector('i');
+            if (icon) {
+                icon.className = isHidden ? 'fa-regular fa-eye-slash' : 'fa-regular fa-eye';
+            }
+            btn.setAttribute('aria-label', isHidden ? 'Hide password' : 'Show password');
+        });
+    });
+
     // User Dropdown toggle in navbar
     const avatarBtn = document.getElementById('user-avatar-btn');
     const menuDropdown = document.getElementById('user-menu-dropdown-content');

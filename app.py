@@ -189,6 +189,7 @@ def login():
 
 # ----------------- FORGOT PASSWORD VIA EMAIL OTP -----------------
 @app.route('/api/auth/forgot-password/send-otp', methods=['POST'])
+@app.route('/api/auth/forgot-password/request-otp', methods=['POST'])
 def send_password_reset_otp():
     data = request.json or {}
     email = data.get('email', '').strip().lower()
